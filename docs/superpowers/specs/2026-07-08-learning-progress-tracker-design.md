@@ -1,20 +1,49 @@
 # Learning Progress Tracker — Design Spec
 
-A CLI + async processor that writes Logseq-compatible markdown pages, turning a dump of URLs and documents into a structured knowledge graph with prerequisite chains, priority scoring, and progress tracking.
+A CLI that ingests URLs and local documents into a Logseq-compatible vault, with defined directory structure, markdown page formats, priority scoring, and progress tracking. Content analysis/categorization is a pluggable processor added later.
 
 ## Architecture
 
 ```
-[CLI: lpt add] → [inbox/] → [Async Processor] → [Logseq Vault pages/]
-                                    ↓
-                              [Claude API]
+[CLI: lpt add] → [inbox/] → [Processor (pluggable, later)] → [Logseq Vault pages/]
+                                                                      ↑
+[CLI: lpt progress/done/dashboard/recompute] ─────────────────────────┘
 ```
 
-Two components:
-1. **CLI (`lpt`)** — accepts URLs or local file paths, drops job files into `inbox/`, provides progress/dashboard commands
-2. **Async Processor** — watches `inbox/`, fetches content, calls Claude API for analysis, writes/updates Logseq pages, computes priority scores
+### What's in scope now
+- **CLI (`lpt`)** — ingestion, progress tracking, dashboard, priority recomputation
+- **Directory structure** — where every file lives, naming conventions
+- **Markdown page format** — property schema, page templates for each type
+- **Page writer** — given structured metadata, writes/updates Logseq pages
+- **Priority engine** — computes scores from page properties and config weights
+- **Progress tracking** — per-item, per-topic, per-domain aggregation + dashboard
 
-Logseq is the UI for everything: graph visualization, learning queue (via queries), note-taking, and consumption.
+### What's out of scope (plugged in later)
+- **Processor** — the thing that reads raw content and produces structured metadata (concepts, prerequisites, complexity, etc.). Could be Claude, a routing agent, Paperclip agents, or anything else. The system defines a **Processor Interface** — a JSON schema the processor must output — and the page writer consumes it.
+
+## Processor Interface
+
+The processor (whatever it is) receives a job file and must output a JSON object conforming to this schema. The page writer uses this to create/update Logseq pages.
+
+```json
+{
+  "title": "Gemma 4 Technical Report",
+  "summary": "2-3 paragraph summary",
+  "medium": "paper",
+  "complexity": "advanced",
+  "size": "deep-dive",
+  "domain": "ML/Infrastructure",
+  "topic": "Inference Optimization",
+  "concepts": ["MoE", "Distillation", "RLHF"],
+  "prerequisites": ["Attention Mechanisms", "KV Cache", "vLLM"],
+  "key_takeaways": ["...", "..."],
+  "engagement_suggestion": "read"
+}
+```
+
+All fields are optional except `title`. The page writer fills in defaults for missing fields (`status: unread`, `progress: 0`, etc.). User-provided CLI flags (`--domain`, `--topic`, `--engagement`) override processor output.
+
+The processor writes its output as a JSON file alongside the job file: `inbox/<job-id>.result.json`. The page writer picks it up from there.
 
 ## CLI
 
@@ -24,97 +53,101 @@ Python package using Click. Installed via `pip install -e .` as `lpt`.
 
 ```bash
 lpt add <url-or-path> [--domain X] [--topic Y] [--engagement read|implement|background] [--tag TAG...]
-lpt status                     # show inbox/processing queue status
+lpt status                     # show inbox queue: pending, processed, failed counts
 lpt progress <title> <0-100>   # update progress on an item
 lpt done <title>               # mark item complete (progress=100, status=completed)
 lpt dashboard                  # regenerate the Learning Dashboard page
 lpt recompute                  # recalculate all priorities after config weight changes
-lpt process                    # run the processor once (alternative to daemon mode)
-lpt suggest <concept>          # (stretch goal) ask Claude for recommended resources to learn a concept
+lpt write <job-id>             # run page writer for a processed job (has .result.json)
+lpt write --all                # run page writer for all processed jobs missing pages
+lpt init                       # initialize vault structure + generate Learning Queue page
 ```
 
 ### `lpt add` Behavior
 
-1. Validates the source (URL reachable, file exists)
+1. Validates the source (file exists for local paths; for URLs, just records it — no fetching)
 2. Creates a job file in `inbox/` as JSON:
    ```json
    {
      "id": "20260708-143022-a1b2",
      "source": "https://arxiv.org/abs/2504.00958",
-     "type": "url",
+     "source_type": "url",
      "domain": "ML/Infrastructure",
      "topic": "Inference Optimization",
      "engagement": "read",
      "tags": ["transformers", "inference"],
-     "created_at": "2026-07-08T14:30:22"
+     "created_at": "2026-07-08T14:30:22",
+     "status": "pending"
    }
    ```
-3. Returns immediately — processing is async
-4. If `--domain` or `--topic` are omitted, the LLM infers them during processing
+3. Returns immediately
+4. If `--domain`, `--topic`, or `--engagement` are omitted, they're left null in the job file — the processor or user fills them in later
+
+### `lpt write` Behavior
+
+Looks for `inbox/<job-id>.result.json`. If found:
+1. Reads the result JSON (processor output)
+2. Merges with job file (CLI flags override processor output)
+3. Calls the page writer to create/update the Logseq page
+4. Creates concept stub pages for any prerequisite/concept without an existing page
+5. Computes priority score
+6. Moves job + result files to `processed/`
 
 ### `lpt progress` / `lpt done` Behavior
 
-Finds the matching Logseq page by title, updates the `progress::` and `status::` properties in the markdown file directly. Triggers a priority recomputation for items that depend on this one as a prerequisite.
+Finds the matching Logseq page by title (fuzzy match), updates `progress::` and `status::` properties in the markdown file. Triggers priority recomputation for items that depend on this one as a prerequisite.
 
 ### `lpt dashboard` Behavior
 
-Scans all pages in the vault, aggregates progress by domain and topic, writes/overwrites a `Learning Dashboard` page in the vault.
+Scans all pages in the vault, aggregates progress by domain and topic, writes/overwrites a `Learning Dashboard` page.
 
-## Async Processor
+## Directory Structure
 
-A Python process that can run as:
-- **One-shot:** `lpt process` — processes all pending jobs in `inbox/` and exits
-- **Watch mode:** `lpt process --watch` — uses filesystem watching (watchdog) to process jobs as they arrive
+```
+learning-progress-tracker/
+├── cli/
+│   ├── __init__.py
+│   ├── main.py              # Click CLI entry point
+│   ├── page_writer.py       # Writes Logseq markdown pages from structured metadata
+│   ├── page_reader.py       # Reads/parses Logseq pages (properties + content)
+│   ├── priority.py          # Priority score computation
+│   └── progress.py          # Progress tracking + dashboard generation
+├── config.yaml              # Vault path, domain/topic weights
+├── inbox/                   # Job files (.json) and processor results (.result.json)
+├── processed/               # Completed jobs (moved here after page is written)
+├── failed/                  # Jobs that failed processing
+├── tests/
+│   ├── test_page_writer.py
+│   ├── test_page_reader.py
+│   ├── test_priority.py
+│   └── test_progress.py
+├── pyproject.toml
+└── README.md
+```
 
-### Processing Pipeline
+### Logseq Vault Structure (at `vault_path` from config)
 
-For each job file in `inbox/`:
+```
+vault/
+├── pages/
+│   ├── Gemma 4 Technical Report.md    # Resource page
+│   ├── KV Cache.md                     # Concept stub or resource
+│   ├── ML___Infrastructure.md          # Domain page (/ escaped as ___)
+│   ├── Inference Optimization.md       # Topic page
+│   ├── Learning Dashboard.md           # Generated dashboard
+│   └── Learning Queue.md               # Pre-built queries page (generated once)
+├── journals/                            # User's daily journals (untouched)
+└── logseq/
+    └── config.edn                       # Logseq config (untouched)
+```
 
-1. **Fetch content**
-   - Web articles: `trafilatura` for clean text extraction
-   - Arxiv papers: `arxiv` API for metadata + PDF download, `pdfplumber` for text
-   - Tweets/X posts: direct fetch with fallback to metadata-only
-   - Local PDFs: `pdfplumber`
-   - Local markdown/text: read directly
+### File Naming Conventions
 
-2. **Send to Claude API** with a structured prompt requesting JSON output:
-   ```json
-   {
-     "title": "Gemma 4 Technical Report",
-     "summary": "2-3 paragraph summary",
-     "medium": "paper",
-     "complexity": "advanced",
-     "size": "deep-dive",
-     "domain": "ML/Infrastructure",
-     "topic": "Inference Optimization",
-     "concepts": ["MoE", "Distillation", "RLHF"],
-     "prerequisites": ["Attention Mechanisms", "KV Cache", "vLLM"],
-     "key_takeaways": ["...", "..."],
-     "engagement_suggestion": "read"
-   }
-   ```
-   - If the user provided `--domain` / `--topic` / `--engagement` in the CLI, those override the LLM's suggestions
-   - The prompt instructs Claude to identify prerequisites at the right granularity — not too broad ("machine learning") and not too narrow ("line 42 of vllm/engine.py")
+- Page filenames = page title with `/` replaced by `___` (Logseq convention)
+- Job files: `<timestamp>-<4char-hex>.json` (e.g., `20260708-143022-a1b2.json`)
+- Result files: `<job-id>.result.json` (same ID as the job file)
 
-3. **Write Logseq page** into `vault/pages/` (see Page Format below)
-
-4. **Create/update concept stub pages** for any prerequisite or concept that doesn't have a page yet
-
-5. **Compute priority score** for the new page and recompute for any pages affected by new concept links
-
-6. **Move job file** from `inbox/` to `processed/`
-
-### Content Fetching Details
-
-| Source Type | Library | Extraction |
-|-------------|---------|------------|
-| Web article | `trafilatura` | Main content text, title, date |
-| Arxiv | `arxiv` API + `pdfplumber` | Abstract, full text from PDF |
-| Tweet/X | `httpx` with appropriate headers | Tweet text, thread if applicable |
-| PDF (local) | `pdfplumber` | Full text extraction |
-| Markdown (local) | Direct read | Raw content |
-
-## Logseq Page Format
+## Logseq Page Formats
 
 ### Resource Page (ingested item)
 
@@ -154,6 +187,8 @@ Google DeepMind's Gemma 4 introduces...
 
 ### Concept Stub Page (auto-generated prerequisite)
 
+Created when a prerequisite or concept is referenced but has no page yet.
+
 ```markdown
 title:: KV Cache
 type:: concept
@@ -164,10 +199,9 @@ referenced-by:: [[Gemma 4 Technical Report]]
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.
-Add a resource with `lpt add` or run `lpt suggest "KV Cache"` to get recommendations.
 ```
 
-### Domain Page (auto-generated)
+### Domain Page
 
 ```markdown
 title:: ML/Infrastructure
@@ -179,7 +213,9 @@ type:: domain
 - [[Model Serving]]
 ```
 
-### Topic Page (auto-generated)
+Updated automatically when new topics are added under this domain.
+
+### Topic Page
 
 ```markdown
 title:: Inference Optimization
@@ -187,67 +223,7 @@ type:: topic
 domain:: [[ML/Infrastructure]]
 ```
 
-## Property Definitions
-
-| Property | Values | Description |
-|----------|--------|-------------|
-| `type` | `paper`, `article`, `tweet`, `video`, `docs`, `concept`, `domain`, `topic` | What kind of page this is |
-| `domain` | Logseq page link | Broad area: ML/Infrastructure, Systems, Databases, Security |
-| `topic` | Logseq page link | Specific within domain: Inference Optimization, KV Cache Design |
-| `engagement` | `read`, `implement`, `background` | How to interact with this item |
-| `status` | `unread`, `in-progress`, `completed`, `stub` | Current learning status |
-| `progress` | 0-100 | Percentage completion |
-| `complexity` | `beginner`, `intermediate`, `advanced` | Difficulty level |
-| `size` | `quick-read`, `medium`, `deep-dive` | Time investment required |
-| `medium` | `paper`, `article`, `tweet`, `video`, `docs` | Content format |
-| `priority` | 0-100 | Computed priority score |
-| `prerequisites` | Comma-separated Logseq page links | What to learn first |
-| `concepts` | Comma-separated Logseq page links | Concepts covered by this item |
-| `source` | URL or file path | Original source |
-| `ingested` | Logseq date link | When the item was added |
-
-## Priority Scoring
-
-Priority is computed by the processor and written as a page property. Recalculated when:
-- A new item is added (affects items sharing concepts/prerequisites)
-- Config weights change (`lpt recompute`)
-- An item is marked complete (unlocks dependents)
-
-### Formula
-
-```
-priority = (overlap_score * 25)
-         + (prerequisite_demand * 25)
-         + (domain_weight * 20)
-         + (topic_weight * 15)
-         + (recency * 5)
-         + (inverse_complexity * 5)
-         + (engagement_boost * 5)
-```
-
-### Components
-
-- **overlap_score (0-25):** How many other items in the queue share concepts with this one. High overlap = this is a hub concept, learning it unlocks understanding across many items.
-- **prerequisite_demand (0-25):** How many items list this (or its concepts) as a prerequisite. High demand = foundational, learn first.
-- **domain_weight (0-20):** From `config.yaml`. Domains you care about more get higher priority.
-- **topic_weight (0-15):** From `config.yaml`. Topics you care about more get higher priority.
-- **recency (0-5):** Newer items get a small boost to keep the queue fresh.
-- **inverse_complexity (0-5):** Simpler items get a slight boost when other factors are equal (quick wins).
-- **engagement_boost (0-5):** `background` items get a small bump (easy to slot in). `implement` items are neutral. `read` items are neutral.
-
-## Progress Tracking
-
-### Per-Item
-`progress:: 0-100` on each resource page. Updated via `lpt progress <title> <value>` or directly in Logseq. When progress hits 100, status flips to `completed`.
-
-### Per-Topic (computed)
-Aggregated from all items under a topic. If topic "Inference Optimization" has 5 items and 3 are completed, topic progress = 60%.
-
-### Per-Domain (computed)
-Aggregated from all topics under a domain.
-
-### Learning Dashboard Page
-Generated by `lpt dashboard`, written to `vault/pages/Learning Dashboard.md`:
+### Learning Dashboard Page (generated by `lpt dashboard`)
 
 ```markdown
 title:: Learning Dashboard
@@ -277,39 +253,94 @@ generated:: [[2026-07-08]]
 3. [[Gemma 4 Technical Report]] (priority: 85, read, advanced)
 ```
 
-## Logseq Queries
+### Learning Queue Page (generated once by `lpt init`)
 
-Pre-built queries for the user to add to their journal or a dedicated page:
+Contains pre-built Logseq queries:
 
-**Learning queue (unread, by priority):**
-```
+```markdown
+title:: Learning Queue
+type:: queries
+
+## Next Up (by priority)
 {{query (and (property :status "unread") (not (property :type "concept")))}}
-```
 
-**Knowledge gaps (stubs to fill):**
-```
+## Knowledge Gaps
 {{query (property :status "stub")}}
-```
 
-**In progress:**
-```
+## In Progress
 {{query (property :status "in-progress")}}
-```
 
-**By domain:**
-```
+## By Domain
 {{query (and (property :domain "[[ML/Infrastructure]]") (property :status "unread"))}}
-```
 
-**By engagement type:**
-```
+## Background Reading
 {{query (and (property :status "unread") (property :engagement "background"))}}
-```
 
-**By complexity:**
-```
+## Quick Wins (beginner)
 {{query (and (property :status "unread") (property :complexity "beginner"))}}
 ```
+
+## Property Definitions
+
+| Property | Values | Description |
+|----------|--------|-------------|
+| `type` | `paper`, `article`, `tweet`, `video`, `docs`, `concept`, `domain`, `topic`, `dashboard`, `queries` | Page type |
+| `domain` | Logseq page link | Broad area: ML/Infrastructure, Systems, Databases, Security |
+| `topic` | Logseq page link | Specific within domain: Inference Optimization, KV Cache Design |
+| `engagement` | `read`, `implement`, `background` | How to interact with this item |
+| `status` | `unread`, `in-progress`, `completed`, `stub` | Current learning status |
+| `progress` | 0-100 | Percentage completion |
+| `complexity` | `beginner`, `intermediate`, `advanced` | Difficulty level |
+| `size` | `quick-read`, `medium`, `deep-dive` | Time investment required |
+| `medium` | `paper`, `article`, `tweet`, `video`, `docs` | Content format |
+| `priority` | 0-100 | Computed priority score |
+| `prerequisites` | Comma-separated Logseq page links | What to learn first |
+| `concepts` | Comma-separated Logseq page links | Concepts covered by this item |
+| `source` | URL or file path | Original source |
+| `ingested` | Logseq date link | When the item was added |
+| `referenced-by` | Comma-separated Logseq page links | (stubs) Which items reference this concept |
+
+## Priority Scoring
+
+Priority is computed by the page writer when creating/updating a page, and recalculated by `lpt recompute`. Stored as the `priority::` property.
+
+### Recalculation Triggers
+- `lpt write` — new page added, recompute affected pages
+- `lpt done` / `lpt progress` — item completed, dependents may shift
+- `lpt recompute` — explicit full recomputation (after config weight changes)
+
+### Formula
+
+```
+priority = (overlap_score * 25)
+         + (prerequisite_demand * 25)
+         + (domain_weight * 20)
+         + (topic_weight * 15)
+         + (recency * 5)
+         + (inverse_complexity * 5)
+         + (engagement_boost * 5)
+```
+
+### Components
+
+- **overlap_score (0-25):** How many other items share concepts with this one. High overlap = hub concept, learning it unlocks many items.
+- **prerequisite_demand (0-25):** How many items list this (or its concepts) as a prerequisite. High demand = foundational.
+- **domain_weight (0-20):** From `config.yaml`. Higher weight = higher priority.
+- **topic_weight (0-15):** From `config.yaml`. Higher weight = higher priority.
+- **recency (0-5):** Newer items get a small boost.
+- **inverse_complexity (0-5):** Simpler items get a slight boost (quick wins when other factors are equal).
+- **engagement_boost (0-5):** `background` items get a small bump (easy to slot in).
+
+## Progress Tracking
+
+### Per-Item
+`progress:: 0-100` on each resource page. Updated via `lpt progress <title> <value>` or directly in Logseq. When progress reaches 100, status flips to `completed`.
+
+### Per-Topic (computed by `lpt dashboard`)
+Aggregated from all resource items under a topic. 5 items, 3 completed = 60%.
+
+### Per-Domain (computed by `lpt dashboard`)
+Aggregated from all topics under a domain.
 
 ## Configuration
 
@@ -317,10 +348,6 @@ Pre-built queries for the user to add to their journal or a dedicated page:
 
 ```yaml
 vault_path: ~/logseq-vault
-inbox_path: ./inbox
-processed_path: ./processed
-
-anthropic_api_key_env: ANTHROPIC_API_KEY
 
 domain_weights:
   ML/Infrastructure: 0.9
@@ -338,42 +365,18 @@ topic_weights:
 default_weight: 0.5
 ```
 
-The API key is read from an environment variable (referenced by name in config, never stored in the file).
-
-## Directory Structure
-
-```
-learning-progress-tracker/
-├── cli/
-│   ├── __init__.py
-│   ├── main.py              # Click CLI entry point
-│   ├── ingest.py            # Content fetching (URLs, PDFs, etc.)
-│   ├── process.py           # LLM processing + page writing
-│   ├── priority.py          # Priority score computation
-│   ├── progress.py          # Progress tracking + dashboard generation
-│   └── page_writer.py       # Logseq markdown page generation
-├── config.yaml
-├── inbox/                   # Pending job files
-├── processed/               # Completed job files
-├── tests/
-│   ├── test_ingest.py
-│   ├── test_process.py
-│   ├── test_priority.py
-│   └── test_page_writer.py
-├── pyproject.toml
-└── README.md
-```
-
-The Logseq vault lives at `vault_path` from config (outside this repo, or symlinked in).
+New domains/topics encountered by the processor get `default_weight` until the user configures them.
 
 ## Error Handling
 
-- **Fetch failures** (URL 404, PDF corrupt): Job moves to `failed/` with an error log. `lpt status` shows failed jobs.
-- **Claude API errors**: Retried 3 times with exponential backoff. On persistent failure, job stays in `inbox/` and `lpt status` reports it.
-- **Duplicate detection**: Before writing a page, check if a page with the same `source::` already exists. If so, skip or update (configurable).
+- **`lpt add` validation failures** (local file not found): Error message, no job file created.
+- **`lpt write` with missing result**: Error message listing jobs without `.result.json` files.
+- **`lpt progress`/`lpt done` title not found**: Fuzzy match with suggestions. If no match, error.
+- **Duplicate detection**: Before writing a page, check if a page with the same `source::` already exists. If so, skip or update (configurable in `config.yaml` via `on_duplicate: skip | update`).
+- **Failed jobs**: The processor (when implemented) moves failed jobs to `failed/` with a `.error.json` alongside.
 
 ## Testing Strategy
 
-- **Unit tests**: Page writer (given LLM output JSON, produces correct markdown), priority calculator (given a set of pages, computes correct scores), config loading
-- **Integration tests**: End-to-end from job file → Claude API (mocked) → written page → verify page content and links
-- **Manual testing**: Add a real URL, process it, open in Logseq, verify graph links work
+- **Unit tests**: Page writer (given metadata JSON → correct markdown), page reader (given markdown → correct parsed properties), priority calculator (given pages → correct scores), progress aggregation
+- **Integration tests**: End-to-end from job file + result JSON → page writer → verify page content, links, and stub creation
+- **No processor tests** — that's out of scope for now
