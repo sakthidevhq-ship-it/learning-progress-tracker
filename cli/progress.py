@@ -3,9 +3,9 @@ from pathlib import Path
 
 from thefuzz import fuzz
 
-from cli.config import Config, title_to_filename
-from cli.page_reader import PageData, list_pages, read_page, update_property
-from cli.priority import _parse_links, recompute_all
+from cli.config import Config
+from cli.page_reader import list_pages, update_property
+from cli.priority import recompute_all
 
 
 def find_page_by_title(vault_path: Path, query: str) -> str | None:

@@ -15,7 +15,12 @@ from cli.progress import update_progress, mark_done, find_page_by_title, generat
 
 def _get_config():
     config_path = os.environ.get("LPT_CONFIG", "config.yaml")
-    return load_config(config_path)
+    try:
+        return load_config(config_path)
+    except FileNotFoundError:
+        raise click.ClickException(f"Config file not found: {config_path}")
+    except Exception as e:
+        raise click.ClickException(f"Error loading config: {e}")
 
 
 def _get_inbox():
@@ -122,10 +127,17 @@ def _write_single(job_id: str, inbox: Path, processed: Path, config):
     metadata = json.loads(result_file.read_text())
 
     page_path = write_resource_page(config.vault_path, metadata, job)
-    ensure_linked_pages(config.vault_path, metadata, metadata["title"])
+
+    resolved_metadata = dict(metadata)
+    if job.get("domain"):
+        resolved_metadata["domain"] = job["domain"]
+    if job.get("topic"):
+        resolved_metadata["topic"] = job["topic"]
+    ensure_linked_pages(config.vault_path, resolved_metadata, metadata["title"])
     recompute_all(config.vault_path, config)
 
-    shutil.move(str(job_file), str(processed / job_file.name))
+    if job_file.exists():
+        shutil.move(str(job_file), str(processed / job_file.name))
     shutil.move(str(result_file), str(processed / result_file.name))
     click.echo(f"Wrote page: {page_path.name}")
 
@@ -167,6 +179,7 @@ type:: queries
 @click.argument("value", type=int)
 def progress_cmd(title, value):
     config = _get_config()
+    value = max(0, min(100, value))
     matched = find_page_by_title(config.vault_path, title)
     if not matched:
         raise click.ClickException(f"No page found matching '{title}'")
