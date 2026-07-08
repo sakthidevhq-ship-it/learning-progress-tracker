@@ -1,0 +1,17 @@
+vault_path: ~/logseq-vault
+
+domain_weights:
+  ML/Infrastructure: 0.9
+  Systems: 0.8
+  Databases: 0.5
+  Security: 0.6
+  Frontend: 0.3
+
+topic_weights:
+  Inference Optimization: 0.95
+  Distributed Training: 0.7
+  KV Cache Design: 0.85
+  RLHF: 0.6
+
+default_weight: 0.5
+on_duplicate: skip
