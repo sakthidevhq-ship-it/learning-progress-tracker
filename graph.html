@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Learning Path</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body { background: #0b0e14; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1;
+  background: radial-gradient(ellipse at 20% 40%, rgba(56,139,253,0.03) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 60%, rgba(63,185,80,0.02) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(240,136,62,0.02) 0%, transparent 40%);
+}
+
+#hud {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10; height: 48px;
+  background: rgba(11,14,20,0.85); backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: flex; align-items: center; padding: 0 28px; gap: 20px;
+}
+#hud .brand { font-size: 13px; font-weight: 600; color: #e6edf3; }
+.hsep { width: 1px; height: 18px; background: rgba(255,255,255,0.06); }
+#hud .stats { display: flex; gap: 16px; font-size: 11px; color: rgba(255,255,255,0.35); }
+#hud .stats b { color: rgba(255,255,255,0.6); font-weight: 600; }
+#hud input, #hud select {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  color: #8b949e; border-radius: 8px; padding: 5px 10px;
+  font-size: 11px; font-family: inherit; outline: none;
+}
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.fbtn {
+  font-size: 10px; padding: 3px 10px; border-radius: 14px; cursor: pointer;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.35); font-family: inherit; transition: all 0.15s;
+  white-space: nowrap;
+}
+.fbtn:hover { border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); }
+.fbtn.active { background: rgba(88,166,255,0.12); border-color: rgba(88,166,255,0.3); color: #58a6ff; }
+.fbtn.active-green { background: rgba(63,185,80,0.12); border-color: rgba(63,185,80,0.3); color: #3fb950; }
+.fbtn.active-orange { background: rgba(240,136,62,0.12); border-color: rgba(240,136,62,0.3); color: #f0883e; }
+.legend { margin-left: auto; display: flex; gap: 14px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: rgba(255,255,255,0.3); }
+.ldot { width: 7px; height: 7px; border-radius: 50%; }
+
+/* Hover tooltip — lightweight, follows cursor */
+#tip {
+  position: fixed; z-index: 30; pointer-events: none; display: none;
+  background: rgba(16,20,28,0.95); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px; padding: 10px 14px; max-width: 280px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  font-family: 'Inter', system-ui, sans-serif; color: #c9d1d9;
+}
+#tip h3 { font-size: 13px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
+#tip .meta { font-size: 10px; color: rgba(255,255,255,0.3); }
+
+/* Side panel — click to open, full detail */
+#panel {
+  position: fixed; top: 48px; right: 0; bottom: 0; width: 380px; z-index: 20;
+  background: rgba(13,17,23,0.97); border-left: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px);
+  transform: translateX(100%); transition: transform 0.2s ease;
+  overflow-y: auto; padding: 24px;
+  font-family: 'Inter', system-ui, sans-serif; color: #c9d1d9;
+  user-select: text;
+}
+#panel.open { transform: translateX(0); }
+#panel .close-btn {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.4); font-size: 14px; cursor: pointer;
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+#panel .close-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+#panel h3 { font-size: 17px; font-weight: 600; margin-bottom: 12px; line-height: 1.3; padding-right: 36px; }
+#panel .pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+#panel .pill {
+  font-size: 10px; padding: 3px 10px; border-radius: 20px;
+  background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.45);
+  letter-spacing: 0.4px; text-transform: uppercase;
+}
+#panel .info { font-size: 13px; color: rgba(255,255,255,0.4); margin: 4px 0; line-height: 1.5; }
+#panel .info b { color: rgba(255,255,255,0.65); font-weight: 500; }
+#panel .pbar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.04); margin-top: 10px; overflow: hidden; }
+#panel .pfill { height: 100%; border-radius: 2px; }
+#panel .section { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.04); }
+#panel .section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.2); margin-bottom: 6px; }
+#panel .concept-list { font-size: 13px; color: rgba(255,255,255,0.35); line-height: 1.7; }
+#panel .concept-known { color: rgba(63,185,80,0.7); }
+#panel .concept-gap { color: rgba(240,136,62,0.7); }
+#panel .sum { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.04); line-height: 1.6; }
+
+canvas { display: block; cursor: grab; }
+canvas.grabbing { cursor: grabbing; }
+</style>
+</head>
+<body>
+<div id="hud">
+  <div class="brand">Learning Path</div>
+  <div class="hsep"></div>
+  <div class="stats" id="stats"></div>
+  <div class="hsep"></div>
+  <div class="filters" id="filters">
+    <button class="fbtn active-green" data-filter="status" data-value="done">Done</button>
+    <button class="fbtn active-orange" data-filter="status" data-value="progress">In Progress</button>
+    <button class="fbtn active" data-filter="status" data-value="ready">Ready</button>
+    <button class="fbtn active" data-filter="status" data-value="blocked">Blocked</button>
+    <span style="width:1px;height:18px;background:rgba(255,255,255,0.06);margin:0 4px"></span>
+    <select id="domainFilter"><option value="">All Domains</option></select>
+    <select id="engagementFilter">
+      <option value="">All Types</option>
+      <option value="read">Read</option>
+      <option value="implement">Implement</option>
+      <option value="background">Background</option>
+    </select>
+  </div>
+  <input id="search" type="text" placeholder="Search..." style="width:130px"/>
+</div>
+<div id="tip"></div>
+<div id="panel"></div>
+<canvas id="c"></canvas>
+
+<script>
+const RAW = VAULT_PLACEHOLDER;
+
+const RES_TYPES = new Set(['paper','article','video','docs','tweet']);
+function plinks(v) { return v ? (v.match(/\[\[([^\]]+)\]\]/g)||[]).map(s=>s.slice(2,-2)) : []; }
+function strip(v) { return (v||'').replace(/\[\[|\]\]/g,''); }
+
+const resources = RAW.filter(n => RES_TYPES.has(n.type)).map(n => ({
+  ...n, domain: strip(n.domain), topic: strip(n.topic),
+  prereqs: plinks(n.prerequisites), concepts: plinks(n.concepts),
+  prereqResources: n.prereqResources || [],
+  pri: parseInt(n.priority)||0, prog: parseInt(n.progress)||0,
+}));
+
+const titleToIdx = {};
+resources.forEach((n, i) => titleToIdx[n.title] = i);
+
+const completed = new Set(resources.filter(n => n.status==='completed').map(n => n.title));
+
+// Status: based on resource-to-resource prerequisites
+resources.forEach(n => {
+  if (n.status === 'completed') { n._st = 'done'; n._cov = 1; return; }
+  if (n.status === 'in-progress') { n._st = 'progress'; }
+  else {
+    const pr = n.prereqResources;
+    if (pr.length === 0) { n._cov = 1; n._st = 'ready'; }
+    else {
+      n._cov = pr.filter(t => completed.has(t)).length / pr.length;
+      n._st = n._cov >= 0.5 ? 'ready' : 'blocked';
+    }
+  }
+  if (n._cov === undefined) {
+    const pr = n.prereqResources;
+    n._cov = pr.length === 0 ? 1 : pr.filter(t => completed.has(t)).length / pr.length;
+  }
+});
+
+// Directed edges: prereqResource → this resource ("read A before B")
+const edges = [];
+resources.forEach((n, ti) => {
+  for (const prereqTitle of n.prereqResources) {
+    const fi = titleToIdx[prereqTitle];
+    if (fi !== undefined) {
+      edges.push({ from: fi, to: ti });
+    }
+  }
+});
+
+// Sibling edges: resources sharing prerequisites (weaker, undirected)
+const siblingEdges = [];
+const siblingPairsSeen = new Set();
+resources.forEach((n, i) => {
+  for (const sib of (n.siblingResources || [])) {
+    const j = titleToIdx[sib.title];
+    if (j === undefined) continue;
+    const key = Math.min(i,j) + ':' + Math.max(i,j);
+    if (siblingPairsSeen.has(key)) continue;
+    siblingPairsSeen.add(key);
+    siblingEdges.push({ a: i, b: j, shared: sib.shared });
+  }
+});
+
+const SC = {
+  done:     { fill: '#3fb950', bg: [63,185,80], border: [63,185,80,0.4], text: '#3fb950', glow: [63,185,80] },
+  progress: { fill: '#f0883e', bg: [240,136,62], border: [240,136,62,0.4], text: '#f0883e', glow: [240,136,62] },
+  ready:    { fill: '#58a6ff', bg: [88,166,255], border: [88,166,255,0.3], text: '#58a6ff', glow: [88,166,255] },
+  blocked:  { fill: 'rgba(255,255,255,0.1)', bg: [255,255,255], border: [255,255,255,0.06], text: 'rgba(255,255,255,0.3)', glow: null },
+};
+
+// --- Force simulation: shared concepts = attraction ---
+const CARD_W = 260, CARD_H = 76;
+
+function simulate(W, H) {
+  // Scale canvas to accommodate more items
+  const scale = Math.max(1, resources.length / 12);
+  const simW = W * Math.max(1, scale * 0.7);
+  const simH = H * Math.max(1, scale * 0.7);
+  const cx = simW / 2, cy = simH / 2;
+  const N = resources.length;
+
+  // Initial positions: spread in a circle
+  resources.forEach((n, i) => {
+    const angle = (2 * Math.PI * i) / N - Math.PI / 2;
+    const r = Math.min(simW, simH) * 0.35;
+    n.x = cx + r * Math.cos(angle);
+    n.y = cy + r * Math.sin(angle);
+    n.vx = 0; n.vy = 0;
+    n._w = CARD_W; n._h = CARD_H;
+  });
+
+  for (let iter = 0; iter < 400; iter++) {
+    const alpha = Math.max(0.01, 1 - iter / 400);
+    const temp = alpha * 0.6;
+
+    // Center gravity
+    resources.forEach(n => {
+      n.vx += (cx - n.x) * 0.001 * alpha;
+      n.vy += (cy - n.y) * 0.001 * alpha;
+    });
+
+    // Repulsion between all pairs
+    for (let i = 0; i < N; i++) {
+      for (let j = i+1; j < N; j++) {
+        const a = resources[i], b = resources[j];
+        let dx = b.x - a.x, dy = b.y - a.y;
+        let dist = Math.sqrt(dx*dx + dy*dy) || 1;
+        const minDist = 200;
+        if (dist < minDist * 3) {
+          const repulsion = (minDist * minDist) / (dist * dist) * 2.5 * alpha;
+          a.vx -= (dx/dist)*repulsion; a.vy -= (dy/dist)*repulsion;
+          b.vx += (dx/dist)*repulsion; b.vy += (dy/dist)*repulsion;
+        }
+      }
+    }
+
+    // Attraction via prerequisite edges (directed: from → to)
+    for (const e of edges) {
+      const a = resources[e.from], b = resources[e.to];
+      let dx = b.x - a.x, dy = b.y - a.y;
+      let dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      const force = (dist - 280) * 0.005 * alpha;
+      a.vx += (dx/dist)*force; a.vy += (dy/dist)*force;
+      b.vx -= (dx/dist)*force; b.vy -= (dy/dist)*force;
+    }
+
+    // Sibling attraction (shared prerequisites — weaker than direct prereqs)
+    for (const e of siblingEdges) {
+      const a = resources[e.a], b = resources[e.b];
+      let dx = b.x - a.x, dy = b.y - a.y;
+      let dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      const force = (dist - 300) * 0.003 * alpha;
+      a.vx += (dx/dist)*force; a.vy += (dy/dist)*force;
+      b.vx -= (dx/dist)*force; b.vy -= (dy/dist)*force;
+    }
+
+    // Same-domain attraction
+    for (let i = 0; i < N; i++) {
+      for (let j = i+1; j < N; j++) {
+        if (resources[i].domain === resources[j].domain && resources[i].domain) {
+          const a = resources[i], b = resources[j];
+          let dx = b.x - a.x, dy = b.y - a.y;
+          let dist = Math.sqrt(dx*dx + dy*dy) || 1;
+          const force = (dist - 250) * 0.002 * alpha;
+          a.vx += (dx/dist)*force; a.vy += (dy/dist)*force;
+          b.vx -= (dx/dist)*force; b.vy -= (dy/dist)*force;
+        }
+      }
+    }
+
+    // Apply velocity with damping
+    resources.forEach(n => {
+      n.vx *= 0.75; n.vy *= 0.75;
+      n.x += n.vx * temp;
+      n.y += n.vy * temp;
+      // Keep in bounds
+      n.x = Math.max(CARD_W/2 + 20, Math.min(simW - CARD_W/2 - 20, n.x));
+      n.y = Math.max(80 + CARD_H/2, Math.min(simH - CARD_H/2 - 20, n.y));
+    });
+  }
+
+  // Convert center positions to top-left for rendering
+  resources.forEach(n => {
+    n._x = n.x - CARD_W / 2;
+    n._y = n.y - CARD_H / 2;
+  });
+}
+
+// --- Domain cluster backgrounds ---
+function drawClusters(ctx) {
+  const domains = {};
+  resources.forEach(n => {
+    if (!n.domain) return;
+    if (!domains[n.domain]) domains[n.domain] = [];
+    domains[n.domain].push(n);
+  });
+
+  const domColors = {
+    'ML/Infrastructure': [56,139,253], 'ML/Frameworks': [163,113,247],
+    'ML/Agents': [63,185,160], 'Game AI': [240,176,62],
+    'Embedded/Gaming': [200,140,80], 'Systems': [100,180,200],
+    'Networking': [180,100,200], 'Programming/Rust': [222,110,50],
+    'Programming/Compilers': [180,180,100], 'Programming/Zig': [240,180,60],
+  };
+
+  for (const [dom, nodes] of Object.entries(domains)) {
+    if (nodes.length < 1) continue;
+    const [r,g,b] = domColors[dom] || [150,150,150];
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    nodes.forEach(n => {
+      minX = Math.min(minX, n._x - 20);
+      maxX = Math.max(maxX, n._x + n._w + 20);
+      minY = Math.min(minY, n._y - 20);
+      maxY = Math.max(maxY, n._y + n._h + 20);
+    });
+
+    const pad = 24;
+    const bx = minX - pad, by = minY - pad - 18;
+    const bw = maxX - minX + pad * 2, bh = maxY - minY + pad * 2 + 18;
+    const cr = 16;
+
+    // Filled background
+    rr(ctx, bx, by, bw, bh, cr);
+    ctx.fillStyle = `rgba(${r},${g},${b},0.03)`;
+    ctx.fill();
+
+    // Dashed border
+    ctx.strokeStyle = `rgba(${r},${g},${b},0.12)`;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Label badge at top-left
+    const label = dom;
+    ctx.font = '600 10px Inter';
+    const lw = ctx.measureText(label).width + 14;
+    const lh = 20;
+    const lx = bx + 12, ly = by + 8;
+    rr(ctx, lx, ly, lw, lh, 6);
+    ctx.fillStyle = `rgba(${r},${g},${b},0.12)`;
+    ctx.fill();
+    ctx.fillStyle = `rgba(${r},${g},${b},0.6)`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, lx + 7, ly + lh/2);
+    ctx.textBaseline = 'alphabetic';
+
+    // Item count
+    const countLabel = `${nodes.length} item${nodes.length>1?'s':''}`;
+    ctx.font = '400 9px Inter';
+    ctx.fillStyle = `rgba(${r},${g},${b},0.25)`;
+    ctx.fillText(countLabel, lx + lw + 8, ly + lh/2 + 1);
+  }
+}
+
+// --- Canvas with static layer caching ---
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const tipEl = document.getElementById('tip');
+let dpr = window.devicePixelRatio || 1;
+let W, H;
+let cam = { x: 0, y: 0, z: 1 };
+let hovered = null;
+let searchQ = '', prevSearchQ = '';
+
+// Offscreen canvas for static content (clusters, edges, cards)
+let staticCanvas = document.createElement('canvas');
+let staticCtx = staticCanvas.getContext('2d');
+let staticDirty = true;
+
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  staticDirty = true;
+}
+
+function init() {
+  simulate(W, H);
+  // Auto-fit: find bounding box of all nodes, fit to viewport
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  resources.forEach(n => {
+    minX = Math.min(minX, n._x - 50);
+    maxX = Math.max(maxX, n._x + n._w + 50);
+    minY = Math.min(minY, n._y - 50);
+    maxY = Math.max(maxY, n._y + n._h + 50);
+  });
+  const bw = maxX - minX, bh = maxY - minY;
+  const z = Math.min((W - 40) / bw, (H - 80) / bh, 1.2);
+  cam = { x: (W - bw*z)/2 - minX*z, y: (H - bh*z)/2 - minY*z + 20, z };
+  computeEdgeGeom();
+  staticDirty = true;
+  updateStats();
+}
+
+function updateStats() {
+  const done = resources.filter(n => n._st === 'done').length;
+  const prog = resources.filter(n => n._st === 'progress').length;
+  const ready = resources.filter(n => n._st === 'ready').length;
+  const total = resources.length;
+  document.getElementById('stats').innerHTML =
+    `<span><b>${done}</b>/${total} done</span>` +
+    `<span><b>${prog}</b> in progress</span>` +
+    `<span><b>${ready}</b> ready</span>`;
+}
+
+// Pre-compute direct neighbors (prereq + sibling edges)
+const directNeighbors = new Map();
+resources.forEach((n, i) => {
+  const nbrs = new Set();
+  edges.forEach(e => {
+    if (e.from === i) nbrs.add(e.to);
+    if (e.to === i) nbrs.add(e.from);
+  });
+  siblingEdges.forEach(e => {
+    if (e.a === i) nbrs.add(e.b);
+    if (e.b === i) nbrs.add(e.a);
+  });
+  directNeighbors.set(i, nbrs);
+});
+
+// Pre-compute edge geometry once after layout
+let edgeGeom = [];
+let sibGeom = [];
+function computeEdgeGeom() {
+  sibGeom = siblingEdges.map(e => {
+    const a = resources[e.a], b = resources[e.b];
+    const acx = a._x+a._w/2, acy = a._y+a._h/2;
+    const bcx = b._x+b._w/2, bcy = b._y+b._h/2;
+    const pa = cardExit(a, bcx, bcy), pb = cardExit(b, acx, acy);
+    const dx = pb.x-pa.x, dy = pb.y-pa.y;
+    const dist = Math.sqrt(dx*dx+dy*dy)||1;
+    const curveAmt = Math.min(25, dist*0.08);
+    const nx = -dy/dist*curveAmt, ny = dx/dist*curveAmt;
+    return { a: e.a, b: e.b, shared: e.shared, pa, pb, cpx: (pa.x+pb.x)/2+nx, cpy: (pa.y+pb.y)/2+ny };
+  });
+  edgeGeom = edges.map(e => {
+    const a = resources[e.from], b = resources[e.to];
+    const acx = a._x+a._w/2, acy = a._y+a._h/2;
+    const bcx = b._x+b._w/2, bcy = b._y+b._h/2;
+    const pa = cardExit(a, bcx, bcy), pb = cardExit(b, acx, acy);
+    const dx = pb.x-pa.x, dy = pb.y-pa.y;
+    const dist = Math.sqrt(dx*dx+dy*dy)||1;
+    const curveAmt = Math.min(25, dist*0.08);
+    const nx = -dy/dist*curveAmt, ny = dx/dist*curveAmt;
+    return { from: e.from, to: e.to, label: e.label, pa, pb, mx: (pa.x+pb.x)/2+nx, my: (pa.y+pb.y)/2+ny, cpx: (pa.x+pb.x)/2+nx, cpy: (pa.y+pb.y)/2+ny };
+  });
+}
+
+function cardExit(node, tx, ty) {
+  const cx = node._x+node._w/2, cy = node._y+node._h/2;
+  const dx = tx-cx, dy = ty-cy;
+  if (dx===0 && dy===0) return {x:cx,y:cy};
+  const s = Math.min(
+    Math.abs(dx)<0.001?1e6:(node._w/2+6)/Math.abs(dx),
+    Math.abs(dy)<0.001?1e6:(node._h/2+6)/Math.abs(dy)
+  );
+  return {x:cx+dx*s, y:cy+dy*s};
+}
+
+// Draw static layer to offscreen canvas
+function drawStatic() {
+  // Size offscreen to match world bounds
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  resources.forEach(n => {
+    minX=Math.min(minX,n._x-80); maxX=Math.max(maxX,n._x+n._w+80);
+    minY=Math.min(minY,n._y-80); maxY=Math.max(maxY,n._y+n._h+80);
+  });
+  const sw = maxX-minX, sh = maxY-minY;
+  staticCanvas.width = sw*dpr; staticCanvas.height = sh*dpr;
+  staticCanvas._ox = minX; staticCanvas._oy = minY;
+  staticCanvas._w = sw; staticCanvas._h = sh;
+
+  const c = staticCtx;
+  c.setTransform(dpr,0,0,dpr,0,0);
+  c.clearRect(0,0,sw,sh);
+  c.save();
+  c.translate(-minX,-minY);
+
+  // Domain clusters
+  drawClusters(c);
+
+  // Edges (non-hover state)
+  for (const eg of edgeGeom) {
+    const a = resources[eg.from], b = resources[eg.to];
+    const dim = (a._filtered && b._filtered) || (searchQ && !a.title.toLowerCase().includes(searchQ) && !b.title.toLowerCase().includes(searchQ));
+    c.beginPath();
+    c.moveTo(eg.pa.x, eg.pa.y);
+    c.quadraticCurveTo(eg.cpx, eg.cpy, eg.pb.x, eg.pb.y);
+    if (dim) { c.strokeStyle='rgba(255,255,255,0.008)'; c.lineWidth=1; }
+    else { c.strokeStyle='rgba(255,255,255,0.04)'; c.lineWidth=1; }
+    c.stroke();
+  }
+
+  // Sibling edges (dashed, subtle)
+  for (const eg of sibGeom) {
+    const a = resources[eg.a], b = resources[eg.b];
+    const dim = (a._filtered && b._filtered) || (searchQ && !a.title.toLowerCase().includes(searchQ) && !b.title.toLowerCase().includes(searchQ));
+    c.beginPath();
+    c.moveTo(eg.pa.x, eg.pa.y);
+    c.quadraticCurveTo(eg.cpx, eg.cpy, eg.pb.x, eg.pb.y);
+    c.setLineDash([4, 4]);
+    c.strokeStyle = dim ? 'rgba(255,255,255,0.005)' : 'rgba(255,255,255,0.03)';
+    c.lineWidth = 0.8;
+    c.stroke();
+    c.setLineDash([]);
+  }
+
+  // Cards (non-hover state) — no shadows for performance
+  for (const n of resources) {
+    const sc = SC[n._st]||SC.blocked;
+    const dim = n._filtered || (searchQ && !n.title.toLowerCase().includes(searchQ));
+    const [cr,cg,cb] = sc.bg;
+    c.globalAlpha = dim ? 0.06 : 1;
+
+    rr(c,n._x,n._y,n._w,n._h,14);
+    c.fillStyle=`rgba(${cr},${cg},${cb},0.04)`; c.fill();
+    const [br,bg2,bb,ba]=sc.border;
+    c.strokeStyle=`rgba(${br},${bg2},${bb},${ba})`; c.lineWidth=0.7; c.stroke();
+
+    rr(c,n._x+1,n._y+16,3,n._h-32,1.5); c.fillStyle=sc.fill; c.fill();
+
+    c.textAlign='left'; c.textBaseline='middle';
+    c.font='500 13px Inter';
+    c.fillStyle=n._st==='blocked'?'rgba(255,255,255,0.3)':sc.text;
+    c.fillText(truncate(c,n.title,n._w-60),n._x+16,n._y+22);
+    c.font='400 10px Inter'; c.fillStyle='rgba(255,255,255,0.15)';
+    c.fillText(truncate(c,[n.domain,n.topic].filter(Boolean).join(' · '),n._w-60),n._x+16,n._y+39);
+    c.font='400 9px Inter'; c.fillStyle='rgba(255,255,255,0.1)';
+    c.fillText([n.type,n.complexity,n.engagement].filter(Boolean).join(' · '),n._x+16,n._y+54);
+
+    if (n.pri) { c.textAlign='right'; c.font='600 10px Inter'; c.fillStyle='rgba(255,255,255,0.1)'; c.fillText(n.pri,n._x+n._w-14,n._y+22); c.textAlign='left'; }
+    if (n._st==='progress'&&n.prog>0) {
+      const bx=n._x+14,by=n._y+n._h-10,bw=n._w-28,bh=3;
+      rr(c,bx,by,bw,bh,1.5); c.fillStyle='rgba(255,255,255,0.03)'; c.fill();
+      rr(c,bx,by,bw*n.prog/100,bh,1.5); c.fillStyle=sc.fill; c.fill();
+    }
+    if (n._st==='done') { c.textAlign='right'; c.font='600 12px Inter'; c.fillStyle=sc.fill; c.fillText('✓',n._x+n._w-14,n._y+54); c.textAlign='left'; }
+    if (n._cov!==undefined&&n._cov<1&&n._st!=='done') {
+      const dx2=n._x+n._w-14,dy2=n._y+54;
+      c.beginPath(); c.arc(dx2,dy2,8,0,Math.PI*2); c.strokeStyle='rgba(255,255,255,0.04)'; c.lineWidth=2; c.stroke();
+      c.beginPath(); c.arc(dx2,dy2,8,-Math.PI/2,-Math.PI/2+Math.PI*2*n._cov);
+      c.strokeStyle=`rgba(${cr},${cg},${cb},0.3)`; c.lineWidth=2; c.stroke();
+      c.font='500 7px Inter'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillStyle=`rgba(${cr},${cg},${cb},0.5)`; c.fillText(Math.round(n._cov*100)+'%',dx2,dy2+0.5);
+      c.textAlign='left'; c.textBaseline='alphabetic';
+    }
+    c.globalAlpha=1;
+  }
+  c.restore();
+  staticDirty = false;
+}
+
+function draw() {
+  if (searchQ !== prevSearchQ) { staticDirty = true; prevSearchQ = searchQ; }
+  if (staticDirty) drawStatic();
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  // Blit static layer with current camera transform
+  ctx.save();
+  ctx.translate(cam.x, cam.y);
+  ctx.scale(cam.z, cam.z);
+  ctx.drawImage(staticCanvas, staticCanvas._ox, staticCanvas._oy, staticCanvas._w, staticCanvas._h);
+
+  // Dynamic layer: hover highlights
+  if (hovered) {
+    const sc = SC[hovered._st];
+    const [hr,hg,hb] = sc.bg;
+
+    // Highlight only level-1 edges (direct neighbors)
+    const hovIdx = resources.indexOf(hovered);
+    const neighbors = directNeighbors.get(hovIdx) || new Set();
+
+    for (const eg of edgeGeom) {
+      if (hovered !== resources[eg.from] && hovered !== resources[eg.to]) continue;
+      const otherIdx = eg.from === hovIdx ? eg.to : eg.from;
+      if (!neighbors.has(otherIdx)) continue;
+      ctx.beginPath();
+      ctx.moveTo(eg.pa.x, eg.pa.y);
+      ctx.quadraticCurveTo(eg.cpx, eg.cpy, eg.pb.x, eg.pb.y);
+      ctx.strokeStyle = `rgba(${hr},${hg},${hb},0.35)`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Highlight sibling edges
+    for (const eg of sibGeom) {
+      if (hovered !== resources[eg.a] && hovered !== resources[eg.b]) continue;
+      const otherIdx = eg.a === hovIdx ? eg.b : eg.a;
+      if (!neighbors.has(otherIdx)) continue;
+      ctx.beginPath();
+      ctx.moveTo(eg.pa.x, eg.pa.y);
+      ctx.quadraticCurveTo(eg.cpx, eg.cpy, eg.pb.x, eg.pb.y);
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = `rgba(${hr},${hg},${hb},0.2)`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Highlight hovered card
+    const n = hovered;
+    const [cr,cg,cb] = sc.bg;
+    const [gr,gg,gb] = sc.glow || sc.bg;
+    ctx.shadowColor = `rgba(${gr},${gg},${gb},0.3)`; ctx.shadowBlur = 32;
+    rr(ctx, n._x, n._y, n._w, n._h, 14);
+    ctx.fillStyle = `rgba(${cr},${cg},${cb},0.1)`; ctx.fill();
+    const [br,bg2,bb,ba] = sc.border;
+    ctx.strokeStyle = `rgba(${br},${bg2},${bb},${Math.min(ba*2.5,0.7)})`; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+  }
+
+  ctx.restore();
+}
+
+let drawPending = false;
+function requestDraw() {
+  if (drawPending) return;
+  drawPending = true;
+  requestAnimationFrame(() => { drawPending = false; draw(); });
+}
+
+function rr(c,x,y,w,h,r) {
+  c.beginPath(); c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+  c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+  c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
+}
+function truncate(c, t, mw) {
+  if (c.measureText(t).width <= mw) return t;
+  while (t.length>3 && c.measureText(t+'…').width>mw) t=t.slice(0,-1);
+  return t+'…';
+}
+
+// --- Interaction ---
+let panning = false, ps = {x:0,y:0};
+let pinned = null; // pinned node — tooltip stays open
+
+const panelEl = document.getElementById('panel');
+
+function buildPanel(node) {
+  const sc = SC[node._st];
+  let h = `<button class="close-btn" onclick="closePanel()">&times;</button>`;
+  h += `<h3 style="color:${sc.text}">${node.title}</h3>`;
+  h += '<div class="pills">';
+  [node.type, node.complexity, node.engagement, node._st].filter(Boolean).forEach(t => h+=`<span class="pill">${t}</span>`);
+  h += '</div>';
+  if (node.domain) h += `<div class="info"><b>Domain</b> ${node.domain}</div>`;
+  if (node.topic) h += `<div class="info"><b>Topic</b> ${node.topic}</div>`;
+  if (node.pri) h += `<div class="info"><b>Priority</b> ${node.pri}/100</div>`;
+  if (node._cov !== undefined) h += `<div class="info"><b>Prereq coverage</b> ${Math.round(node._cov*100)}%</div>`;
+  if (node._st === 'progress' && node.prog) {
+    h += `<div class="pbar"><div class="pfill" style="width:${node.prog}%;background:${sc.fill}"></div></div>`;
+  }
+  const nodeIdx = resources.indexOf(node);
+  const prereqEdges = edges.filter(e => e.to === nodeIdx);
+  if (prereqEdges.length) {
+    h += '<div class="section"><div class="section-title">Read these first</div><div class="concept-list">';
+    prereqEdges.forEach(e => {
+      const other = resources[e.from];
+      const done = other._st === 'done';
+      h += `<span class="${done?'concept-known':'concept-gap'}">${done?'✓':'○'} ${other.title}</span><br/>`;
+    });
+    h += '</div></div>';
+  }
+  const unlockEdges = edges.filter(e => e.from === nodeIdx);
+  if (unlockEdges.length) {
+    h += '<div class="section"><div class="section-title">Unlocks</div><div class="concept-list">';
+    unlockEdges.forEach(e => { h += `${resources[e.to].title}<br/>`; });
+    h += '</div></div>';
+  }
+  // Siblings (shared prerequisites)
+  const nodeSibs = siblingEdges.filter(e => e.a === nodeIdx || e.b === nodeIdx);
+  if (nodeSibs.length) {
+    h += '<div class="section"><div class="section-title">Related (shared prerequisites)</div><div class="concept-list">';
+    nodeSibs.forEach(e => {
+      const other = resources[e.a === nodeIdx ? e.b : e.a];
+      h += `${other.title} <span style="color:rgba(255,255,255,0.2)">via ${e.shared.slice(0,2).join(', ')}${e.shared.length>2?' +' +(e.shared.length-2):''}</span><br/>`;
+    });
+    h += '</div></div>';
+  }
+  if (node.concepts.length) {
+    h += '<div class="section"><div class="section-title">Concepts covered</div><div class="concept-list">';
+    h += node.concepts.join(', ') + '</div></div>';
+  }
+  if (node.prereqs.length) {
+    h += '<div class="section"><div class="section-title">Concept prerequisites</div><div class="concept-list">';
+    h += node.prereqs.join(', ') + '</div></div>';
+  }
+  if (node.summary) h += `<div class="sum">${node.summary}</div>`;
+  return h;
+}
+
+function openPanel(node) {
+  pinned = node;
+  hovered = node;
+  panelEl.innerHTML = buildPanel(node);
+  panelEl.classList.add('open');
+  requestDraw();
+}
+
+function closePanel() {
+  pinned = null;
+  hovered = null;
+  panelEl.classList.remove('open');
+  requestDraw();
+}
+window.closePanel = closePanel;
+
+function hitTest(ex, ey) {
+  const wx = (ex-cam.x)/cam.z, wy = (ey-cam.y)/cam.z;
+  for (const n of resources) {
+    if (wx>=n._x && wx<=n._x+n._w && wy>=n._y && wy<=n._y+n._h) return n;
+  }
+  return null;
+}
+
+canvas.addEventListener('wheel', ev => {
+  ev.preventDefault();
+  const s = ev.deltaY>0 ? 0.94 : 1.06;
+  cam.z *= s; cam.x = ev.clientX-(ev.clientX-cam.x)*s; cam.y = ev.clientY-(ev.clientY-cam.y)*s;
+  requestDraw();
+});
+
+let dragStart = null;
+let dragging = false;
+
+canvas.addEventListener('mousedown', ev => {
+  dragStart = { x: ev.clientX, y: ev.clientY, cx: cam.x, cy: cam.y };
+  dragging = false;
+});
+
+canvas.addEventListener('mousemove', ev => {
+  if (dragStart && !dragging) {
+    if (Math.abs(ev.clientX - dragStart.x) > 4 || Math.abs(ev.clientY - dragStart.y) > 4) {
+      dragging = true;
+      canvas.classList.add('grabbing');
+    }
+  }
+  if (dragging && dragStart) {
+    cam.x = dragStart.cx + (ev.clientX - dragStart.x);
+    cam.y = dragStart.cy + (ev.clientY - dragStart.y);
+    requestDraw();
+    return;
+  }
+  if (pinned) { canvas.style.cursor = hitTest(ev.clientX, ev.clientY) ? 'pointer' : 'grab'; return; }
+
+  const hit = hitTest(ev.clientX, ev.clientY);
+  if (hit !== hovered) { hovered = hit; requestDraw(); }
+  canvas.style.cursor = hit ? 'pointer' : 'grab';
+
+  if (hit) {
+    const sc = SC[hit._st];
+    tipEl.innerHTML = `<h3 style="color:${sc.text}">${hit.title}</h3><div class="meta">${[hit.domain, hit.topic, hit._st].filter(Boolean).join(' · ')}</div>`;
+    tipEl.style.display = 'block';
+    tipEl.style.left = Math.min(ev.clientX + 16, W - 300) + 'px';
+    tipEl.style.top = (ev.clientY + 16) + 'px';
+  } else {
+    tipEl.style.display = 'none';
+  }
+});
+
+canvas.addEventListener('mouseup', ev => {
+  const wasClick = !dragging && dragStart;
+  dragStart = null;
+  dragging = false;
+  canvas.classList.remove('grabbing');
+
+  if (wasClick) {
+    const hit = hitTest(ev.clientX, ev.clientY);
+    if (hit) {
+      openPanel(hit);
+      tipEl.style.display = 'none';
+    } else if (pinned) {
+      closePanel();
+    }
+  }
+});
+
+canvas.addEventListener('mouseleave', () => {
+  if (!pinned) { hovered = null; tipEl.style.display = 'none'; requestDraw(); }
+});
+
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && pinned) closePanel(); });
+
+document.getElementById('search').addEventListener('input', ev => { searchQ = ev.target.value.toLowerCase(); staticDirty = true; requestDraw(); });
+
+// Smart filters
+const activeStatuses = new Set(['done', 'progress', 'ready', 'blocked']);
+let filterDomain = '';
+let filterEngagement = '';
+
+function applyFilters() {
+  resources.forEach(n => {
+    let visible = true;
+    if (!activeStatuses.has(n._st)) visible = false;
+    if (filterDomain && n.domain !== filterDomain) visible = false;
+    if (filterEngagement && n.engagement !== filterEngagement) visible = false;
+    n._filtered = !visible;
+  });
+  staticDirty = true;
+  requestDraw();
+}
+
+// Status toggle buttons
+document.querySelectorAll('.fbtn[data-filter="status"]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const val = btn.dataset.value;
+    if (activeStatuses.has(val)) { activeStatuses.delete(val); btn.classList.remove('active', 'active-green', 'active-orange'); }
+    else {
+      activeStatuses.add(val);
+      if (val === 'done') btn.classList.add('active-green');
+      else if (val === 'progress') btn.classList.add('active-orange');
+      else btn.classList.add('active');
+    }
+    applyFilters();
+  });
+});
+
+document.getElementById('domainFilter').addEventListener('change', ev => { filterDomain = ev.target.value; applyFilters(); });
+document.getElementById('engagementFilter').addEventListener('change', ev => { filterEngagement = ev.target.value; applyFilters(); });
+
+// Populate domain dropdown
+const allDomains = [...new Set(resources.map(n => n.domain).filter(Boolean))].sort();
+const domSel = document.getElementById('domainFilter');
+allDomains.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; domSel.appendChild(o); });
+
+window.addEventListener('resize', () => { resize(); init(); requestDraw(); });
+resize();
+// Wait for Inter font to load before rendering
+document.fonts.ready.then(() => { init(); requestDraw(); });
+</script>
+</body>
+</html>

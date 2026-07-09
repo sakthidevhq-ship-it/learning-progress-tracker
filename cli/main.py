@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import subprocess
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -210,3 +211,19 @@ def recompute():
     config = _get_config()
     count = recompute_all(config.vault_path, config)
     click.echo(f"Recomputed priorities for {count} pages")
+
+
+@cli.command()
+@click.option("--no-open", is_flag=True, help="Build without opening in browser")
+def graph(no_open):
+    config = _get_config()
+    project_root = Path(__file__).parent.parent
+    template = project_root / "graph.html"
+    output = project_root / "knowledge-graph.html"
+    vault = config.vault_path
+
+    from cli.build_graph import build
+    build(str(vault), str(template), str(output))
+
+    if not no_open:
+        subprocess.run(["open", str(output)], check=False)

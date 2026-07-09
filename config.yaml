@@ -1,10 +1,11 @@
-vault_path: ~/logseq-vault
+vault_path: ./vault
 
 domain_weights:
   ML/Infrastructure: 0.9
+  ML/Agents: 0.85
+  ML/Frameworks: 0.8
   Systems: 0.8
-  Databases: 0.5
-  Security: 0.6
+  Game AI: 0.6
   Frontend: 0.3
 
 topic_weights:
@@ -12,6 +13,10 @@ topic_weights:
   Distributed Training: 0.7
   KV Cache Design: 0.85
   RLHF: 0.6
+  Prompt Engineering: 0.8
+  LLM Serving: 0.9
+  Agentic Systems: 0.85
+  Model Architecture: 0.75
 
 default_weight: 0.5
 on_duplicate: skip
