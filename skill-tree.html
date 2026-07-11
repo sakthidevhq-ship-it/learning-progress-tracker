@@ -15,6 +15,9 @@ body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflo
   display: flex; align-items: center; padding: 0 20px; gap: 14px;
 }
 #hud .brand { font-size: 13px; font-weight: 700; color: #e6edf3; letter-spacing: 0.5px; }
+#hud .crumb { font-size: 11px; color: rgba(255,255,255,0.35); }
+#hud .crumb b { color: rgba(255,255,255,0.7); font-weight: 600; }
+#hud .crumb .back { cursor: pointer; color: rgba(88,166,255,0.8); }
 .hsep { width: 1px; height: 16px; background: rgba(255,255,255,0.06); }
 #hud input, #hud select {
   background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
@@ -47,6 +50,8 @@ body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflo
 .sheet-sec { margin-top: 18px; }
 .sheet-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.28); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 .sheet-title .cnt { color: rgba(255,255,255,0.18); font-weight: 500; }
+.sheet-title .clear { margin-left: auto; cursor: pointer; color: rgba(255,255,255,0.25); font-size: 9px; text-transform: none; letter-spacing: 0; }
+.sheet-title .clear:hover { color: rgba(255,255,255,0.5); }
 
 .quest {
   border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;
@@ -65,6 +70,21 @@ body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflo
 .quest.q-unlock .q-kind { color: #a371f7; }
 .qbar { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.05); margin-top: 5px; overflow: hidden; }
 .qbar-fill { height: 100%; background: #f0883e; border-radius: 2px; }
+
+/* Goal card */
+.goal-card {
+  border: 1px solid rgba(227,179,65,0.35); border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 7px;
+  background: rgba(227,179,65,0.05);
+}
+.goal-card .g-title { font-size: 12px; font-weight: 700; color: #e3b341; margin-bottom: 3px; }
+.goal-card .g-meta { font-size: 9px; color: rgba(255,255,255,0.35); margin-bottom: 8px; }
+.goal-step { display: flex; align-items: center; gap: 7px; padding: 3px 0; font-size: 10.5px; cursor: pointer; border-radius: 5px; }
+.goal-step:hover { background: rgba(255,255,255,0.03); }
+.goal-step .gs-n { font-size: 8px; color: rgba(227,179,65,0.6); font-weight: 700; width: 14px; text-align: right; flex-shrink: 0; }
+.goal-step .gs-t { color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.goal-step.gs-done .gs-t { color: rgba(63,185,80,0.6); text-decoration: line-through; }
+.goal-step.gs-next .gs-t { color: #e6edf3; font-weight: 600; }
 
 .rank-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer; padding: 2px 4px; border-radius: 6px; }
 .rank-row:hover { background: rgba(255,255,255,0.03); }
@@ -115,6 +135,14 @@ body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflo
 #panel .pills { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
 #panel .pill { font-size: 9px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.4px; }
 #panel .pill.xp { color: #e3b341; background: rgba(227,179,65,0.08); }
+#panel .goal-btn {
+  display: inline-block; margin-bottom: 12px; cursor: pointer;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  color: #e3b341; background: rgba(227,179,65,0.08);
+  border: 1px solid rgba(227,179,65,0.35); border-radius: 14px; padding: 5px 14px;
+  font-family: inherit;
+}
+#panel .goal-btn:hover { background: rgba(227,179,65,0.15); }
 #panel .info { font-size: 12px; color: rgba(255,255,255,0.35); margin: 3px 0; line-height: 1.5; }
 #panel .info b { color: rgba(255,255,255,0.6); font-weight: 500; }
 #panel .pbar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.04); margin-top: 8px; overflow: hidden; }
@@ -134,7 +162,8 @@ canvas.grabbing { cursor: grabbing; }
 <div id="hud">
   <div class="brand">SKILL TREE</div>
   <div class="hsep"></div>
-  <select id="domainFilter"><option value="">All Branches</option></select>
+  <div class="crumb" id="crumb"></div>
+  <select id="domainFilter"><option value="">⤷ Enter branch…</option></select>
   <input id="search" type="text" placeholder="Search..." style="width:120px"/>
   <a href="knowledge-graph.html" style="font-size:10px;color:rgba(88,166,255,0.7);text-decoration:none;border:1px solid rgba(88,166,255,0.25);border-radius:14px;padding:3px 10px;white-space:nowrap">◉ Map</a>
   <div class="legend">
@@ -157,7 +186,7 @@ function plinks(v) { return v ? (v.match(/\[\[([^\]]+)\]\]/g)||[]).map(s=>s.slic
 function strip(v) { return (v||'').replace(/\[\[|\]\]/g,''); }
 
 const resources = RAW.filter(n => RES_TYPES.has(n.type)).map(n => ({
-  ...n, domain: strip(n.domain), topic: strip(n.topic),
+  ...n, domain: strip(n.domain) || 'Other', topic: strip(n.topic),
   prereqs: plinks(n.prerequisites), concepts: plinks(n.concepts),
   prereqResources: n.prereqResources || [],
   pri: parseInt(n.priority)||0, prog: parseInt(n.progress)||0,
@@ -184,14 +213,6 @@ resources.forEach((n, ti) => {
   }
 });
 
-// Cross-branch links per node (bridge pips)
-const crossDoms = resources.map(() => new Set());
-edges.forEach(e => {
-  const da = resources[e.from].domain || 'Other';
-  const db = resources[e.to].domain || 'Other';
-  if (da !== db) { crossDoms[e.from].add(db); crossDoms[e.to].add(da); }
-});
-
 // --- XP economy ---
 const CPLX_XP = { beginner: 50, intermediate: 100, advanced: 150 };
 const SIZE_MUL = { 'quick-read': 0.6, medium: 1, 'deep-dive': 1.5 };
@@ -207,11 +228,10 @@ const earnedXP = resources.reduce((s, n) => {
   if (n._st === 'progress') return s + Math.floor(n._xp * n.prog / 100 / 5) * 5;
   return s;
 }, 0);
-
 function levelFromXP(xp) {
   let lvl = 1, need = 200, cum = 0;
   while (xp >= cum + need) { cum += need; need = Math.round(need * 1.25 / 5) * 5; lvl++; }
-  return { lvl, into: xp - cum, need, cum };
+  return { lvl, into: xp - cum, need };
 }
 const LV = levelFromXP(earnedXP);
 
@@ -226,14 +246,12 @@ function rankOf(frac) {
 
 const unlockCount = new Array(resources.length).fill(0);
 edges.forEach(e => unlockCount[e.from]++);
-
 function questScore(n, i) { return n.pri + unlockCount[i]*8 + n._cov*10; }
 
 const continueQ = resources.map((n,i)=>({n,i})).filter(q => q.n._st==='progress')
   .sort((a,b) => b.n.prog - a.n.prog);
 const newQ = resources.map((n,i)=>({n,i})).filter(q => q.n._st==='ready')
   .sort((a,b) => questScore(b.n,b.i) - questScore(a.n,a.i)).slice(0, 4);
-
 let unlockQ = null;
 {
   const cands = resources.map((n,i)=>({n,i})).filter(q => q.n._st==='blocked')
@@ -246,19 +264,19 @@ let unlockQ = null;
     .sort((a,b) => b.n.pri - a.n.pri);
   if (cands.length) {
     const t = cands[0];
-    unlockQ = { finish: resources[titleToIdx[t.missing[0]]], finishIdx: titleToIdx[t.missing[0]], opens: t.n, opensIdx: t.i };
+    unlockQ = { finish: resources[titleToIdx[t.missing[0]]], finishIdx: titleToIdx[t.missing[0]], opens: t.n };
   }
 }
-
 const topPickIdx = continueQ.length ? continueQ[0].i : (newQ.length ? newQ[0].i : -1);
 
 const doneRes = resources.filter(n => n._st === 'done');
 const domStats = {};
 resources.forEach(n => {
-  const d = n.domain || 'Other';
-  domStats[d] = domStats[d] || { total: 0, done: 0 };
+  const d = n.domain;
+  domStats[d] = domStats[d] || { total: 0, done: 0, prog: 0 };
   domStats[d].total++;
   if (n._st === 'done') domStats[d].done++;
+  if (n._st === 'progress') domStats[d].prog++;
 });
 const branchFracs = Object.values(domStats).map(s => s.done / s.total);
 const ACH = [
@@ -301,125 +319,159 @@ const SC = {
   blocked:  { fill: 'rgba(255,255,255,0.08)', glow: null, text: 'rgba(255,255,255,0.25)' },
 };
 
-// --- Constellation-on-level-spine layout ---
-// Global vertical axis = learning depth (true level). Domains are columns
-// ordered by knowledge flow. Level-1's 40 items spread across columns
-// instead of piling onto one radial ring.
-const CELL = 112, HEX_R = 20, SUBROW_H = 64, BAND_PAD = 26;
-const DOM_GAP = 42, HEADER_ZONE = 96, SIDEBAR_W = 272;
+// ============================================================
+// TWO-LEVEL META-TREE
+// Galaxy: 14 branch orbs (honest aggregates — no cycles, no hubs)
+// Branch: zoom into one domain's resources (local order tolerable)
+// Goal paths: the verb that works at both levels
+// ============================================================
 
-let columns = [], bands = [], trunks = [], frontierBand = -1;
-let worldW = 0, worldH = 0;
+const SIDEBAR_W = 272;
+let view = { mode: 'galaxy', domain: null };
+let goal = null; // { target, set:Set<idx>, order:[idx] }
 
-function layoutSpine() {
-  // Knowledge-flow ordering
-  const crossW = {};
+// --- Galaxy layout: deterministic force sim on domain orbs ---
+const galaxyNodes = []; // {domain, x, y, r, count, done}
+function layoutGalaxy(W, H) {
+  const doms = Object.keys(domStats).sort((a,b) => domStats[b].total - domStats[a].total);
+  // Symmetric inter-domain weights from cross edges
+  const wmap = {};
   edges.forEach(e => {
-    const da = resources[e.from].domain || 'Other';
-    const db = resources[e.to].domain || 'Other';
-    if (da === db) return;
-    (crossW[da] = crossW[da] || {})[db] = (crossW[da][db] || 0) + 1;
+    const a = resources[e.from].domain, b = resources[e.to].domain;
+    if (a === b) return;
+    const key = a < b ? a+'|'+b : b+'|'+a;
+    wmap[key] = (wmap[key]||0) + 1;
   });
-  const netOut = {};
-  Object.keys(domStats).forEach(d => netOut[d] = 0);
-  for (const [a, tos] of Object.entries(crossW))
-    for (const [b, w] of Object.entries(tos)) {
-      if (netOut[a] !== undefined) netOut[a] += w;
-      if (netOut[b] !== undefined) netOut[b] -= w;
-    }
-  const domOrder = Object.keys(domStats).sort((a,b) =>
-    (netOut[b]-netOut[a]) || (domStats[b].total - domStats[a].total));
-
-  // Group nodes: domain → band → items
-  const maxBand = Math.max(...resources.map(n => Math.round(n.lvl)));
-  const cells = {};   // dom -> band -> [idx]
-  resources.forEach((n, i) => {
-    const d = n.domain || 'Other';
-    const b = Math.round(n.lvl);
-    ((cells[d] = cells[d] || {})[b] = cells[d][b] || []).push(i);
+  galaxyNodes.length = 0;
+  const cx = (W - SIDEBAR_W)/2 + SIDEBAR_W, cy = (H - 44)/2 + 44;
+  doms.forEach((d, i) => {
+    const s = domStats[d];
+    const r = 30 + Math.sqrt(s.total) * 9;
+    // deterministic seed on a circle, biggest at center
+    const angle = (2*Math.PI*i)/doms.length - Math.PI/2;
+    const dist = i === 0 ? 0 : 250 + (i%3)*60;
+    galaxyNodes.push({ domain: d, x: cx + dist*Math.cos(angle), y: cy + dist*Math.sin(angle), vx:0, vy:0, r, ...s });
   });
-  // Sort within cell by level float, then priority
-  for (const d in cells) for (const b in cells[d])
-    cells[d][b].sort((x,y) => resources[x].lvl - resources[y].lvl || resources[y].pri - resources[x].pri);
-
-  // Row wrap: ≤7 in one row, else split into 2 balanced rows
-  function rowsOf(items) {
-    if (items.length <= 7) return [items];
-    const half = Math.ceil(items.length / 2);
-    return [items.slice(0, half), items.slice(half)];
+  const byDom = {};
+  galaxyNodes.forEach(g => byDom[g.domain] = g);
+  // Force sim: attraction along weighted pairs, repulsion, center gravity
+  for (let it = 0; it < 300; it++) {
+    const alpha = 1 - it/300;
+    galaxyNodes.forEach(g => { g.vx += (cx-g.x)*0.002*alpha; g.vy += (cy-g.y)*0.002*alpha; });
+    for (let i = 0; i < galaxyNodes.length; i++) {
+      for (let j = i+1; j < galaxyNodes.length; j++) {
+        const a = galaxyNodes[i], b = galaxyNodes[j];
+        let dx = b.x-a.x, dy = b.y-a.y;
+        let dist = Math.sqrt(dx*dx+dy*dy)||1;
+        const minD = a.r + b.r + 60;
+        if (dist < minD*1.8) {
+          const f = (minD*minD)/(dist*dist)*1.6*alpha;
+          a.vx -= dx/dist*f; a.vy -= dy/dist*f;
+          b.vx += dx/dist*f; b.vy += dy/dist*f;
+        }
+      }
+    }
+    for (const [key, w] of Object.entries(wmap)) {
+      const [da, db] = key.split('|');
+      const a = byDom[da], b = byDom[db];
+      if (!a || !b) continue;
+      let dx = b.x-a.x, dy = b.y-a.y;
+      let dist = Math.sqrt(dx*dx+dy*dy)||1;
+      const ideal = a.r + b.r + 90;
+      const f = (dist-ideal)*0.004*Math.min(w/6,1)*alpha;
+      a.vx += dx/dist*f; a.vy += dy/dist*f;
+      b.vx -= dx/dist*f; b.vy -= dy/dist*f;
+    }
+    galaxyNodes.forEach(g => { g.vx*=0.8; g.vy*=0.8; g.x+=g.vx; g.y+=g.vy; });
   }
-
-  // Band heights = max sub-rows across domains for that band
-  bands = [];
-  let y = HEADER_ZONE;
-  for (let b = 0; b <= maxBand; b++) {
-    let maxRows = 1;
-    for (const d of domOrder) {
-      const items = (cells[d] || {})[b] || [];
-      if (items.length) maxRows = Math.max(maxRows, rowsOf(items).length);
-    }
-    const h = BAND_PAD*2 + maxRows * SUBROW_H;
-    bands.push({ b, y, h });
-    y += h;
-  }
-  worldH = y;
-
-  // Column widths + x positions
-  columns = [];
-  let x = 60; // left gutter for LV labels
-  for (const d of domOrder) {
-    let maxRowLen = 1;
-    for (let b = 0; b <= maxBand; b++) {
-      const items = (cells[d] || {})[b] || [];
-      rowsOf(items).forEach(r => maxRowLen = Math.max(maxRowLen, r.length));
-    }
-    const w = Math.max(176, maxRowLen * CELL + 28);
-    columns.push({ domain: d, x, w });
-    x += w + DOM_GAP;
-  }
-  worldW = x;
-
-  // Node positions
-  const colByDom = {};
-  columns.forEach(c => colByDom[c.domain] = c);
-  resources.forEach((n, i) => {
-    const d = n.domain || 'Other';
-    const col = colByDom[d];
-    const b = Math.round(n.lvl);
-    const band = bands[b];
-    const rows = rowsOf(cells[d][b]);
-    let r = 0, cIdx = 0;
-    for (let ri = 0; ri < rows.length; ri++) {
-      const k = rows[ri].indexOf(i);
-      if (k >= 0) { r = ri; cIdx = k; break; }
-    }
-    const rowItems = rows[r].length;
-    const rowW = rowItems * CELL;
-    const startX = col.x + (col.w - rowW) / 2;
-    n._x = startX + cIdx*CELL + CELL/2;
-    n._y = band.y + BAND_PAD + r*SUBROW_H + HEX_R + 4;
-    n._r = HEX_R;
-    n._panelDomain = d;
-  });
-
-  // Frontier: shallowest band containing a ready or in-progress node
-  frontierBand = -1;
-  for (let b = 0; b <= maxBand; b++) {
-    if (resources.some(n => Math.round(n.lvl) === b && (n._st === 'ready' || n._st === 'progress'))) {
-      frontierBand = b; break;
-    }
-  }
-
-  // Trunk arcs between columns (aggregated cross-branch flow, 2+ links)
-  trunks = [];
-  for (const [a, tos] of Object.entries(crossW)) {
-    for (const [b, w] of Object.entries(tos)) {
-      if (w < 2) continue;
-      const ca = colByDom[a], cb = colByDom[b];
-      if (ca && cb) trunks.push({ ca, cb, w, domain: a });
-    }
+  // Aggregated arcs for drawing
+  galaxyArcs.length = 0;
+  for (const [key, w] of Object.entries(wmap)) {
+    if (w < 2) continue;
+    const [da, db] = key.split('|');
+    if (byDom[da] && byDom[db]) galaxyArcs.push({ a: byDom[da], b: byDom[db], w });
   }
 }
+const galaxyArcs = [];
+
+// --- Branch layout: one domain's resources, local level rows ---
+function layoutBranch(domain, W, H) {
+  const members = resources.map((n,i)=>({n,i})).filter(q => q.n.domain === domain);
+  // rows by rounded local level, compacted
+  const lvls = [...new Set(members.map(q => Math.round(q.n.lvl)))].sort((a,b)=>a-b);
+  const rowOf = {}; lvls.forEach((lv, r) => rowOf[lv] = r);
+  const rows = lvls.map(()=>[]);
+  members.forEach(q => rows[rowOf[Math.round(q.n.lvl)]].push(q));
+  rows.forEach(row => row.sort((a,b) => a.n.lvl - b.n.lvl || b.n.pri - a.n.pri));
+
+  const CELLX = 150, CELLY = 118, HEXR = 26;
+  const availW = W - SIDEBAR_W;
+  const cx = SIDEBAR_W + availW/2;
+  let y = 150;
+  rows.forEach(row => {
+    // wrap long rows
+    const perRow = Math.max(1, Math.min(row.length, Math.floor((availW-80)/CELLX)));
+    for (let k = 0; k < row.length; k += perRow) {
+      const slice = row.slice(k, k+perRow);
+      const w = slice.length * CELLX;
+      slice.forEach((q, ci) => {
+        q.n._x = cx - w/2 + ci*CELLX + CELLX/2;
+        q.n._y = y;
+        q.n._r = HEXR;
+      });
+      y += CELLY;
+    }
+  });
+  return { members, height: y };
+}
+
+// --- Goal pathfinding (cycle-safe backward walk) ---
+function computeGoal(idx) {
+  const needed = new Set();
+  const visited = new Set();
+  (function walk(i) {
+    if (visited.has(i)) return;
+    visited.add(i);
+    for (const t of resources[i].prereqResources) {
+      const j = titleToIdx[t];
+      if (j === undefined || resources[j]._st === 'done') continue;
+      needed.add(j);
+      walk(j);
+    }
+  })(idx);
+  needed.add(idx);
+  // Topo order over induced subgraph; cycle leftovers by level
+  const arr = [...needed];
+  const indeg = new Map(arr.map(i=>[i,0]));
+  const adj = new Map(arr.map(i=>[i,[]]));
+  for (const i of arr) {
+    for (const t of resources[i].prereqResources) {
+      const j = titleToIdx[t];
+      if (j !== undefined && needed.has(j)) { adj.get(j).push(i); indeg.set(i, indeg.get(i)+1); }
+    }
+  }
+  const q = arr.filter(i => indeg.get(i) === 0).sort((a,b) => resources[a].lvl - resources[b].lvl);
+  const order = [];
+  while (q.length) {
+    const c = q.shift();
+    order.push(c);
+    for (const d of adj.get(c)) {
+      indeg.set(d, indeg.get(d)-1);
+      if (indeg.get(d) === 0) q.push(d);
+    }
+  }
+  arr.sort((a,b) => resources[a].lvl - resources[b].lvl).forEach(i => { if (!order.includes(i)) order.push(i); });
+  return { target: idx, set: needed, order };
+}
+
+function setGoal(idx) {
+  goal = computeGoal(idx);
+  buildSheet();
+  requestDraw();
+}
+function clearGoal() { goal = null; buildSheet(); requestDraw(); }
+window.setGoal = setGoal;
+window.clearGoal = clearGoal;
 
 // --- Canvas ---
 const canvas = document.getElementById('c');
@@ -429,8 +481,9 @@ const panelEl = document.getElementById('panel');
 let dpr = window.devicePixelRatio || 1;
 let W, H;
 let cam = { x: 0, y: 0, z: 1 };
-let hovered = null, pinned = null;
-let searchQ = '', filterDomain = '';
+let hovered = null, hoveredOrb = null, pinned = null;
+let searchQ = '';
+let branchData = null;
 
 function resize() {
   W = window.innerWidth; H = window.innerHeight;
@@ -438,30 +491,69 @@ function resize() {
   canvas.style.width = W+'px'; canvas.style.height = H+'px';
 }
 
-function init() {
-  layoutSpine();
-  const availW = W - SIDEBAR_W;
-  // Fit height (never zoom below legibility); pan horizontally for width
-  let z = Math.min((H - 60) / worldH, 1);
-  z = Math.max(z, 0.62);
-  const contentW = worldW * z;
-  const xOff = contentW < availW ? SIDEBAR_W + (availW - contentW)/2 : SIDEBAR_W + 16;
-  cam = { x: xOff, y: 50 + Math.max(0, (H - 50 - worldH*z)/2), z };
-  buildSheet();
+function enterGalaxy() {
+  view = { mode: 'galaxy', domain: null };
+  branchData = null;
+  hovered = null; hoveredOrb = null;
+  layoutGalaxy(W, H);
+  cam = { x: 0, y: 0, z: 1 };
+  updateCrumb();
+  requestDraw();
 }
 
-function nodeDimmed(n) {
-  return (filterDomain && n._panelDomain !== filterDomain)
-      || (searchQ && !n.title.toLowerCase().includes(searchQ));
+function enterBranch(domain) {
+  view = { mode: 'branch', domain };
+  hovered = null; hoveredOrb = null;
+  branchData = layoutBranch(domain, W, H);
+  const contentH = branchData.height;
+  const z = Math.min(1, (H - 120) / contentH);
+  cam = { x: 0, y: Math.max(60, (H - contentH*z)/2), z };
+  updateCrumb();
+  requestDraw();
+}
+window.enterBranch = enterBranch;
+window.enterGalaxy = enterGalaxy;
+
+function updateCrumb() {
+  const el = document.getElementById('crumb');
+  if (view.mode === 'galaxy') el.innerHTML = '<b>Galaxy</b> · click a branch to enter';
+  else el.innerHTML = `<span class="back" onclick="enterGalaxy()">◀ Galaxy</span> / <b>${domTheme(view.domain).name}</b>`;
+}
+
+function init() {
+  layoutGalaxy(W, H);
+  if (view.mode === 'branch') enterBranch(view.domain);
+  updateCrumb();
+  buildSheet();
 }
 
 // --- Character sheet ---
 function buildSheet() {
-  const done = resources.filter(n => n._st === 'done').length;
+  const done = doneRes.length;
   let h = '';
   h += `<div class="lvl-row"><span class="lvl-num">Lv ${LV.lvl}</span><span class="lvl-label">Learner</span><span class="lvl-total"><b>${earnedXP.toLocaleString()}</b> XP</span></div>`;
   h += `<div class="xpbar"><div class="xpbar-fill" style="width:${Math.round(LV.into/LV.need*100)}%"></div></div>`;
   h += `<div class="xp-hint">${LV.into} / ${LV.need} XP to Lv ${LV.lvl+1} · ${done}/${resources.length} unlocked</div>`;
+
+  // Active goal card
+  if (goal) {
+    const t = resources[goal.target];
+    const remaining = goal.order.filter(i => resources[i]._st !== 'done');
+    const totalXP = remaining.reduce((s,i) => s + resources[i]._xp, 0);
+    h += `<div class="sheet-sec"><div class="sheet-title">🎯 Goal Path <span class="clear" onclick="clearGoal()">clear ✕</span></div>`;
+    h += `<div class="goal-card">
+      <div class="g-title">${t.title}</div>
+      <div class="g-meta">${remaining.length} step${remaining.length>1?'s':''} · +${totalXP.toLocaleString()} XP · ${domTheme(t.domain).name}</div>`;
+    let nextMarked = false;
+    goal.order.forEach((i, k) => {
+      const r = resources[i];
+      const isDone = r._st === 'done';
+      let cls = isDone ? 'gs-done' : '';
+      if (!isDone && !nextMarked) { cls = 'gs-next'; nextMarked = true; }
+      h += `<div class="goal-step ${cls}" data-idx="${i}"><span class="gs-n">${k+1}</span><span class="gs-t">${isDone?'✓ ':''}${r.title}</span></div>`;
+    });
+    h += `</div></div>`;
+  }
 
   h += `<div class="sheet-sec"><div class="sheet-title">⚔ Quest Log</div>`;
   continueQ.slice(0,2).forEach(q => {
@@ -511,254 +603,254 @@ function buildSheet() {
 
   const sheet = document.getElementById('sheet');
   sheet.innerHTML = h;
-  sheet.querySelectorAll('.quest').forEach(el => {
-    el.addEventListener('click', () => flyTo(resources[parseInt(el.dataset.idx)]));
+  sheet.querySelectorAll('.quest, .goal-step').forEach(el => {
+    el.addEventListener('click', () => flyToIdx(parseInt(el.dataset.idx)));
   });
   sheet.querySelectorAll('.rank-row').forEach(el => {
-    el.addEventListener('click', () => {
-      const d = el.dataset.dom;
-      filterDomain = (filterDomain === d) ? '' : d;
-      document.getElementById('domainFilter').value = filterDomain;
-      requestDraw();
-    });
+    el.addEventListener('click', () => enterBranch(el.dataset.dom));
   });
 }
 
-function flyTo(n) {
-  const z = Math.max(cam.z, 0.9);
-  cam = {
-    x: SIDEBAR_W + (W - SIDEBAR_W)/2 - n._x * z,
-    y: 44 + (H - 44)/2 - n._y * z,
-    z
-  };
+function flyToIdx(idx) {
+  const n = resources[idx];
+  if (view.mode !== 'branch' || view.domain !== n.domain) enterBranch(n.domain);
+  // center on node
+  cam.x = SIDEBAR_W + (W - SIDEBAR_W)/2 - n._x * cam.z;
+  cam.y = 44 + (H - 44)/2 - n._y * cam.z;
   openPanel(n);
   requestDraw();
 }
 
+// --- Drawing ---
 function draw() {
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
   ctx.save();
   ctx.translate(cam.x, cam.y);
   ctx.scale(cam.z, cam.z);
+  if (view.mode === 'galaxy') drawGalaxy();
+  else drawBranch();
+  ctx.restore();
+}
 
-  // Level bands: separators + labels
-  for (const band of bands) {
+function drawGalaxy() {
+  // Arcs
+  for (const arc of galaxyArcs) {
     ctx.beginPath();
-    ctx.moveTo(30, band.y);
-    ctx.lineTo(worldW - 10, band.y);
-    ctx.strokeStyle = 'rgba(255,255,255,0.035)';
-    ctx.lineWidth = 1;
+    ctx.moveTo(arc.a.x, arc.a.y);
+    ctx.lineTo(arc.b.x, arc.b.y);
+    ctx.strokeStyle = `rgba(255,255,255,${0.02 + Math.min(arc.w/40, 0.06)})`;
+    ctx.lineWidth = 1 + Math.log2(arc.w);
     ctx.stroke();
-    ctx.font = '700 10px Inter';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(255,255,255,0.14)';
-    ctx.fillText(`LV ${band.b}`, 12, band.y + band.h/2);
   }
+  // Goal: gold ring on orbs containing path members
+  const goalDoms = goal ? new Set([...goal.set].map(i => resources[i].domain)) : null;
 
-  // Frontier line
-  if (frontierBand >= 0) {
-    const fb = bands[frontierBand];
+  for (const g of galaxyNodes) {
+    const theme = domTheme(g.domain);
+    const [r,gg,b] = theme.c;
+    const frac = g.done / g.total;
+    const rank = rankOf(frac);
+    const isHov = hoveredOrb === g;
+    const dimmed = searchQ && !resources.some(n => n.domain === g.domain && n.title.toLowerCase().includes(searchQ));
+    ctx.globalAlpha = dimmed ? 0.15 : 1;
+
+    // Glow by rank
+    if (frac > 0) {
+      ctx.shadowColor = `rgba(${r},${gg},${b},${isHov ? 0.5 : 0.22})`;
+      ctx.shadowBlur = isHov ? 34 : 18;
+    }
+
+    // Orb body
     ctx.beginPath();
-    ctx.moveTo(30, fb.y + 2);
-    ctx.lineTo(worldW - 10, fb.y + 2);
-    ctx.setLineDash([8, 6]);
-    ctx.strokeStyle = 'rgba(227,179,65,0.25)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.font = '700 8px Inter';
-    ctx.textAlign = 'right';
-    ctx.fillStyle = 'rgba(227,179,65,0.5)';
-    ctx.fillText('YOUR FRONTIER', worldW - 14, fb.y - 6);
-  }
-
-  // Domain columns: tint + header
-  for (const col of columns) {
-    const theme = domTheme(col.domain);
-    const [r,g,b] = theme.c;
-    const dim = filterDomain && filterDomain !== col.domain;
-    ctx.globalAlpha = dim ? 0.12 : 1;
-
-    // Column tint
-    const grad = ctx.createLinearGradient(col.x, HEADER_ZONE, col.x, worldH);
-    grad.addColorStop(0, `rgba(${r},${g},${b},0.035)`);
-    grad.addColorStop(1, `rgba(${r},${g},${b},0.008)`);
+    ctx.arc(g.x, g.y, g.r, 0, Math.PI*2);
+    const grad = ctx.createRadialGradient(g.x - g.r*0.3, g.y - g.r*0.3, 0, g.x, g.y, g.r);
+    grad.addColorStop(0, `rgba(${r},${gg},${b},${0.16 + frac*0.2})`);
+    grad.addColorStop(1, `rgba(${r},${gg},${b},0.04)`);
     ctx.fillStyle = grad;
-    rr(ctx, col.x, HEADER_ZONE - 4, col.w, worldH - HEADER_ZONE + 4, 10);
     ctx.fill();
-
-    // Header
-    const s = domStats[col.domain] || { done: 0, total: 0 };
-    const rank = rankOf(s.total ? s.done / s.total : 0);
-    ctx.font = '700 12px Inter';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = `rgba(${r},${g},${b},0.8)`;
-    ctx.fillText(truncText(theme.name.toUpperCase(), Math.floor(col.w/8)), col.x + col.w/2, 56);
-    ctx.font = '700 8px Inter';
-    ctx.fillStyle = rank.c;
-    ctx.fillText(`${rank.t} · ${s.done}/${s.total}`, col.x + col.w/2, 72);
-    // Progress bar
-    const bw = Math.min(col.w - 40, 120);
-    rr(ctx, col.x + col.w/2 - bw/2, 80, bw, 3, 1.5);
-    ctx.fillStyle = 'rgba(255,255,255,0.05)';
-    ctx.fill();
-    if (s.done > 0) {
-      rr(ctx, col.x + col.w/2 - bw/2, 80, bw * s.done/s.total, 3, 1.5);
-      ctx.fillStyle = `rgba(${r},${g},${b},0.55)`;
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  // Trunk arcs above headers (aggregated cross-branch flow)
-  for (const t of trunks) {
-    const theme = domTheme(t.domain);
-    const [r,g,b] = theme.c;
-    const dim = filterDomain && filterDomain !== t.ca.domain && filterDomain !== t.cb.domain;
-    const ax = t.ca.x + t.ca.w/2, bx = t.cb.x + t.cb.w/2;
-    const apexY = 34 - Math.min(26, Math.abs(bx-ax)/60);
-    ctx.beginPath();
-    ctx.moveTo(ax, 44);
-    ctx.quadraticCurveTo((ax+bx)/2, apexY, bx, 44);
-    ctx.strokeStyle = `rgba(${r},${g},${b},${dim ? 0.015 : 0.14})`;
-    ctx.lineWidth = 1 + Math.log2(t.w) * 1.6;
-    ctx.stroke();
-    if (!dim) {
-      const sz = 5;
-      ctx.beginPath();
-      ctx.moveTo(bx, 44);
-      ctx.lineTo(bx - sz*0.8, 44 - sz);
-      ctx.lineTo(bx + sz*0.8, 44 - sz);
-      ctx.closePath();
-      ctx.fillStyle = `rgba(${r},${g},${b},0.35)`;
-      ctx.fill();
-      ctx.font = '600 8px Inter';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = `rgba(${r},${g},${b},0.4)`;
-      ctx.fillText(String(t.w), (ax+bx)/2, apexY + 8);
-    }
-  }
-
-  // Edges: intra-domain always; cross-domain only on hover
-  const hovIdx = hovered ? resources.indexOf(hovered) : -1;
-  for (const e of edges) {
-    const a = resources[e.from], b = resources[e.to];
-    const isHov = hovIdx >= 0 && (e.from === hovIdx || e.to === hovIdx);
-    const sameDom = a._panelDomain === b._panelDomain;
-    if (!sameDom && !isHov) continue;
-    const dim = nodeDimmed(a) && nodeDimmed(b);
-    if (dim && !isHov) continue;
-
-    const ax = a._x, ay = a._y + a._r + 3;
-    const bx = b._x, by = b._y - b._r - 10;
-    const my = (ay + by) / 2;
-    ctx.beginPath();
-    ctx.moveTo(ax, ay);
-    ctx.bezierCurveTo(ax, my, bx, my, bx, by);
-    if (isHov) {
-      const sc = SC[hovered._st];
-      const [hr,hg,hb] = sc.glow || [88,166,255];
-      ctx.strokeStyle = `rgba(${hr},${hg},${hb},0.5)`;
-      ctx.lineWidth = 2;
-    } else {
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-      ctx.lineWidth = 1;
-    }
-    ctx.stroke();
-    // Arrowhead
-    const sz = isHov ? 6 : 4;
-    ctx.beginPath();
-    ctx.moveTo(bx, by + sz);
-    ctx.lineTo(bx - sz*0.7, by - sz*0.4);
-    ctx.lineTo(bx + sz*0.7, by - sz*0.4);
-    ctx.closePath();
-    ctx.fillStyle = isHov ? ctx.strokeStyle : 'rgba(255,255,255,0.12)';
-    ctx.fill();
-  }
-
-  // Nodes
-  for (let i = 0; i < resources.length; i++) {
-    const n = resources[i];
-    const sc = SC[n._st];
-    const theme = domTheme(n._panelDomain);
-    const [dr,dg,db] = theme.c;
-    const dim = nodeDimmed(n);
-    const isHov = hovered === n;
-    const isTop = i === topPickIdx;
-
-    ctx.globalAlpha = dim ? 0.08 : 1;
-
-    if ((isHov || isTop || n._st === 'done') && sc.glow && !dim) {
-      const [gr,gg,gb] = isTop ? [227,179,65] : sc.glow;
-      ctx.shadowColor = `rgba(${gr},${gg},${gb},${isHov ? 0.5 : isTop ? 0.35 : 0.18})`;
-      ctx.shadowBlur = isHov ? 22 : isTop ? 18 : 9;
-    }
-
-    drawHex(ctx, n._x, n._y, n._r + (isHov ? 2 : 0));
-    if (n._st === 'done') {
-      const grad = ctx.createRadialGradient(n._x, n._y, 0, n._x, n._y, n._r);
-      grad.addColorStop(0, `rgba(${dr},${dg},${db},0.3)`);
-      grad.addColorStop(1, `rgba(${dr},${dg},${db},0.12)`);
-      ctx.fillStyle = grad;
-    } else if (n._st === 'progress') ctx.fillStyle = `rgba(${dr},${dg},${db},0.14)`;
-    else if (n._st === 'ready') ctx.fillStyle = `rgba(${dr},${dg},${db},0.07)`;
-    else ctx.fillStyle = 'rgba(255,255,255,0.015)';
-    ctx.fill();
-
-    if (n._st === 'done') ctx.strokeStyle = `rgba(63,185,80,${isHov?0.8:0.45})`;
-    else if (n._st === 'progress') ctx.strokeStyle = `rgba(240,136,62,${isHov?0.8:0.45})`;
-    else if (n._st === 'ready') ctx.strokeStyle = `rgba(88,166,255,${isHov?0.6:0.25})`;
-    else ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.strokeStyle = `rgba(${r},${gg},${b},${isHov ? 0.75 : 0.3})`;
     ctx.lineWidth = isHov ? 2 : 1;
     ctx.stroke();
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
 
-    if (isTop && !dim) {
-      drawHex(ctx, n._x, n._y, n._r + 7);
+    // Progress fill ring
+    if (frac > 0) {
+      ctx.beginPath();
+      ctx.arc(g.x, g.y, g.r + 6, -Math.PI/2, -Math.PI/2 + Math.PI*2*frac);
+      ctx.strokeStyle = `rgba(${r},${gg},${b},0.85)`;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+    }
+    // In-progress tick
+    if (g.prog > 0) {
+      ctx.beginPath();
+      ctx.arc(g.x, g.y, g.r + 6, -Math.PI/2 + Math.PI*2*frac, -Math.PI/2 + Math.PI*2*(frac + g.prog/g.total));
+      ctx.strokeStyle = 'rgba(240,136,62,0.7)';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+    }
+
+    // Goal highlight
+    if (goalDoms && goalDoms.has(g.domain)) {
+      ctx.beginPath();
+      ctx.arc(g.x, g.y, g.r + 12, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(227,179,65,0.55)';
+      ctx.setLineDash([5,5]);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Labels
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `700 ${Math.max(11, g.r/3.4)}px Inter`;
+    ctx.fillStyle = 'rgba(230,237,243,0.85)';
+    ctx.fillText(`${g.done}/${g.total}`, g.x, g.y - 6);
+    ctx.font = '700 8px Inter';
+    ctx.fillStyle = rank.c;
+    ctx.fillText(rank.t, g.x, g.y + 10);
+
+    ctx.font = '600 11px Inter';
+    ctx.fillStyle = `rgba(${r},${gg},${b},0.85)`;
+    ctx.fillText(theme.name, g.x, g.y + g.r + 20);
+
+    ctx.globalAlpha = 1;
+  }
+}
+
+function drawBranch() {
+  const { members } = branchData;
+  const theme = domTheme(view.domain);
+  const [dr,dg,db] = theme.c;
+
+  // Branch title
+  const s = domStats[view.domain];
+  const rank = rankOf(s.done/s.total);
+  const cx = SIDEBAR_W + (W - SIDEBAR_W)/2;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '800 20px Inter';
+  ctx.fillStyle = `rgba(${dr},${dg},${db},0.9)`;
+  ctx.fillText(theme.name.toUpperCase(), (cx - cam.x)/cam.z, (74 - cam.y)/cam.z);
+  ctx.font = '700 10px Inter';
+  ctx.fillStyle = rank.c;
+  ctx.fillText(`${rank.t} · ${s.done}/${s.total}`, (cx - cam.x)/cam.z, (94 - cam.y)/cam.z);
+
+  const idxSet = new Set(members.map(q => q.i));
+  const hovIdx = hovered ? resources.indexOf(hovered) : -1;
+
+  // Local edges (within branch)
+  for (const e of edges) {
+    if (!idxSet.has(e.from) || !idxSet.has(e.to)) continue;
+    const a = resources[e.from], b = resources[e.to];
+    const isHov = hovIdx >= 0 && (e.from === hovIdx || e.to === hovIdx);
+    const inGoal = goal && goal.set.has(e.from) && goal.set.has(e.to);
+    ctx.beginPath();
+    const ax = a._x, ay = a._y + a._r + 3;
+    const bx = b._x, by = b._y - b._r - 10;
+    const my = (ay+by)/2;
+    ctx.moveTo(ax, ay);
+    ctx.bezierCurveTo(ax, my, bx, my, bx, by);
+    if (inGoal) { ctx.strokeStyle = 'rgba(227,179,65,0.6)'; ctx.lineWidth = 2; }
+    else if (isHov) { const sc = SC[hovered._st]; const [hr,hg,hb] = sc.glow||[88,166,255]; ctx.strokeStyle = `rgba(${hr},${hg},${hb},0.5)`; ctx.lineWidth = 2; }
+    else { ctx.strokeStyle = 'rgba(255,255,255,0.09)'; ctx.lineWidth = 1; }
+    ctx.stroke();
+  }
+
+  // Nodes
+  for (const q of members) {
+    const n = q.n, i = q.i;
+    const sc = SC[n._st];
+    const dim = (searchQ && !n.title.toLowerCase().includes(searchQ)) || (goal && !goal.set.has(i) && goal.set.size > 0 && !goal.set.has(i));
+    const inGoal = goal && goal.set.has(i);
+    const isHov = hovered === n;
+    const isTop = i === topPickIdx;
+
+    ctx.globalAlpha = (goal && !inGoal) ? 0.15 : dim ? 0.1 : 1;
+
+    if ((isHov || isTop || inGoal || n._st === 'done') && !dim) {
+      const glow = inGoal ? [227,179,65] : (isTop ? [227,179,65] : (sc.glow || [88,166,255]));
+      ctx.shadowColor = `rgba(${glow[0]},${glow[1]},${glow[2]},${isHov ? 0.5 : 0.25})`;
+      ctx.shadowBlur = isHov ? 26 : 14;
+    }
+
+    drawHex(ctx, n._x, n._y, n._r + (isHov ? 3 : 0));
+    if (n._st === 'done') {
+      const grad = ctx.createRadialGradient(n._x, n._y, 0, n._x, n._y, n._r);
+      grad.addColorStop(0, `rgba(${dr},${dg},${db},0.32)`);
+      grad.addColorStop(1, `rgba(${dr},${dg},${db},0.12)`);
+      ctx.fillStyle = grad;
+    } else if (n._st === 'progress') ctx.fillStyle = `rgba(${dr},${dg},${db},0.16)`;
+    else if (n._st === 'ready') ctx.fillStyle = `rgba(${dr},${dg},${db},0.08)`;
+    else ctx.fillStyle = 'rgba(255,255,255,0.02)';
+    ctx.fill();
+
+    if (inGoal) ctx.strokeStyle = 'rgba(227,179,65,0.8)';
+    else if (n._st === 'done') ctx.strokeStyle = `rgba(63,185,80,${isHov?0.8:0.5})`;
+    else if (n._st === 'progress') ctx.strokeStyle = `rgba(240,136,62,${isHov?0.8:0.5})`;
+    else if (n._st === 'ready') ctx.strokeStyle = `rgba(88,166,255,${isHov?0.6:0.3})`;
+    else ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = inGoal || isHov ? 2 : 1;
+    ctx.stroke();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+    if (isTop && !goal) {
+      drawHex(ctx, n._x, n._y, n._r + 8);
       ctx.strokeStyle = 'rgba(227,179,65,0.7)';
       ctx.lineWidth = 1.5;
       ctx.stroke();
-      ctx.font = '800 8px Inter';
-      ctx.textAlign = 'center';
+      ctx.font = '800 9px Inter'; ctx.textAlign = 'center';
       ctx.fillStyle = '#e3b341';
-      ctx.fillText('★ NEXT', n._x, n._y - n._r - 14);
+      ctx.fillText('★ NEXT', n._x, n._y - n._r - 16);
+    }
+    if (goal && goal.target === i) {
+      ctx.font = '800 9px Inter'; ctx.textAlign = 'center';
+      ctx.fillStyle = '#e3b341';
+      ctx.fillText('🎯 GOAL', n._x, n._y - n._r - 16);
     }
 
     if (n._st === 'progress' && n.prog > 0) {
       ctx.beginPath();
-      ctx.arc(n._x, n._y, n._r + 5, -Math.PI/2, -Math.PI/2 + Math.PI*2*(n.prog/100));
+      ctx.arc(n._x, n._y, n._r + 6, -Math.PI/2, -Math.PI/2 + Math.PI*2*(n.prog/100));
       ctx.strokeStyle = '#f0883e';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 3;
       ctx.stroke();
     }
 
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (n._st === 'done') {
-      ctx.fillStyle = '#3fb950'; ctx.font = '700 13px Inter';
-      ctx.fillText('✓', n._x, n._y);
-    } else if (n._st === 'blocked') {
-      ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.font = '400 10px Inter';
-      ctx.fillText('🔒', n._x, n._y);
-    } else {
+    if (n._st === 'done') { ctx.fillStyle = '#3fb950'; ctx.font = '700 15px Inter'; ctx.fillText('✓', n._x, n._y); }
+    else if (n._st === 'blocked') { ctx.fillStyle = 'rgba(255,255,255,0.14)'; ctx.font = '400 12px Inter'; ctx.fillText('🔒', n._x, n._y); }
+    else {
       const icons = { paper:'📄', article:'📝', video:'🎬', docs:'📚', tweet:'🐦' };
-      ctx.font = '400 12px Inter';
+      ctx.font = '400 14px Inter';
       ctx.fillText(icons[n.type] || '📄', n._x, n._y);
     }
 
-    ctx.font = '500 8.5px Inter';
-    ctx.fillStyle = n._st==='blocked' ? 'rgba(255,255,255,0.18)' : n._st==='done' ? 'rgba(255,255,255,0.55)' : sc.text;
-    ctx.fillText(truncText(n.title, 17), n._x, n._y + n._r + 12);
+    // Two-line label
+    ctx.font = '500 9.5px Inter';
+    ctx.fillStyle = n._st==='blocked' ? 'rgba(255,255,255,0.22)' : n._st==='done' ? 'rgba(255,255,255,0.6)' : sc.text;
+    const words = n.title.split(' ');
+    let l1 = '', l2 = '';
+    for (const w of words) {
+      if ((l1 + ' ' + w).trim().length <= 20 && !l2) l1 = (l1 + ' ' + w).trim();
+      else l2 = (l2 + ' ' + w).trim();
+    }
+    if (l2.length > 20) l2 = l2.slice(0, 19) + '…';
+    ctx.fillText(l1, n._x, n._y + n._r + 13);
+    if (l2) ctx.fillText(l2, n._x, n._y + n._r + 24);
 
-    // Bridge pips
-    const cds = [...crossDoms[i]].slice(0, 3);
-    cds.forEach((d, k) => {
+    // Cross-branch pips
+    const cds = new Set();
+    edges.forEach(e => {
+      if (e.from === i && resources[e.to].domain !== n.domain) cds.add(resources[e.to].domain);
+      if (e.to === i && resources[e.from].domain !== n.domain) cds.add(resources[e.from].domain);
+    });
+    [...cds].slice(0,3).forEach((d, k) => {
       const [pr,pg,pb] = domTheme(d).c;
       ctx.beginPath();
-      ctx.arc(n._x + n._r - k*7, n._y - n._r + 1, 2.5, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(${pr},${pg},${pb},0.85)`;
+      ctx.arc(n._x + n._r - k*8, n._y - n._r + 2, 3, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${pr},${pg},${pb},0.9)`;
       ctx.fill();
       ctx.strokeStyle = 'rgba(10,12,16,0.8)';
       ctx.lineWidth = 1;
@@ -767,8 +859,6 @@ function draw() {
 
     ctx.globalAlpha = 1;
   }
-
-  ctx.restore();
 }
 
 function drawHex(ctx, cx, cy, r) {
@@ -780,20 +870,22 @@ function drawHex(ctx, cx, cy, r) {
   }
   ctx.closePath();
 }
-function rr(c,x,y,w,h,r) {
-  c.beginPath(); c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
-  c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
-  c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
-}
 function truncText(t, m) { return t.length > m ? t.slice(0, m-1) + '…' : t; }
 
 function hitTest(ex, ey) {
   if (ex < SIDEBAR_W) return null;
   const wx = (ex-cam.x)/cam.z, wy = (ey-cam.y)/cam.z;
-  for (const n of resources) {
+  if (view.mode === 'galaxy') {
+    for (const g of galaxyNodes) {
+      const dx = wx-g.x, dy = wy-g.y;
+      if (dx*dx + dy*dy <= (g.r+8)*(g.r+8)) return { orb: g };
+    }
+    return null;
+  }
+  for (const q of branchData.members) {
+    const n = q.n;
     const dx = wx-n._x, dy = wy-n._y;
-    if (dx*dx + dy*dy <= (n._r+5)*(n._r+5)) return n;
+    if (dx*dx + dy*dy <= (n._r+6)*(n._r+6)) return { node: n };
   }
   return null;
 }
@@ -801,14 +893,17 @@ function hitTest(ex, ey) {
 // --- Detail panel ---
 function buildPanel(node) {
   const sc = SC[node._st];
-  const theme = domTheme(node._panelDomain);
+  const theme = domTheme(node.domain);
+  const nodeIdx = resources.indexOf(node);
   let h = `<button class="close-btn" onclick="closePanel()">&times;</button>`;
   h += `<h3 style="color:${sc.text}">${node.title}</h3>`;
   h += '<div class="pills">';
   h += `<span class="pill xp">+${node._xp} XP</span>`;
-  h += `<span class="pill">depth ${node.lvl.toFixed(1)}</span>`;
   [node.type, node.complexity, node.engagement, node._st].filter(Boolean).forEach(t => h+=`<span class="pill">${t}</span>`);
   h += '</div>';
+  if (node._st !== 'done') {
+    h += `<button class="goal-btn" onclick="setGoal(${nodeIdx})">🎯 Set as goal</button><br/>`;
+  }
   h += `<div class="info"><b>Branch</b> ${theme.name}</div>`;
   if (node.topic) h += `<div class="info"><b>Topic</b> ${node.topic}</div>`;
   if (node.pri) h += `<div class="info"><b>Priority</b> ${node.pri}/100</div>`;
@@ -816,7 +911,6 @@ function buildPanel(node) {
   if (node._st === 'progress' && node.prog) {
     h += `<div class="pbar"><div class="pfill" style="width:${node.prog}%;background:${sc.fill}"></div></div>`;
   }
-  const nodeIdx = resources.indexOf(node);
   const req = edges.filter(e => e.to === nodeIdx);
   if (req.length) {
     h += '<div class="section"><div class="section-title">Requires</div><div class="concept-list">';
@@ -865,34 +959,54 @@ canvas.addEventListener('mousemove', ev => {
     cam.y = dragStart.cy + (ev.clientY - dragStart.y);
     requestDraw(); return;
   }
-  if (pinned) { canvas.style.cursor = hitTest(ev.clientX, ev.clientY) ? 'pointer' : 'grab'; return; }
   const hit = hitTest(ev.clientX, ev.clientY);
-  if (hit !== hovered) { hovered = hit; requestDraw(); }
+  const newHovOrb = hit && hit.orb ? hit.orb : null;
+  const newHov = hit && hit.node ? hit.node : null;
+  if (newHov !== hovered || newHovOrb !== hoveredOrb) {
+    if (!pinned) hovered = newHov;
+    hoveredOrb = newHovOrb;
+    requestDraw();
+  }
   canvas.style.cursor = hit ? 'pointer' : 'grab';
-  if (hit) {
-    const sc = SC[hit._st];
-    tipEl.innerHTML = `<h3 style="color:${sc.text}">${hit.title}</h3><div class="meta">${[domTheme(hit._panelDomain).name, hit.topic, hit._st, 'depth '+hit.lvl.toFixed(1)].filter(Boolean).join(' · ')} · <span class="xp">+${hit._xp} XP</span></div>`;
+
+  if (newHovOrb) {
+    const s = domStats[newHovOrb.domain];
+    const rank = rankOf(s.done/s.total);
+    tipEl.innerHTML = `<h3 style="color:rgb(${domTheme(newHovOrb.domain).c.join(',')})">${domTheme(newHovOrb.domain).name}</h3><div class="meta">${rank.t} · ${s.done}/${s.total} done${s.prog?` · ${s.prog} in progress`:''} · click to enter</div>`;
     tipEl.style.display = 'block';
     tipEl.style.left = Math.min(ev.clientX+16, W-300) + 'px';
     tipEl.style.top = (ev.clientY+16) + 'px';
-  } else tipEl.style.display = 'none';
+  } else if (newHov && !pinned) {
+    const sc = SC[newHov._st];
+    tipEl.innerHTML = `<h3 style="color:${sc.text}">${newHov.title}</h3><div class="meta">${[newHov.topic, newHov._st].filter(Boolean).join(' · ')} · <span class="xp">+${newHov._xp} XP</span></div>`;
+    tipEl.style.display = 'block';
+    tipEl.style.left = Math.min(ev.clientX+16, W-300) + 'px';
+    tipEl.style.top = (ev.clientY+16) + 'px';
+  } else {
+    tipEl.style.display = 'none';
+  }
 });
 canvas.addEventListener('mouseup', ev => {
   const wasClick = !dragging && dragStart;
   dragStart = null; dragging = false; canvas.classList.remove('grabbing');
-  if (wasClick) {
-    const hit = hitTest(ev.clientX, ev.clientY);
-    if (hit) { openPanel(hit); tipEl.style.display = 'none'; }
-    else if (pinned) closePanel();
-  }
+  if (!wasClick) return;
+  const hit = hitTest(ev.clientX, ev.clientY);
+  if (hit && hit.orb) { enterBranch(hit.orb.domain); tipEl.style.display = 'none'; }
+  else if (hit && hit.node) { openPanel(hit.node); tipEl.style.display = 'none'; }
+  else if (pinned) closePanel();
+  else if (view.mode === 'branch') enterGalaxy();
 });
-canvas.addEventListener('mouseleave', () => { if (!pinned) { hovered = null; tipEl.style.display = 'none'; requestDraw(); } });
-document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && pinned) closePanel(); });
+canvas.addEventListener('mouseleave', () => { hoveredOrb = null; if (!pinned) { hovered = null; tipEl.style.display = 'none'; } requestDraw(); });
+document.addEventListener('keydown', ev => {
+  if (ev.key !== 'Escape') return;
+  if (pinned) closePanel();
+  else if (view.mode === 'branch') enterGalaxy();
+});
 
 document.getElementById('search').addEventListener('input', ev => { searchQ = ev.target.value.toLowerCase(); requestDraw(); });
-document.getElementById('domainFilter').addEventListener('change', ev => { filterDomain = ev.target.value; requestDraw(); });
+document.getElementById('domainFilter').addEventListener('change', ev => { if (ev.target.value) enterBranch(ev.target.value); ev.target.value = ''; });
 
-const allDomains = [...new Set(resources.map(n => n.domain).filter(Boolean))].sort();
+const allDomains = [...new Set(resources.map(n => n.domain))].sort();
 const domSel = document.getElementById('domainFilter');
 allDomains.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = domTheme(d).name; domSel.appendChild(o); });
 
