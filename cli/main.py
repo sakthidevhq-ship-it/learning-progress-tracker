@@ -215,15 +215,25 @@ def recompute():
 
 @cli.command()
 @click.option("--no-open", is_flag=True, help="Build without opening in browser")
-def graph(no_open):
+@click.option("--view", type=click.Choice(["map", "tree"]), default="map", help="Which view to open")
+def graph(no_open, view):
     config = _get_config()
     project_root = Path(__file__).parent.parent
-    template = project_root / "graph.html"
-    output = project_root / "knowledge-graph.html"
     vault = config.vault_path
 
     from cli.build_graph import build
-    build(str(vault), str(template), str(output))
 
-    if not no_open:
-        subprocess.run(["open", str(output)], check=False)
+    outputs = {}
+    for template_name, output_name, key in [
+        ("graph.html", "knowledge-graph.html", "map"),
+        ("skill-tree.html", "knowledge-tree.html", "tree"),
+    ]:
+        template = project_root / template_name
+        if not template.exists():
+            continue
+        output = project_root / output_name
+        build(str(vault), str(template), str(output))
+        outputs[key] = output
+
+    if not no_open and view in outputs:
+        subprocess.run(["open", str(outputs[view])], check=False)

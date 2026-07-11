@@ -96,10 +96,16 @@ ML/Infrastructure, ML/Agents, ML/Frameworks, ML/Foundations, ML/Voice, Game AI, 
 | `lpt progress "title" N` | Set progress (0-100) |
 | `lpt done "title"` | Mark complete |
 | `lpt recompute` | Recalculate all priorities |
-| `lpt graph` | Rebuild graph and open in browser |
+| `lpt graph` | Rebuild both views, open the map |
+| `lpt graph --view tree` | Rebuild both views, open the skill tree |
 
 ## Graph Visualization
 
+Two views, cross-linked via a button in each HUD:
+- **Map** (`graph.html` → `knowledge-graph.html`) — force-directed relatedness map. Answers "where does this fit, what's related?"
+- **Skill Tree** (`skill-tree.html` → `knowledge-tree.html`) — RPG talent panels per domain with tiers, locks, and XP. Answers "what's my progress, what do I unlock next?"
+
+Map view details:
 - **Position = relatedness** — resources sharing concepts cluster together
 - **Color = status** — green (done), orange (in progress), blue (ready), dim (blocked)
 - **Solid edges** = prerequisite ("read A before B")

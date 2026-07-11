@@ -13,8 +13,9 @@ dist/
 .claude/
 .superpowers/
 
-# Built graph (regenerated, deployed via GitHub Actions)
+# Built graphs (regenerated, deployed via GitHub Actions)
 knowledge-graph.html
+knowledge-tree.html
 
 # Processed jobs archive
 processed/
