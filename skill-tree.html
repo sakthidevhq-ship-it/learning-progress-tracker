@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Skill Tree</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
 body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; }
 
@@ -12,14 +12,10 @@ body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflo
   position: fixed; top: 0; left: 0; right: 0; z-index: 10; height: 44px;
   background: rgba(10,12,16,0.9); backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255,255,255,0.04);
-  display: flex; align-items: center; padding: 0 20px; gap: 16px;
+  display: flex; align-items: center; padding: 0 20px; gap: 14px;
 }
 #hud .brand { font-size: 13px; font-weight: 700; color: #e6edf3; letter-spacing: 0.5px; }
 .hsep { width: 1px; height: 16px; background: rgba(255,255,255,0.06); }
-#hud .stats { display: flex; gap: 14px; font-size: 11px; color: rgba(255,255,255,0.3); }
-#hud .stats b { color: rgba(255,255,255,0.55); font-weight: 600; }
-#hud .xp-bar { width: 120px; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; }
-#hud .xp-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #3fb950, #58a6ff); transition: width 0.5s; }
 #hud input, #hud select {
   background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
   color: #8b949e; border-radius: 6px; padding: 4px 8px;
@@ -28,6 +24,64 @@ body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflo
 .legend { margin-left: auto; display: flex; gap: 12px; }
 .legend-item { display: flex; align-items: center; gap: 4px; font-size: 9px; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.5px; }
 .ldot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* Character sheet sidebar */
+#sheet {
+  position: fixed; top: 44px; left: 0; bottom: 0; width: 272px; z-index: 15;
+  background: rgba(11,13,18,0.92); backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255,255,255,0.05);
+  overflow-y: auto; padding: 18px 16px 30px;
+  font-family: 'Inter', system-ui, sans-serif; color: #c9d1d9;
+}
+#sheet::-webkit-scrollbar { width: 4px; }
+#sheet::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+.lvl-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.lvl-num { font-size: 30px; font-weight: 800; color: #e3b341; line-height: 1; }
+.lvl-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.3); }
+.lvl-total { margin-left: auto; font-size: 10px; color: rgba(255,255,255,0.3); }
+.lvl-total b { color: rgba(227,179,65,0.9); }
+.xpbar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 4px; }
+.xpbar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #e3b341, #f0883e); }
+.xp-hint { font-size: 9px; color: rgba(255,255,255,0.25); margin-bottom: 4px; }
+
+.sheet-sec { margin-top: 18px; }
+.sheet-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.28); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.sheet-title .cnt { color: rgba(255,255,255,0.18); font-weight: 500; }
+
+.quest {
+  border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;
+  padding: 9px 11px; margin-bottom: 7px; cursor: pointer;
+  background: rgba(255,255,255,0.015); transition: all 0.12s;
+}
+.quest:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.14); }
+.quest .q-kind { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 3px; }
+.quest .q-title { font-size: 11.5px; font-weight: 600; color: #dde3ea; line-height: 1.35; margin-bottom: 4px; }
+.quest .q-meta { font-size: 9px; color: rgba(255,255,255,0.3); display: flex; gap: 8px; flex-wrap: wrap; }
+.quest .q-xp { color: #e3b341; font-weight: 600; }
+.quest.q-continue { border-color: rgba(240,136,62,0.25); }
+.quest.q-continue .q-kind { color: #f0883e; }
+.quest.q-new .q-kind { color: #58a6ff; }
+.quest.q-unlock { border-color: rgba(163,113,247,0.22); }
+.quest.q-unlock .q-kind { color: #a371f7; }
+.qbar { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.05); margin-top: 5px; overflow: hidden; }
+.qbar-fill { height: 100%; background: #f0883e; border-radius: 2px; }
+
+.rank-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer; padding: 2px 4px; border-radius: 6px; }
+.rank-row:hover { background: rgba(255,255,255,0.03); }
+.rank-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.rank-name { font-size: 10.5px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.rank-title { font-size: 8px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+.rank-frac { font-size: 9px; color: rgba(255,255,255,0.22); width: 34px; text-align: right; }
+
+.ach-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+.ach {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: default;
+  background: rgba(227,179,65,0.08); border: 1px solid rgba(227,179,65,0.3);
+}
+.ach.locked { background: rgba(255,255,255,0.015); border-color: rgba(255,255,255,0.05); filter: grayscale(1); opacity: 0.3; }
 
 #tip {
   position: fixed; z-index: 30; pointer-events: none; display: none;
@@ -38,6 +92,7 @@ body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflo
 }
 #tip h3 { font-size: 12px; font-weight: 600; margin-bottom: 3px; line-height: 1.3; }
 #tip .meta { font-size: 9px; color: rgba(255,255,255,0.25); }
+#tip .meta .xp { color: #e3b341; font-weight: 600; }
 
 #panel {
   position: fixed; top: 44px; right: 0; bottom: 0; width: 360px; z-index: 20;
@@ -60,6 +115,7 @@ body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflo
 #panel h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; line-height: 1.3; padding-right: 34px; }
 #panel .pills { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
 #panel .pill { font-size: 9px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.4px; }
+#panel .pill.xp { color: #e3b341; background: rgba(227,179,65,0.08); }
 #panel .info { font-size: 12px; color: rgba(255,255,255,0.35); margin: 3px 0; line-height: 1.5; }
 #panel .info b { color: rgba(255,255,255,0.6); font-weight: 500; }
 #panel .pbar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.04); margin-top: 8px; overflow: hidden; }
@@ -79,9 +135,6 @@ canvas.grabbing { cursor: grabbing; }
 <div id="hud">
   <div class="brand">SKILL TREE</div>
   <div class="hsep"></div>
-  <div class="stats" id="stats"></div>
-  <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
-  <div class="hsep"></div>
   <select id="domainFilter"><option value="">All Branches</option></select>
   <input id="search" type="text" placeholder="Search..." style="width:120px"/>
   <a href="knowledge-graph.html" style="font-size:10px;color:rgba(88,166,255,0.7);text-decoration:none;border:1px solid rgba(88,166,255,0.25);border-radius:14px;padding:3px 10px;white-space:nowrap">◉ Map</a>
@@ -92,6 +145,7 @@ canvas.grabbing { cursor: grabbing; }
     <div class="legend-item"><div class="ldot" style="background:rgba(255,255,255,0.08)"></div>Locked</div>
   </div>
 </div>
+<div id="sheet"></div>
 <div id="tip"></div>
 <div id="panel"></div>
 <canvas id="c"></canvas>
@@ -122,7 +176,6 @@ resources.forEach(n => {
   else n._st = n._cov >= 0.5 ? 'ready' : 'blocked';
 });
 
-// Directed prerequisite edges
 const edges = [];
 resources.forEach((n, ti) => {
   for (const pt of n.prereqResources) {
@@ -131,10 +184,97 @@ resources.forEach((n, ti) => {
   }
 });
 
-// Level-1 neighbors for hover
-const neighbors = new Map();
-resources.forEach((_, i) => neighbors.set(i, new Set()));
-edges.forEach(e => { neighbors.get(e.from).add(e.to); neighbors.get(e.to).add(e.from); });
+// --- XP economy ---
+const CPLX_XP = { beginner: 50, intermediate: 100, advanced: 150 };
+const SIZE_MUL = { 'quick-read': 0.6, medium: 1, 'deep-dive': 1.5 };
+function xpOf(n) {
+  const base = CPLX_XP[n.complexity] || 100;
+  const mul = SIZE_MUL[n.size] || 1;
+  return Math.round(base * mul / 5) * 5;
+}
+resources.forEach(n => n._xp = xpOf(n));
+
+const earnedXP = resources.reduce((s, n) => {
+  if (n._st === 'done') return s + n._xp;
+  if (n._st === 'progress') return s + Math.floor(n._xp * n.prog / 100 / 5) * 5;
+  return s;
+}, 0);
+
+// Level curve: cost of next level grows 1.25x from 200
+function levelFromXP(xp) {
+  let lvl = 1, need = 200, cum = 0;
+  while (xp >= cum + need) { cum += need; need = Math.round(need * 1.25 / 5) * 5; lvl++; }
+  return { lvl, into: xp - cum, need, cum };
+}
+const LV = levelFromXP(earnedXP);
+
+// --- Ranks ---
+function rankOf(frac) {
+  if (frac >= 1) return { t: 'GRANDMASTER', c: '#e3b341' };
+  if (frac >= 0.75) return { t: 'MASTER', c: '#f0883e' };
+  if (frac >= 0.5) return { t: 'EXPERT', c: '#a371f7' };
+  if (frac >= 0.25) return { t: 'ADEPT', c: '#58a6ff' };
+  if (frac > 0) return { t: 'NOVICE', c: '#3fb950' };
+  return { t: 'UNEXPLORED', c: 'rgba(255,255,255,0.18)' };
+}
+
+// --- Unlock counts + quest log ---
+const unlockCount = new Array(resources.length).fill(0);
+edges.forEach(e => unlockCount[e.from]++);
+
+function questScore(n, i) { return n.pri + unlockCount[i]*8 + n._cov*10; }
+
+const continueQ = resources.map((n,i)=>({n,i})).filter(q => q.n._st==='progress')
+  .sort((a,b) => b.n.prog - a.n.prog);
+const newQ = resources.map((n,i)=>({n,i})).filter(q => q.n._st==='ready')
+  .sort((a,b) => questScore(b.n,b.i) - questScore(a.n,a.i)).slice(0, 4);
+
+// Unlock target: best blocked item exactly one not-done prereq away
+let unlockQ = null;
+{
+  const cands = resources.map((n,i)=>({n,i})).filter(q => q.n._st==='blocked')
+    .map(q => {
+      const missing = q.n.prereqResources.filter(t => !completed.has(t));
+      return { ...q, missing };
+    })
+    .filter(q => q.missing.length === 1)
+    .filter(q => {
+      const m = resources[titleToIdx[q.missing[0]]];
+      return m && (m._st === 'ready' || m._st === 'progress');
+    })
+    .sort((a,b) => b.n.pri - a.n.pri);
+  if (cands.length) {
+    const target = cands[0];
+    unlockQ = { finish: resources[titleToIdx[target.missing[0]]], finishIdx: titleToIdx[target.missing[0]], opens: target.n, opensIdx: target.i };
+  }
+}
+
+const topPickIdx = continueQ.length ? continueQ[0].i : (newQ.length ? newQ[0].i : -1);
+
+// --- Achievements (computed from real state only) ---
+const doneRes = resources.filter(n => n._st === 'done');
+const domStats = {};
+resources.forEach(n => {
+  const d = n.domain || 'Other';
+  domStats[d] = domStats[d] || { total: 0, done: 0 };
+  domStats[d].total++;
+  if (n._st === 'done') domStats[d].done++;
+});
+const branchFracs = Object.values(domStats).map(s => s.done / s.total);
+const ACH = [
+  { icon: '🥇', name: 'First Steps', desc: 'Complete your first resource', ok: doneRes.length >= 1 },
+  { icon: '📚', name: 'Getting Serious', desc: 'Complete 5 resources', ok: doneRes.length >= 5 },
+  { icon: '🔟', name: 'Double Digits', desc: 'Complete 10 resources', ok: doneRes.length >= 10 },
+  { icon: '📄', name: 'Scholar', desc: 'Complete 3 papers', ok: doneRes.filter(n => n.type==='paper').length >= 3 },
+  { icon: '🧠', name: 'Pioneer', desc: 'Complete an advanced resource', ok: doneRes.some(n => n.complexity==='advanced') },
+  { icon: '🤿', name: 'Deep Diver', desc: 'Complete a deep-dive', ok: doneRes.some(n => n.size==='deep-dive') },
+  { icon: '🛠', name: 'Builder', desc: 'Complete an implement-type resource', ok: doneRes.some(n => n.engagement==='implement') },
+  { icon: '🌍', name: 'Polymath', desc: 'Complete resources in 3+ branches', ok: new Set(doneRes.map(n=>n.domain)).size >= 3 },
+  { icon: '🌱', name: 'Branch Adept', desc: 'Reach 25% in any branch', ok: branchFracs.some(f => f >= 0.25) },
+  { icon: '⚔️', name: 'Branch Expert', desc: 'Reach 50% in any branch', ok: branchFracs.some(f => f >= 0.5) },
+  { icon: '👑', name: 'Branch Master', desc: 'Reach 75% in any branch', ok: branchFracs.some(f => f >= 0.75) },
+  { icon: '💎', name: 'Completionist', desc: 'Finish an entire branch', ok: branchFracs.some(f => f >= 1) },
+];
 
 const DOMAIN_THEMES = {
   'ML/Infrastructure': { c: [56,139,253],  name: 'ML Infrastructure' },
@@ -161,14 +301,14 @@ const SC = {
   blocked:  { fill: 'rgba(255,255,255,0.08)', glow: null, text: 'rgba(255,255,255,0.25)' },
 };
 
-// --- Talent-panel layout: one panel per domain, tiers top-down, grid cells ---
+// --- Talent-panel layout ---
 const CELL_W = 112, CELL_H = 86, HEX_R = 20;
-const PANEL_PAD = 20, HEADER_H = 48, PANEL_GAP = 44, MAX_COLS = 4;
+const PANEL_PAD = 20, HEADER_H = 52, PANEL_GAP = 44, MAX_COLS = 4;
+const SIDEBAR_W = 272;
 
 let panels = [], worldW = 0, worldH = 0;
 
 function layoutPanels() {
-  // Global topological depth
   const depth = new Array(resources.length).fill(0);
   const adj = resources.map(() => []);
   const ind = new Array(resources.length).fill(0);
@@ -181,7 +321,6 @@ function layoutPanels() {
     for (const nx of adj[c]) { depth[nx] = Math.max(depth[nx], depth[c]+1); if (--ind[nx]===0) q.push(nx); }
   }
 
-  // Group by domain
   const byDom = {};
   resources.forEach((n, i) => {
     const d = n.domain || 'Other';
@@ -190,7 +329,6 @@ function layoutPanels() {
 
   panels = [];
   for (const [d, members] of Object.entries(byDom)) {
-    // Normalize depths to consecutive tiers within this domain
     const uniq = [...new Set(members.map(i => depth[i]))].sort((a,b) => a-b);
     const tierOf = {}; uniq.forEach((dv, t) => tierOf[dv] = t);
     const tiers = uniq.map(() => []);
@@ -198,20 +336,16 @@ function layoutPanels() {
     tiers.forEach(t => t.sort((a,b) => resources[b].pri - resources[a].pri));
 
     const cols = Math.min(MAX_COLS, Math.max(1, ...tiers.map(t => t.length)));
-
-    // Wrap each tier into grid rows; remember tier boundaries for separators
     const rows = [], tierStarts = [];
     for (const t of tiers) {
       tierStarts.push(rows.length);
       for (let i = 0; i < t.length; i += cols) rows.push(t.slice(i, i + cols));
     }
-
     const w = PANEL_PAD*2 + cols*CELL_W;
     const h = HEADER_H + PANEL_PAD + rows.length*CELL_H + PANEL_PAD;
     panels.push({ domain: d, rows, cols, w, h, members, tierStarts });
   }
 
-  // Big panels first, shelf-packed
   panels.sort((a,b) => b.members.length - a.members.length);
   const totalArea = panels.reduce((s,p) => s + p.w*p.h, 0);
   const targetW = Math.max(1500, Math.sqrt(totalArea * 2.4));
@@ -225,7 +359,6 @@ function layoutPanels() {
   }
   worldW = maxX; worldH = y + rowH;
 
-  // Absolute node positions (rows centered within panel width)
   for (const p of panels) {
     p.rows.forEach((row, ri) => {
       const rowW = row.length * CELL_W;
@@ -260,23 +393,108 @@ function resize() {
 
 function init() {
   layoutPanels();
-  const z = Math.min((W-60)/worldW, (H-110)/worldH, 1);
-  cam = { x: (W - worldW*z)/2, y: 64 + Math.max(0, (H-64-worldH*z)/2 - 20), z };
-  updateStats();
-}
-
-function updateStats() {
-  const done = resources.filter(n => n._st === 'done').length;
-  const prog = resources.filter(n => n._st === 'progress').length;
-  const total = resources.length;
-  document.getElementById('stats').innerHTML =
-    `<span><b>${done}</b>/${total} unlocked</span><span><b>${prog}</b> learning</span>`;
-  document.getElementById('xpFill').style.width = Math.round(done/total*100) + '%';
+  const availW = W - SIDEBAR_W;
+  const z = Math.min((availW-50)/worldW, (H-110)/worldH, 1);
+  cam = { x: SIDEBAR_W + (availW - worldW*z)/2, y: 64 + Math.max(0, (H-64-worldH*z)/2 - 20), z };
+  buildSheet();
 }
 
 function nodeDimmed(n) {
   return (filterDomain && n._panelDomain !== filterDomain)
       || (searchQ && !n.title.toLowerCase().includes(searchQ));
+}
+
+// --- Character sheet DOM ---
+function buildSheet() {
+  const done = resources.filter(n => n._st === 'done').length;
+  let h = '';
+
+  // Level + XP
+  h += `<div class="lvl-row"><span class="lvl-num">Lv ${LV.lvl}</span><span class="lvl-label">Learner</span><span class="lvl-total"><b>${earnedXP.toLocaleString()}</b> XP</span></div>`;
+  h += `<div class="xpbar"><div class="xpbar-fill" style="width:${Math.round(LV.into/LV.need*100)}%"></div></div>`;
+  h += `<div class="xp-hint">${LV.into} / ${LV.need} XP to Lv ${LV.lvl+1} · ${done}/${resources.length} unlocked</div>`;
+
+  // Quest log
+  h += `<div class="sheet-sec"><div class="sheet-title">⚔ Quest Log</div>`;
+  continueQ.slice(0,2).forEach(q => {
+    h += `<div class="quest q-continue" data-idx="${q.i}">
+      <div class="q-kind">Continue</div>
+      <div class="q-title">${q.n.title}</div>
+      <div class="q-meta"><span>${domTheme(q.n.domain).name}</span><span class="q-xp">+${q.n._xp} XP</span></div>
+      <div class="qbar"><div class="qbar-fill" style="width:${q.n.prog}%"></div></div>
+    </div>`;
+  });
+  newQ.forEach(q => {
+    const why = unlockCount[q.i] > 0 ? `unlocks ${unlockCount[q.i]}` : (q.n.pri >= 45 ? 'high priority' : q.n.complexity || '');
+    h += `<div class="quest q-new" data-idx="${q.i}">
+      <div class="q-kind">New Quest</div>
+      <div class="q-title">${q.n.title}</div>
+      <div class="q-meta"><span>${domTheme(q.n.domain).name}</span><span>${why}</span><span class="q-xp">+${q.n._xp} XP</span></div>
+    </div>`;
+  });
+  if (unlockQ) {
+    h += `<div class="quest q-unlock" data-idx="${unlockQ.finishIdx}">
+      <div class="q-kind">🔓 Unlock Path</div>
+      <div class="q-title">${unlockQ.finish.title}</div>
+      <div class="q-meta"><span>opens: ${unlockQ.opens.title.slice(0,32)}${unlockQ.opens.title.length>32?'…':''}</span></div>
+    </div>`;
+  }
+  h += `</div>`;
+
+  // Branch ranks
+  const sortedDoms = Object.entries(domStats).sort((a,b) => (b[1].done/b[1].total) - (a[1].done/a[1].total) || b[1].total - a[1].total);
+  h += `<div class="sheet-sec"><div class="sheet-title">Branch Ranks</div>`;
+  sortedDoms.forEach(([d, s]) => {
+    const theme = domTheme(d);
+    const [r,g,b] = theme.c;
+    const rank = rankOf(s.done / s.total);
+    h += `<div class="rank-row" data-dom="${d}">
+      <div class="rank-dot" style="background:rgb(${r},${g},${b})"></div>
+      <div class="rank-name">${theme.name}</div>
+      <div class="rank-title" style="color:${rank.c}">${rank.t}</div>
+      <div class="rank-frac">${s.done}/${s.total}</div>
+    </div>`;
+  });
+  h += `</div>`;
+
+  // Achievements
+  const unlocked = ACH.filter(a => a.ok).length;
+  h += `<div class="sheet-sec"><div class="sheet-title">Achievements <span class="cnt">${unlocked}/${ACH.length}</span></div><div class="ach-grid">`;
+  ACH.forEach(a => {
+    h += `<div class="ach ${a.ok?'':'locked'}" title="${a.name} — ${a.desc}">${a.icon}</div>`;
+  });
+  h += `</div></div>`;
+
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = h;
+
+  // Quest click → fly to node + open detail
+  sheet.querySelectorAll('.quest').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.idx);
+      flyTo(resources[idx]);
+    });
+  });
+  // Rank click → filter to that branch
+  sheet.querySelectorAll('.rank-row').forEach(el => {
+    el.addEventListener('click', () => {
+      const d = el.dataset.dom;
+      filterDomain = (filterDomain === d) ? '' : d;
+      document.getElementById('domainFilter').value = filterDomain;
+      requestDraw();
+    });
+  });
+}
+
+function flyTo(n) {
+  const z = 1;
+  cam = {
+    x: SIDEBAR_W + (W - SIDEBAR_W)/2 - n._x * z,
+    y: 44 + (H - 44)/2 - n._y * z,
+    z
+  };
+  openPanel(n);
+  requestDraw();
 }
 
 function draw() {
@@ -293,7 +511,6 @@ function draw() {
     const dim = filterDomain && filterDomain !== p.domain;
     ctx.globalAlpha = dim ? 0.15 : 1;
 
-    // Panel background
     rr(ctx, p.x, p.y, p.w, p.h, 16);
     const grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
     grad.addColorStop(0, `rgba(${r},${g},${b},0.05)`);
@@ -304,30 +521,35 @@ function draw() {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Header
-    const done = p.members.filter(i => resources[i]._st === 'done').length;
+    const s = domStats[p.domain] || { done: 0, total: p.members.length };
+    const rank = rankOf(s.done / s.total);
+
     ctx.fillStyle = `rgba(${r},${g},${b},0.75)`;
     ctx.font = '700 13px Inter';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(theme.name.toUpperCase(), p.x + PANEL_PAD, p.y + 24);
-    ctx.font = '500 10px Inter';
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${done}/${p.members.length}`, p.x + p.w - PANEL_PAD, p.y + 24);
+    ctx.fillText(theme.name.toUpperCase(), p.x + PANEL_PAD, p.y + 22);
 
-    // Header progress bar
+    // Rank badge in header
+    ctx.font = '700 8px Inter';
+    ctx.fillStyle = rank.c;
+    const rw = ctx.measureText(rank.t).width;
+    ctx.textAlign = 'right';
+    ctx.fillText(rank.t, p.x + p.w - PANEL_PAD, p.y + 18);
+    ctx.font = '500 9px Inter';
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillText(`${s.done}/${s.total}`, p.x + p.w - PANEL_PAD, p.y + 30);
+
     const bw = p.w - PANEL_PAD*2;
-    rr(ctx, p.x + PANEL_PAD, p.y + 36, bw, 3, 1.5);
+    rr(ctx, p.x + PANEL_PAD, p.y + 40, bw, 3, 1.5);
     ctx.fillStyle = 'rgba(255,255,255,0.04)';
     ctx.fill();
-    if (done > 0) {
-      rr(ctx, p.x + PANEL_PAD, p.y + 36, bw * done/p.members.length, 3, 1.5);
+    if (s.done > 0) {
+      rr(ctx, p.x + PANEL_PAD, p.y + 40, bw * s.done/s.total, 3, 1.5);
       ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
       ctx.fill();
     }
 
-    // Tier separator lines
     for (let ti = 1; ti < p.tierStarts.length; ti++) {
       const rowIdx = p.tierStarts[ti];
       const sy = p.y + HEADER_H + PANEL_PAD + rowIdx*CELL_H - 8;
@@ -349,19 +571,17 @@ function draw() {
     const a = resources[e.from], b = resources[e.to];
     const dim = nodeDimmed(a) && nodeDimmed(b);
     const isHov = hovIdx >= 0 && (e.from === hovIdx || e.to === hovIdx);
-    if (dim && !isHov) continue;   // skip fully-dimmed edges entirely — less noise
+    if (dim && !isHov) continue;
 
     const samePanel = a._panelDomain === b._panelDomain;
     ctx.beginPath();
     if (samePanel) {
-      // vertical flow: bottom of prereq → top of dependent
       const ax = a._x, ay = a._y + a._r + 4;
       const bx = b._x, by = b._y - b._r - 12;
       const my = (ay + by) / 2;
       ctx.moveTo(ax, ay);
       ctx.bezierCurveTo(ax, my, bx, my, bx, by);
     } else {
-      // cross-panel: gentle center-to-center curve
       const dx = b._x - a._x, dy = b._y - a._y;
       const dist = Math.sqrt(dx*dx + dy*dy) || 1;
       const nx = -dy/dist*40, ny = dx/dist*40;
@@ -383,9 +603,8 @@ function draw() {
     }
     ctx.stroke();
 
-    // Arrowhead into the dependent (same-panel only; cross-panel stays whisper-quiet)
-    if (samePanel || isHov) {
-      const tx = b._x, ty = b._y - b._r - (samePanel ? 12 : 0);
+    if (samePanel) {
+      const tx = b._x, ty = b._y - b._r - 12;
       const sz = isHov ? 6 : 4;
       ctx.beginPath();
       ctx.moveTo(tx, ty + sz);
@@ -393,24 +612,26 @@ function draw() {
       ctx.lineTo(tx + sz*0.7, ty - sz*0.5);
       ctx.closePath();
       ctx.fillStyle = isHov ? ctx.strokeStyle : 'rgba(255,255,255,0.1)';
-      if (samePanel) ctx.fill();
+      ctx.fill();
     }
   }
 
   // Nodes
-  for (const n of resources) {
+  for (let i = 0; i < resources.length; i++) {
+    const n = resources[i];
     const sc = SC[n._st];
     const theme = domTheme(n._panelDomain);
     const [dr,dg,db] = theme.c;
     const dim = nodeDimmed(n);
     const isHov = hovered === n;
+    const isTop = i === topPickIdx;
 
     ctx.globalAlpha = dim ? 0.08 : 1;
 
-    if (sc.glow && !dim) {
-      const [gr,gg,gb] = sc.glow;
-      ctx.shadowColor = `rgba(${gr},${gg},${gb},${isHov ? 0.5 : n._st==='done' ? 0.22 : 0.1})`;
-      ctx.shadowBlur = isHov ? 22 : 10;
+    if ((isHov || isTop || n._st === 'done') && sc.glow && !dim) {
+      const [gr,gg,gb] = isTop ? [227,179,65] : sc.glow;
+      ctx.shadowColor = `rgba(${gr},${gg},${gb},${isHov ? 0.5 : isTop ? 0.35 : 0.18})`;
+      ctx.shadowBlur = isHov ? 22 : isTop ? 18 : 9;
     }
 
     drawHex(ctx, n._x, n._y, n._r + (isHov ? 2 : 0));
@@ -432,7 +653,18 @@ function draw() {
     ctx.stroke();
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
 
-    // Progress ring
+    // Gold ring + NEXT tag for the top recommendation
+    if (isTop && !dim) {
+      drawHex(ctx, n._x, n._y, n._r + 7);
+      ctx.strokeStyle = 'rgba(227,179,65,0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.font = '800 8px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#e3b341';
+      ctx.fillText('★ NEXT', n._x, n._y - n._r - 14);
+    }
+
     if (n._st === 'progress' && n.prog > 0) {
       ctx.beginPath();
       ctx.arc(n._x, n._y, n._r + 5, -Math.PI/2, -Math.PI/2 + Math.PI*2*(n.prog/100));
@@ -441,7 +673,6 @@ function draw() {
       ctx.stroke();
     }
 
-    // Icon
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     if (n._st === 'done') {
       ctx.fillStyle = '#3fb950'; ctx.font = '700 13px Inter';
@@ -455,7 +686,6 @@ function draw() {
       ctx.fillText(icons[n.type] || '📄', n._x, n._y);
     }
 
-    // Label below hex
     ctx.font = '500 8.5px Inter';
     ctx.fillStyle = n._st==='blocked' ? 'rgba(255,255,255,0.18)' : n._st==='done' ? 'rgba(255,255,255,0.55)' : sc.text;
     ctx.fillText(truncText(n.title, 17), n._x, n._y + n._r + 12);
@@ -484,6 +714,7 @@ function rr(c,x,y,w,h,r) {
 function truncText(t, m) { return t.length > m ? t.slice(0, m-1) + '…' : t; }
 
 function hitTest(ex, ey) {
+  if (ex < SIDEBAR_W) return null;
   const wx = (ex-cam.x)/cam.z, wy = (ey-cam.y)/cam.z;
   for (const n of resources) {
     const dx = wx-n._x, dy = wy-n._y;
@@ -499,6 +730,7 @@ function buildPanel(node) {
   let h = `<button class="close-btn" onclick="closePanel()">&times;</button>`;
   h += `<h3 style="color:${sc.text}">${node.title}</h3>`;
   h += '<div class="pills">';
+  h += `<span class="pill xp">+${node._xp} XP</span>`;
   [node.type, node.complexity, node.engagement, node._st].filter(Boolean).forEach(t => h+=`<span class="pill">${t}</span>`);
   h += '</div>';
   h += `<div class="info"><b>Branch</b> ${theme.name}</div>`;
@@ -563,7 +795,7 @@ canvas.addEventListener('mousemove', ev => {
   canvas.style.cursor = hit ? 'pointer' : 'grab';
   if (hit) {
     const sc = SC[hit._st];
-    tipEl.innerHTML = `<h3 style="color:${sc.text}">${hit.title}</h3><div class="meta">${[domTheme(hit._panelDomain).name, hit.topic, hit._st].filter(Boolean).join(' · ')}</div>`;
+    tipEl.innerHTML = `<h3 style="color:${sc.text}">${hit.title}</h3><div class="meta">${[domTheme(hit._panelDomain).name, hit.topic, hit._st].filter(Boolean).join(' · ')} · <span class="xp">+${hit._xp} XP</span></div>`;
     tipEl.style.display = 'block';
     tipEl.style.left = Math.min(ev.clientX+16, W-300) + 'px';
     tipEl.style.top = (ev.clientY+16) + 'px';
