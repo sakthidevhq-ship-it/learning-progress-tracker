@@ -46,6 +46,7 @@ def parse_page(path):
         "status": props.get("status", ""),
         "progress": props.get("progress", ""),
         "complexity": props.get("complexity", ""),
+        "size": props.get("size", ""),
         "priority": props.get("priority", ""),
         "engagement": props.get("engagement", ""),
         "prerequisites": props.get("prerequisites", ""),
@@ -74,6 +75,30 @@ def compute_resource_prereqs(data):
                 if teacher != r["title"]:
                     prereq_resources.add(teacher)
         r["prereqResources"] = sorted(prereq_resources)
+
+    # Learning-depth levels: intrinsic floor + SCC-condensed chain propagation
+    try:
+        from cli.levels import assign_levels
+    except ImportError:
+        from levels import assign_levels
+    title_to_idx = {r["title"]: i for i, r in enumerate(resources)}
+    level_nodes = [
+        {
+            "complexity": r.get("complexity", ""),
+            "prereq_count": len(parse_links(r["prerequisites"])),
+            "size": r.get("size", ""),
+        }
+        for r in resources
+    ]
+    level_edges = []
+    for i, r in enumerate(resources):
+        for t in r["prereqResources"]:
+            j = title_to_idx.get(t)
+            if j is not None:
+                level_edges.append((j, i))
+    levels = assign_levels(level_nodes, level_edges)
+    for r, lv in zip(resources, levels):
+        r["level"] = round(lv, 2)
 
     # Sibling edges: resources that share prerequisites (but no direct prereq link)
     # These create weaker "related" connections

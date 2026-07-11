@@ -25,7 +25,6 @@ body { background: #0a0c10; font-family: 'Inter', system-ui, sans-serif; overflo
 .legend-item { display: flex; align-items: center; gap: 4px; font-size: 9px; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.5px; }
 .ldot { width: 8px; height: 8px; border-radius: 2px; }
 
-/* Character sheet sidebar */
 #sheet {
   position: fixed; top: 44px; left: 0; bottom: 0; width: 272px; z-index: 15;
   background: rgba(11,13,18,0.92); backdrop-filter: blur(20px);
@@ -162,6 +161,7 @@ const resources = RAW.filter(n => RES_TYPES.has(n.type)).map(n => ({
   prereqs: plinks(n.prerequisites), concepts: plinks(n.concepts),
   prereqResources: n.prereqResources || [],
   pri: parseInt(n.priority)||0, prog: parseInt(n.progress)||0,
+  lvl: (typeof n.level === 'number') ? n.level : parseFloat(n.level) || 0,
 }));
 
 const titleToIdx = {};
@@ -184,6 +184,14 @@ resources.forEach((n, ti) => {
   }
 });
 
+// Cross-branch links per node (bridge pips)
+const crossDoms = resources.map(() => new Set());
+edges.forEach(e => {
+  const da = resources[e.from].domain || 'Other';
+  const db = resources[e.to].domain || 'Other';
+  if (da !== db) { crossDoms[e.from].add(db); crossDoms[e.to].add(da); }
+});
+
 // --- XP economy ---
 const CPLX_XP = { beginner: 50, intermediate: 100, advanced: 150 };
 const SIZE_MUL = { 'quick-read': 0.6, medium: 1, 'deep-dive': 1.5 };
@@ -200,7 +208,6 @@ const earnedXP = resources.reduce((s, n) => {
   return s;
 }, 0);
 
-// Level curve: cost of next level grows 1.25x from 200
 function levelFromXP(xp) {
   let lvl = 1, need = 200, cum = 0;
   while (xp >= cum + need) { cum += need; need = Math.round(need * 1.25 / 5) * 5; lvl++; }
@@ -208,7 +215,6 @@ function levelFromXP(xp) {
 }
 const LV = levelFromXP(earnedXP);
 
-// --- Ranks ---
 function rankOf(frac) {
   if (frac >= 1) return { t: 'GRANDMASTER', c: '#e3b341' };
   if (frac >= 0.75) return { t: 'MASTER', c: '#f0883e' };
@@ -218,7 +224,6 @@ function rankOf(frac) {
   return { t: 'UNEXPLORED', c: 'rgba(255,255,255,0.18)' };
 }
 
-// --- Unlock counts + quest log ---
 const unlockCount = new Array(resources.length).fill(0);
 edges.forEach(e => unlockCount[e.from]++);
 
@@ -229,14 +234,10 @@ const continueQ = resources.map((n,i)=>({n,i})).filter(q => q.n._st==='progress'
 const newQ = resources.map((n,i)=>({n,i})).filter(q => q.n._st==='ready')
   .sort((a,b) => questScore(b.n,b.i) - questScore(a.n,a.i)).slice(0, 4);
 
-// Unlock target: best blocked item exactly one not-done prereq away
 let unlockQ = null;
 {
   const cands = resources.map((n,i)=>({n,i})).filter(q => q.n._st==='blocked')
-    .map(q => {
-      const missing = q.n.prereqResources.filter(t => !completed.has(t));
-      return { ...q, missing };
-    })
+    .map(q => ({ ...q, missing: q.n.prereqResources.filter(t => !completed.has(t)) }))
     .filter(q => q.missing.length === 1)
     .filter(q => {
       const m = resources[titleToIdx[q.missing[0]]];
@@ -244,14 +245,13 @@ let unlockQ = null;
     })
     .sort((a,b) => b.n.pri - a.n.pri);
   if (cands.length) {
-    const target = cands[0];
-    unlockQ = { finish: resources[titleToIdx[target.missing[0]]], finishIdx: titleToIdx[target.missing[0]], opens: target.n, opensIdx: target.i };
+    const t = cands[0];
+    unlockQ = { finish: resources[titleToIdx[t.missing[0]]], finishIdx: titleToIdx[t.missing[0]], opens: t.n, opensIdx: t.i };
   }
 }
 
 const topPickIdx = continueQ.length ? continueQ[0].i : (newQ.length ? newQ[0].i : -1);
 
-// --- Achievements (computed from real state only) ---
 const doneRes = resources.filter(n => n._st === 'done');
 const domStats = {};
 resources.forEach(n => {
@@ -301,60 +301,18 @@ const SC = {
   blocked:  { fill: 'rgba(255,255,255,0.08)', glow: null, text: 'rgba(255,255,255,0.25)' },
 };
 
-// --- Talent-panel layout ---
-const CELL_W = 112, CELL_H = 86, HEX_R = 20;
-const PANEL_PAD = 20, HEADER_H = 52, PANEL_GAP = 44, MAX_COLS = 4;
-const SIDEBAR_W = 272;
+// --- Constellation-on-level-spine layout ---
+// Global vertical axis = learning depth (true level). Domains are columns
+// ordered by knowledge flow. Level-1's 40 items spread across columns
+// instead of piling onto one radial ring.
+const CELL = 112, HEX_R = 20, SUBROW_H = 64, BAND_PAD = 26;
+const DOM_GAP = 42, HEADER_ZONE = 96, SIDEBAR_W = 272;
 
-let panels = [], trunks = [], worldW = 0, worldH = 0;
+let columns = [], bands = [], trunks = [], frontierBand = -1;
+let worldW = 0, worldH = 0;
 
-// Cross-branch link colors per node (for bridge pips)
-const crossDoms = resources.map(() => new Set());
-edges.forEach(e => {
-  const da = resources[e.from].domain || 'Other';
-  const db = resources[e.to].domain || 'Other';
-  if (da !== db) { crossDoms[e.from].add(db); crossDoms[e.to].add(da); }
-});
-
-function layoutPanels() {
-  const depth = new Array(resources.length).fill(0);
-  const adj = resources.map(() => []);
-  const ind = new Array(resources.length).fill(0);
-  edges.forEach(e => { adj[e.from].push(e.to); ind[e.to]++; });
-  const q = [];
-  resources.forEach((_, i) => { if (ind[i] === 0) q.push(i); });
-  let head = 0;
-  while (head < q.length) {
-    const c = q[head++];
-    for (const nx of adj[c]) { depth[nx] = Math.max(depth[nx], depth[c]+1); if (--ind[nx]===0) q.push(nx); }
-  }
-
-  const byDom = {};
-  resources.forEach((n, i) => {
-    const d = n.domain || 'Other';
-    (byDom[d] = byDom[d] || []).push(i);
-  });
-
-  panels = [];
-  for (const [d, members] of Object.entries(byDom)) {
-    const uniq = [...new Set(members.map(i => depth[i]))].sort((a,b) => a-b);
-    const tierOf = {}; uniq.forEach((dv, t) => tierOf[dv] = t);
-    const tiers = uniq.map(() => []);
-    members.forEach(i => tiers[tierOf[depth[i]]].push(i));
-    tiers.forEach(t => t.sort((a,b) => resources[b].pri - resources[a].pri));
-
-    const cols = Math.min(MAX_COLS, Math.max(1, ...tiers.map(t => t.length)));
-    const rows = [], tierStarts = [];
-    for (const t of tiers) {
-      tierStarts.push(rows.length);
-      for (let i = 0; i < t.length; i += cols) rows.push(t.slice(i, i + cols));
-    }
-    const w = PANEL_PAD*2 + cols*CELL_W;
-    const h = HEADER_H + PANEL_PAD + rows.length*CELL_H + PANEL_PAD;
-    panels.push({ domain: d, rows, cols, w, h, members, tierStarts });
-  }
-
-  // Domain-level dependency weights: crossW[A][B] = edges flowing A → B
+function layoutSpine() {
+  // Knowledge-flow ordering
   const crossW = {};
   edges.forEach(e => {
     const da = resources[e.from].domain || 'Other';
@@ -362,55 +320,104 @@ function layoutPanels() {
     if (da === db) return;
     (crossW[da] = crossW[da] || {})[db] = (crossW[da][db] || 0) + 1;
   });
-
-  // Knowledge flow: net exporters of prerequisites go left, importers right
   const netOut = {};
-  panels.forEach(p => netOut[p.domain] = 0);
-  for (const [a, tos] of Object.entries(crossW)) {
+  Object.keys(domStats).forEach(d => netOut[d] = 0);
+  for (const [a, tos] of Object.entries(crossW))
     for (const [b, w] of Object.entries(tos)) {
       if (netOut[a] !== undefined) netOut[a] += w;
       if (netOut[b] !== undefined) netOut[b] -= w;
     }
-  }
-  panels.sort((a,b) => (netOut[b.domain] - netOut[a.domain]) || (b.members.length - a.members.length));
+  const domOrder = Object.keys(domStats).sort((a,b) =>
+    (netOut[b]-netOut[a]) || (domStats[b].total - domStats[a].total));
 
-  // Pack into vertical columns, left → right along the flow
-  const totalArea = panels.reduce((s,p) => s + p.w*p.h, 0);
-  const targetH = Math.max(800, Math.sqrt(totalArea / 1.8));
-  let colX = 0, colY = 0, colW = 0, maxY = 0;
-  for (const p of panels) {
-    if (colY > 0 && colY + p.h > targetH) { colX += colW + PANEL_GAP; colY = 0; colW = 0; }
-    p.x = colX; p.y = colY;
-    colY += p.h + PANEL_GAP;
-    colW = Math.max(colW, p.w);
-    maxY = Math.max(maxY, p.y + p.h);
-  }
-  worldW = colX + colW; worldH = maxY;
+  // Group nodes: domain → band → items
+  const maxBand = Math.max(...resources.map(n => Math.round(n.lvl)));
+  const cells = {};   // dom -> band -> [idx]
+  resources.forEach((n, i) => {
+    const d = n.domain || 'Other';
+    const b = Math.round(n.lvl);
+    ((cells[d] = cells[d] || {})[b] = cells[d][b] || []).push(i);
+  });
+  // Sort within cell by level float, then priority
+  for (const d in cells) for (const b in cells[d])
+    cells[d][b].sort((x,y) => resources[x].lvl - resources[y].lvl || resources[y].pri - resources[x].pri);
 
-  // Trunk arteries: aggregated cross-branch dependencies (2+ links)
-  trunks = [];
-  const pByDom = {};
-  panels.forEach(p => pByDom[p.domain] = p);
-  for (const [a, tos] of Object.entries(crossW)) {
-    for (const [b, w] of Object.entries(tos)) {
-      if (w < 2) continue;
-      const pa = pByDom[a], pb = pByDom[b];
-      if (pa && pb) trunks.push({ pa, pb, w });
+  // Row wrap: ≤7 in one row, else split into 2 balanced rows
+  function rowsOf(items) {
+    if (items.length <= 7) return [items];
+    const half = Math.ceil(items.length / 2);
+    return [items.slice(0, half), items.slice(half)];
+  }
+
+  // Band heights = max sub-rows across domains for that band
+  bands = [];
+  let y = HEADER_ZONE;
+  for (let b = 0; b <= maxBand; b++) {
+    let maxRows = 1;
+    for (const d of domOrder) {
+      const items = (cells[d] || {})[b] || [];
+      if (items.length) maxRows = Math.max(maxRows, rowsOf(items).length);
+    }
+    const h = BAND_PAD*2 + maxRows * SUBROW_H;
+    bands.push({ b, y, h });
+    y += h;
+  }
+  worldH = y;
+
+  // Column widths + x positions
+  columns = [];
+  let x = 60; // left gutter for LV labels
+  for (const d of domOrder) {
+    let maxRowLen = 1;
+    for (let b = 0; b <= maxBand; b++) {
+      const items = (cells[d] || {})[b] || [];
+      rowsOf(items).forEach(r => maxRowLen = Math.max(maxRowLen, r.length));
+    }
+    const w = Math.max(176, maxRowLen * CELL + 28);
+    columns.push({ domain: d, x, w });
+    x += w + DOM_GAP;
+  }
+  worldW = x;
+
+  // Node positions
+  const colByDom = {};
+  columns.forEach(c => colByDom[c.domain] = c);
+  resources.forEach((n, i) => {
+    const d = n.domain || 'Other';
+    const col = colByDom[d];
+    const b = Math.round(n.lvl);
+    const band = bands[b];
+    const rows = rowsOf(cells[d][b]);
+    let r = 0, cIdx = 0;
+    for (let ri = 0; ri < rows.length; ri++) {
+      const k = rows[ri].indexOf(i);
+      if (k >= 0) { r = ri; cIdx = k; break; }
+    }
+    const rowItems = rows[r].length;
+    const rowW = rowItems * CELL;
+    const startX = col.x + (col.w - rowW) / 2;
+    n._x = startX + cIdx*CELL + CELL/2;
+    n._y = band.y + BAND_PAD + r*SUBROW_H + HEX_R + 4;
+    n._r = HEX_R;
+    n._panelDomain = d;
+  });
+
+  // Frontier: shallowest band containing a ready or in-progress node
+  frontierBand = -1;
+  for (let b = 0; b <= maxBand; b++) {
+    if (resources.some(n => Math.round(n.lvl) === b && (n._st === 'ready' || n._st === 'progress'))) {
+      frontierBand = b; break;
     }
   }
 
-  for (const p of panels) {
-    p.rows.forEach((row, ri) => {
-      const rowW = row.length * CELL_W;
-      const startX = p.x + PANEL_PAD + (p.cols*CELL_W - rowW)/2;
-      row.forEach((idx, ci) => {
-        const n = resources[idx];
-        n._x = startX + ci*CELL_W + CELL_W/2;
-        n._y = p.y + HEADER_H + PANEL_PAD + ri*CELL_H + CELL_H/2 - 10;
-        n._r = HEX_R;
-        n._panelDomain = p.domain;
-      });
-    });
+  // Trunk arcs between columns (aggregated cross-branch flow, 2+ links)
+  trunks = [];
+  for (const [a, tos] of Object.entries(crossW)) {
+    for (const [b, w] of Object.entries(tos)) {
+      if (w < 2) continue;
+      const ca = colByDom[a], cb = colByDom[b];
+      if (ca && cb) trunks.push({ ca, cb, w, domain: a });
+    }
   }
 }
 
@@ -432,10 +439,14 @@ function resize() {
 }
 
 function init() {
-  layoutPanels();
+  layoutSpine();
   const availW = W - SIDEBAR_W;
-  const z = Math.min((availW-50)/worldW, (H-110)/worldH, 1);
-  cam = { x: SIDEBAR_W + (availW - worldW*z)/2, y: 64 + Math.max(0, (H-64-worldH*z)/2 - 20), z };
+  // Fit height (never zoom below legibility); pan horizontally for width
+  let z = Math.min((H - 60) / worldH, 1);
+  z = Math.max(z, 0.62);
+  const contentW = worldW * z;
+  const xOff = contentW < availW ? SIDEBAR_W + (availW - contentW)/2 : SIDEBAR_W + 16;
+  cam = { x: xOff, y: 50 + Math.max(0, (H - 50 - worldH*z)/2), z };
   buildSheet();
 }
 
@@ -444,17 +455,14 @@ function nodeDimmed(n) {
       || (searchQ && !n.title.toLowerCase().includes(searchQ));
 }
 
-// --- Character sheet DOM ---
+// --- Character sheet ---
 function buildSheet() {
   const done = resources.filter(n => n._st === 'done').length;
   let h = '';
-
-  // Level + XP
   h += `<div class="lvl-row"><span class="lvl-num">Lv ${LV.lvl}</span><span class="lvl-label">Learner</span><span class="lvl-total"><b>${earnedXP.toLocaleString()}</b> XP</span></div>`;
   h += `<div class="xpbar"><div class="xpbar-fill" style="width:${Math.round(LV.into/LV.need*100)}%"></div></div>`;
   h += `<div class="xp-hint">${LV.into} / ${LV.need} XP to Lv ${LV.lvl+1} · ${done}/${resources.length} unlocked</div>`;
 
-  // Quest log
   h += `<div class="sheet-sec"><div class="sheet-title">⚔ Quest Log</div>`;
   continueQ.slice(0,2).forEach(q => {
     h += `<div class="quest q-continue" data-idx="${q.i}">
@@ -481,7 +489,6 @@ function buildSheet() {
   }
   h += `</div>`;
 
-  // Branch ranks
   const sortedDoms = Object.entries(domStats).sort((a,b) => (b[1].done/b[1].total) - (a[1].done/a[1].total) || b[1].total - a[1].total);
   h += `<div class="sheet-sec"><div class="sheet-title">Branch Ranks</div>`;
   sortedDoms.forEach(([d, s]) => {
@@ -497,25 +504,16 @@ function buildSheet() {
   });
   h += `</div>`;
 
-  // Achievements
   const unlocked = ACH.filter(a => a.ok).length;
   h += `<div class="sheet-sec"><div class="sheet-title">Achievements <span class="cnt">${unlocked}/${ACH.length}</span></div><div class="ach-grid">`;
-  ACH.forEach(a => {
-    h += `<div class="ach ${a.ok?'':'locked'}" title="${a.name} — ${a.desc}">${a.icon}</div>`;
-  });
+  ACH.forEach(a => { h += `<div class="ach ${a.ok?'':'locked'}" title="${a.name} — ${a.desc}">${a.icon}</div>`; });
   h += `</div></div>`;
 
   const sheet = document.getElementById('sheet');
   sheet.innerHTML = h;
-
-  // Quest click → fly to node + open detail
   sheet.querySelectorAll('.quest').forEach(el => {
-    el.addEventListener('click', () => {
-      const idx = parseInt(el.dataset.idx);
-      flyTo(resources[idx]);
-    });
+    el.addEventListener('click', () => flyTo(resources[parseInt(el.dataset.idx)]));
   });
-  // Rank click → filter to that branch
   sheet.querySelectorAll('.rank-row').forEach(el => {
     el.addEventListener('click', () => {
       const d = el.dataset.dom;
@@ -527,7 +525,7 @@ function buildSheet() {
 }
 
 function flyTo(n) {
-  const z = 1;
+  const z = Math.max(cam.z, 0.9);
   cam = {
     x: SIDEBAR_W + (W - SIDEBAR_W)/2 - n._x * z,
     y: 44 + (H - 44)/2 - n._y * z,
@@ -544,156 +542,141 @@ function draw() {
   ctx.translate(cam.x, cam.y);
   ctx.scale(cam.z, cam.z);
 
-  // Panels
-  for (const p of panels) {
-    const theme = domTheme(p.domain);
-    const [r,g,b] = theme.c;
-    const dim = filterDomain && filterDomain !== p.domain;
-    ctx.globalAlpha = dim ? 0.15 : 1;
-
-    rr(ctx, p.x, p.y, p.w, p.h, 16);
-    const grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
-    grad.addColorStop(0, `rgba(${r},${g},${b},0.05)`);
-    grad.addColorStop(1, `rgba(${r},${g},${b},0.015)`);
-    ctx.fillStyle = grad;
-    ctx.fill();
-    ctx.strokeStyle = `rgba(${r},${g},${b},0.15)`;
+  // Level bands: separators + labels
+  for (const band of bands) {
+    ctx.beginPath();
+    ctx.moveTo(30, band.y);
+    ctx.lineTo(worldW - 10, band.y);
+    ctx.strokeStyle = 'rgba(255,255,255,0.035)';
     ctx.lineWidth = 1;
     ctx.stroke();
-
-    const s = domStats[p.domain] || { done: 0, total: p.members.length };
-    const rank = rankOf(s.done / s.total);
-
-    ctx.fillStyle = `rgba(${r},${g},${b},0.75)`;
-    ctx.font = '700 13px Inter';
+    ctx.font = '700 10px Inter';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(theme.name.toUpperCase(), p.x + PANEL_PAD, p.y + 22);
+    ctx.fillStyle = 'rgba(255,255,255,0.14)';
+    ctx.fillText(`LV ${band.b}`, 12, band.y + band.h/2);
+  }
 
-    // Rank badge in header
+  // Frontier line
+  if (frontierBand >= 0) {
+    const fb = bands[frontierBand];
+    ctx.beginPath();
+    ctx.moveTo(30, fb.y + 2);
+    ctx.lineTo(worldW - 10, fb.y + 2);
+    ctx.setLineDash([8, 6]);
+    ctx.strokeStyle = 'rgba(227,179,65,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = '700 8px Inter';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(227,179,65,0.5)';
+    ctx.fillText('YOUR FRONTIER', worldW - 14, fb.y - 6);
+  }
+
+  // Domain columns: tint + header
+  for (const col of columns) {
+    const theme = domTheme(col.domain);
+    const [r,g,b] = theme.c;
+    const dim = filterDomain && filterDomain !== col.domain;
+    ctx.globalAlpha = dim ? 0.12 : 1;
+
+    // Column tint
+    const grad = ctx.createLinearGradient(col.x, HEADER_ZONE, col.x, worldH);
+    grad.addColorStop(0, `rgba(${r},${g},${b},0.035)`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},0.008)`);
+    ctx.fillStyle = grad;
+    rr(ctx, col.x, HEADER_ZONE - 4, col.w, worldH - HEADER_ZONE + 4, 10);
+    ctx.fill();
+
+    // Header
+    const s = domStats[col.domain] || { done: 0, total: 0 };
+    const rank = rankOf(s.total ? s.done / s.total : 0);
+    ctx.font = '700 12px Inter';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = `rgba(${r},${g},${b},0.8)`;
+    ctx.fillText(truncText(theme.name.toUpperCase(), Math.floor(col.w/8)), col.x + col.w/2, 56);
     ctx.font = '700 8px Inter';
     ctx.fillStyle = rank.c;
-    const rw = ctx.measureText(rank.t).width;
-    ctx.textAlign = 'right';
-    ctx.fillText(rank.t, p.x + p.w - PANEL_PAD, p.y + 18);
-    ctx.font = '500 9px Inter';
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
-    ctx.fillText(`${s.done}/${s.total}`, p.x + p.w - PANEL_PAD, p.y + 30);
-
-    const bw = p.w - PANEL_PAD*2;
-    rr(ctx, p.x + PANEL_PAD, p.y + 40, bw, 3, 1.5);
-    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.fillText(`${rank.t} · ${s.done}/${s.total}`, col.x + col.w/2, 72);
+    // Progress bar
+    const bw = Math.min(col.w - 40, 120);
+    rr(ctx, col.x + col.w/2 - bw/2, 80, bw, 3, 1.5);
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
     ctx.fill();
     if (s.done > 0) {
-      rr(ctx, p.x + PANEL_PAD, p.y + 40, bw * s.done/s.total, 3, 1.5);
-      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+      rr(ctx, col.x + col.w/2 - bw/2, 80, bw * s.done/s.total, 3, 1.5);
+      ctx.fillStyle = `rgba(${r},${g},${b},0.55)`;
       ctx.fill();
-    }
-
-    for (let ti = 1; ti < p.tierStarts.length; ti++) {
-      const rowIdx = p.tierStarts[ti];
-      const sy = p.y + HEADER_H + PANEL_PAD + rowIdx*CELL_H - 8;
-      ctx.beginPath();
-      ctx.moveTo(p.x + PANEL_PAD + 8, sy);
-      ctx.lineTo(p.x + p.w - PANEL_PAD - 8, sy);
-      ctx.strokeStyle = `rgba(${r},${g},${b},0.08)`;
-      ctx.setLineDash([3,5]);
-      ctx.lineWidth = 0.5;
-      ctx.stroke();
-      ctx.setLineDash([]);
     }
     ctx.globalAlpha = 1;
   }
 
-  // Trunk arteries: branch-to-branch dependency flows
+  // Trunk arcs above headers (aggregated cross-branch flow)
   for (const t of trunks) {
-    const theme = domTheme(t.pa.domain);
+    const theme = domTheme(t.domain);
     const [r,g,b] = theme.c;
-    const dim = filterDomain && filterDomain !== t.pa.domain && filterDomain !== t.pb.domain;
-
-    let ax, bx;
-    if (t.pa.x + t.pa.w <= t.pb.x) { ax = t.pa.x + t.pa.w; bx = t.pb.x; }
-    else if (t.pb.x + t.pb.w <= t.pa.x) { ax = t.pa.x; bx = t.pb.x + t.pb.w; }
-    else { ax = t.pa.x + t.pa.w/2; bx = t.pb.x + t.pb.w/2; }
-    const ay = t.pa.y + Math.min(t.pa.h/2, 200);
-    const by = t.pb.y + Math.min(t.pb.h/2, 200);
-    const mx = (ax + bx) / 2;
-
+    const dim = filterDomain && filterDomain !== t.ca.domain && filterDomain !== t.cb.domain;
+    const ax = t.ca.x + t.ca.w/2, bx = t.cb.x + t.cb.w/2;
+    const apexY = 34 - Math.min(26, Math.abs(bx-ax)/60);
     ctx.beginPath();
-    ctx.moveTo(ax, ay);
-    ctx.bezierCurveTo(mx, ay, mx, by, bx, by);
-    ctx.strokeStyle = `rgba(${r},${g},${b},${dim ? 0.012 : 0.1})`;
-    ctx.lineWidth = 2 + Math.log2(t.w) * 2.2;
+    ctx.moveTo(ax, 44);
+    ctx.quadraticCurveTo((ax+bx)/2, apexY, bx, 44);
+    ctx.strokeStyle = `rgba(${r},${g},${b},${dim ? 0.015 : 0.14})`;
+    ctx.lineWidth = 1 + Math.log2(t.w) * 1.6;
     ctx.stroke();
-
     if (!dim) {
-      // Arrowhead at receiving end
-      const ang = Math.atan2(by - ((ay+by)/2), bx - mx);
-      const sz = 7;
+      const sz = 5;
       ctx.beginPath();
-      ctx.moveTo(bx, by);
-      ctx.lineTo(bx - sz*Math.cos(ang-0.45), by - sz*Math.sin(ang-0.45));
-      ctx.lineTo(bx - sz*Math.cos(ang+0.45), by - sz*Math.sin(ang+0.45));
+      ctx.moveTo(bx, 44);
+      ctx.lineTo(bx - sz*0.8, 44 - sz);
+      ctx.lineTo(bx + sz*0.8, 44 - sz);
       ctx.closePath();
-      ctx.fillStyle = `rgba(${r},${g},${b},0.3)`;
+      ctx.fillStyle = `rgba(${r},${g},${b},0.35)`;
       ctx.fill();
-      // Weight label
-      ctx.font = '600 9px Inter';
+      ctx.font = '600 8px Inter';
       ctx.textAlign = 'center';
       ctx.fillStyle = `rgba(${r},${g},${b},0.4)`;
-      ctx.fillText(`${t.w} links`, mx, (ay+by)/2 - 5);
+      ctx.fillText(String(t.w), (ax+bx)/2, apexY + 8);
     }
   }
 
-  // Edges
+  // Edges: intra-domain always; cross-domain only on hover
   const hovIdx = hovered ? resources.indexOf(hovered) : -1;
   for (const e of edges) {
     const a = resources[e.from], b = resources[e.to];
-    const dim = nodeDimmed(a) && nodeDimmed(b);
     const isHov = hovIdx >= 0 && (e.from === hovIdx || e.to === hovIdx);
+    const sameDom = a._panelDomain === b._panelDomain;
+    if (!sameDom && !isHov) continue;
+    const dim = nodeDimmed(a) && nodeDimmed(b);
     if (dim && !isHov) continue;
 
-    const samePanel = a._panelDomain === b._panelDomain;
+    const ax = a._x, ay = a._y + a._r + 3;
+    const bx = b._x, by = b._y - b._r - 10;
+    const my = (ay + by) / 2;
     ctx.beginPath();
-    if (samePanel) {
-      const ax = a._x, ay = a._y + a._r + 4;
-      const bx = b._x, by = b._y - b._r - 12;
-      const my = (ay + by) / 2;
-      ctx.moveTo(ax, ay);
-      ctx.bezierCurveTo(ax, my, bx, my, bx, by);
-    } else {
-      const dx = b._x - a._x, dy = b._y - a._y;
-      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-      const nx = -dy/dist*40, ny = dx/dist*40;
-      ctx.moveTo(a._x, a._y);
-      ctx.quadraticCurveTo((a._x+b._x)/2 + nx, (a._y+b._y)/2 + ny, b._x, b._y);
-    }
-
+    ctx.moveTo(ax, ay);
+    ctx.bezierCurveTo(ax, my, bx, my, bx, by);
     if (isHov) {
       const sc = SC[hovered._st];
       const [hr,hg,hb] = sc.glow || [88,166,255];
-      ctx.strokeStyle = `rgba(${hr},${hg},${hb},0.45)`;
+      ctx.strokeStyle = `rgba(${hr},${hg},${hb},0.5)`;
       ctx.lineWidth = 2;
-    } else if (samePanel) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-      ctx.lineWidth = 1;
     } else {
-      ctx.strokeStyle = 'rgba(255,255,255,0.02)';
-      ctx.lineWidth = 0.6;
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
     }
     ctx.stroke();
-
-    if (samePanel) {
-      const tx = b._x, ty = b._y - b._r - 12;
-      const sz = isHov ? 6 : 4;
-      ctx.beginPath();
-      ctx.moveTo(tx, ty + sz);
-      ctx.lineTo(tx - sz*0.7, ty - sz*0.5);
-      ctx.lineTo(tx + sz*0.7, ty - sz*0.5);
-      ctx.closePath();
-      ctx.fillStyle = isHov ? ctx.strokeStyle : 'rgba(255,255,255,0.1)';
-      ctx.fill();
-    }
+    // Arrowhead
+    const sz = isHov ? 6 : 4;
+    ctx.beginPath();
+    ctx.moveTo(bx, by + sz);
+    ctx.lineTo(bx - sz*0.7, by - sz*0.4);
+    ctx.lineTo(bx + sz*0.7, by - sz*0.4);
+    ctx.closePath();
+    ctx.fillStyle = isHov ? ctx.strokeStyle : 'rgba(255,255,255,0.12)';
+    ctx.fill();
   }
 
   // Nodes
@@ -733,7 +716,6 @@ function draw() {
     ctx.stroke();
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
 
-    // Gold ring + NEXT tag for the top recommendation
     if (isTop && !dim) {
       drawHex(ctx, n._x, n._y, n._r + 7);
       ctx.strokeStyle = 'rgba(227,179,65,0.7)';
@@ -770,7 +752,7 @@ function draw() {
     ctx.fillStyle = n._st==='blocked' ? 'rgba(255,255,255,0.18)' : n._st==='done' ? 'rgba(255,255,255,0.55)' : sc.text;
     ctx.fillText(truncText(n.title, 17), n._x, n._y + n._r + 12);
 
-    // Bridge pips: colored dots for cross-branch connections
+    // Bridge pips
     const cds = [...crossDoms[i]].slice(0, 3);
     cds.forEach((d, k) => {
       const [pr,pg,pb] = domTheme(d).c;
@@ -824,6 +806,7 @@ function buildPanel(node) {
   h += `<h3 style="color:${sc.text}">${node.title}</h3>`;
   h += '<div class="pills">';
   h += `<span class="pill xp">+${node._xp} XP</span>`;
+  h += `<span class="pill">depth ${node.lvl.toFixed(1)}</span>`;
   [node.type, node.complexity, node.engagement, node._st].filter(Boolean).forEach(t => h+=`<span class="pill">${t}</span>`);
   h += '</div>';
   h += `<div class="info"><b>Branch</b> ${theme.name}</div>`;
@@ -888,7 +871,7 @@ canvas.addEventListener('mousemove', ev => {
   canvas.style.cursor = hit ? 'pointer' : 'grab';
   if (hit) {
     const sc = SC[hit._st];
-    tipEl.innerHTML = `<h3 style="color:${sc.text}">${hit.title}</h3><div class="meta">${[domTheme(hit._panelDomain).name, hit.topic, hit._st].filter(Boolean).join(' · ')} · <span class="xp">+${hit._xp} XP</span></div>`;
+    tipEl.innerHTML = `<h3 style="color:${sc.text}">${hit.title}</h3><div class="meta">${[domTheme(hit._panelDomain).name, hit.topic, hit._st, 'depth '+hit.lvl.toFixed(1)].filter(Boolean).join(' · ')} · <span class="xp">+${hit._xp} XP</span></div>`;
     tipEl.style.display = 'block';
     tipEl.style.left = Math.min(ev.clientX+16, W-300) + 'px';
     tipEl.style.top = (ev.clientY+16) + 'px';
