@@ -306,7 +306,15 @@ const CELL_W = 112, CELL_H = 86, HEX_R = 20;
 const PANEL_PAD = 20, HEADER_H = 52, PANEL_GAP = 44, MAX_COLS = 4;
 const SIDEBAR_W = 272;
 
-let panels = [], worldW = 0, worldH = 0;
+let panels = [], trunks = [], worldW = 0, worldH = 0;
+
+// Cross-branch link colors per node (for bridge pips)
+const crossDoms = resources.map(() => new Set());
+edges.forEach(e => {
+  const da = resources[e.from].domain || 'Other';
+  const db = resources[e.to].domain || 'Other';
+  if (da !== db) { crossDoms[e.from].add(db); crossDoms[e.to].add(da); }
+});
 
 function layoutPanels() {
   const depth = new Array(resources.length).fill(0);
@@ -346,18 +354,50 @@ function layoutPanels() {
     panels.push({ domain: d, rows, cols, w, h, members, tierStarts });
   }
 
-  panels.sort((a,b) => b.members.length - a.members.length);
-  const totalArea = panels.reduce((s,p) => s + p.w*p.h, 0);
-  const targetW = Math.max(1500, Math.sqrt(totalArea * 2.4));
-  let x = 0, y = 0, rowH = 0, maxX = 0;
-  for (const p of panels) {
-    if (x > 0 && x + p.w > targetW) { x = 0; y += rowH + PANEL_GAP; rowH = 0; }
-    p.x = x; p.y = y;
-    x += p.w + PANEL_GAP;
-    rowH = Math.max(rowH, p.h);
-    maxX = Math.max(maxX, p.x + p.w);
+  // Domain-level dependency weights: crossW[A][B] = edges flowing A → B
+  const crossW = {};
+  edges.forEach(e => {
+    const da = resources[e.from].domain || 'Other';
+    const db = resources[e.to].domain || 'Other';
+    if (da === db) return;
+    (crossW[da] = crossW[da] || {})[db] = (crossW[da][db] || 0) + 1;
+  });
+
+  // Knowledge flow: net exporters of prerequisites go left, importers right
+  const netOut = {};
+  panels.forEach(p => netOut[p.domain] = 0);
+  for (const [a, tos] of Object.entries(crossW)) {
+    for (const [b, w] of Object.entries(tos)) {
+      if (netOut[a] !== undefined) netOut[a] += w;
+      if (netOut[b] !== undefined) netOut[b] -= w;
+    }
   }
-  worldW = maxX; worldH = y + rowH;
+  panels.sort((a,b) => (netOut[b.domain] - netOut[a.domain]) || (b.members.length - a.members.length));
+
+  // Pack into vertical columns, left → right along the flow
+  const totalArea = panels.reduce((s,p) => s + p.w*p.h, 0);
+  const targetH = Math.max(800, Math.sqrt(totalArea / 1.8));
+  let colX = 0, colY = 0, colW = 0, maxY = 0;
+  for (const p of panels) {
+    if (colY > 0 && colY + p.h > targetH) { colX += colW + PANEL_GAP; colY = 0; colW = 0; }
+    p.x = colX; p.y = colY;
+    colY += p.h + PANEL_GAP;
+    colW = Math.max(colW, p.w);
+    maxY = Math.max(maxY, p.y + p.h);
+  }
+  worldW = colX + colW; worldH = maxY;
+
+  // Trunk arteries: aggregated cross-branch dependencies (2+ links)
+  trunks = [];
+  const pByDom = {};
+  panels.forEach(p => pByDom[p.domain] = p);
+  for (const [a, tos] of Object.entries(crossW)) {
+    for (const [b, w] of Object.entries(tos)) {
+      if (w < 2) continue;
+      const pa = pByDom[a], pb = pByDom[b];
+      if (pa && pb) trunks.push({ pa, pb, w });
+    }
+  }
 
   for (const p of panels) {
     p.rows.forEach((row, ri) => {
@@ -565,6 +605,46 @@ function draw() {
     ctx.globalAlpha = 1;
   }
 
+  // Trunk arteries: branch-to-branch dependency flows
+  for (const t of trunks) {
+    const theme = domTheme(t.pa.domain);
+    const [r,g,b] = theme.c;
+    const dim = filterDomain && filterDomain !== t.pa.domain && filterDomain !== t.pb.domain;
+
+    let ax, bx;
+    if (t.pa.x + t.pa.w <= t.pb.x) { ax = t.pa.x + t.pa.w; bx = t.pb.x; }
+    else if (t.pb.x + t.pb.w <= t.pa.x) { ax = t.pa.x; bx = t.pb.x + t.pb.w; }
+    else { ax = t.pa.x + t.pa.w/2; bx = t.pb.x + t.pb.w/2; }
+    const ay = t.pa.y + Math.min(t.pa.h/2, 200);
+    const by = t.pb.y + Math.min(t.pb.h/2, 200);
+    const mx = (ax + bx) / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.bezierCurveTo(mx, ay, mx, by, bx, by);
+    ctx.strokeStyle = `rgba(${r},${g},${b},${dim ? 0.012 : 0.1})`;
+    ctx.lineWidth = 2 + Math.log2(t.w) * 2.2;
+    ctx.stroke();
+
+    if (!dim) {
+      // Arrowhead at receiving end
+      const ang = Math.atan2(by - ((ay+by)/2), bx - mx);
+      const sz = 7;
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      ctx.lineTo(bx - sz*Math.cos(ang-0.45), by - sz*Math.sin(ang-0.45));
+      ctx.lineTo(bx - sz*Math.cos(ang+0.45), by - sz*Math.sin(ang+0.45));
+      ctx.closePath();
+      ctx.fillStyle = `rgba(${r},${g},${b},0.3)`;
+      ctx.fill();
+      // Weight label
+      ctx.font = '600 9px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = `rgba(${r},${g},${b},0.4)`;
+      ctx.fillText(`${t.w} links`, mx, (ay+by)/2 - 5);
+    }
+  }
+
   // Edges
   const hovIdx = hovered ? resources.indexOf(hovered) : -1;
   for (const e of edges) {
@@ -689,6 +769,19 @@ function draw() {
     ctx.font = '500 8.5px Inter';
     ctx.fillStyle = n._st==='blocked' ? 'rgba(255,255,255,0.18)' : n._st==='done' ? 'rgba(255,255,255,0.55)' : sc.text;
     ctx.fillText(truncText(n.title, 17), n._x, n._y + n._r + 12);
+
+    // Bridge pips: colored dots for cross-branch connections
+    const cds = [...crossDoms[i]].slice(0, 3);
+    cds.forEach((d, k) => {
+      const [pr,pg,pb] = domTheme(d).c;
+      ctx.beginPath();
+      ctx.arc(n._x + n._r - k*7, n._y - n._r + 1, 2.5, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${pr},${pg},${pb},0.85)`;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(10,12,16,0.8)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
 
     ctx.globalAlpha = 1;
   }
