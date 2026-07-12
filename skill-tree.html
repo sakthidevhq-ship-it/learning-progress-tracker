@@ -329,6 +329,7 @@ const SC = {
 const SIDEBAR_W = 272;
 let view = { mode: 'galaxy', domain: null };
 let goal = null; // { target, set:Set<idx>, order:[idx] }
+let galaxySats = []; // quest-path satellites materialized on the galaxy
 
 // --- Galaxy layout: deterministic force sim on domain orbs ---
 const galaxyNodes = []; // {domain, x, y, r, count, done}
@@ -467,9 +468,10 @@ function computeGoal(idx) {
 function setGoal(idx) {
   goal = computeGoal(idx);
   buildSheet();
-  requestDraw();
+  // The quest route is a cross-domain object — show it on the world map
+  enterGalaxy();
 }
-function clearGoal() { goal = null; buildSheet(); requestDraw(); }
+function clearGoal() { goal = null; galaxySats = []; buildSheet(); requestDraw(); }
 window.setGoal = setGoal;
 window.clearGoal = clearGoal;
 
@@ -718,6 +720,131 @@ function drawGalaxy() {
 
     ctx.globalAlpha = 1;
   }
+
+  // --- Quest satellites: goal-path nodes materialized on the world map ---
+  galaxySats = [];
+  const byDom = {};
+  galaxyNodes.forEach(g => byDom[g.domain] = g);
+
+  if (goal) {
+    // Group consecutive positions per domain so multiple steps fan around their orb
+    const perDomCount = {}, perDomSeen = {};
+    goal.order.forEach(i => {
+      const d = resources[i].domain;
+      perDomCount[d] = (perDomCount[d] || 0) + 1;
+    });
+
+    goal.order.forEach((i, k) => {
+      const n = resources[i];
+      const orb = byDom[n.domain];
+      if (!orb) return;
+      // Face the neighboring step's orb so the chain flows between branches
+      let refOrb = null;
+      for (let j = k+1; j < goal.order.length; j++) {
+        const o = byDom[resources[goal.order[j]].domain];
+        if (o && o !== orb) { refOrb = o; break; }
+      }
+      if (!refOrb) for (let j = k-1; j >= 0; j--) {
+        const o = byDom[resources[goal.order[j]].domain];
+        if (o && o !== orb) { refOrb = o; break; }
+      }
+      let baseAngle = refOrb ? Math.atan2(refOrb.y - orb.y, refOrb.x - orb.x) : -Math.PI/2;
+      const m = perDomCount[n.domain];
+      const idx = (perDomSeen[n.domain] = (perDomSeen[n.domain] || 0) + 1) - 1;
+      const spread = (idx - (m-1)/2) * 0.55;
+      const angle = baseAngle + spread;
+      const dist = orb.r + 38;
+      galaxySats.push({ i, step: k+1, x: orb.x + dist*Math.cos(angle), y: orb.y + dist*Math.sin(angle), r: goal.target === i ? 18 : 14 });
+    });
+
+    // Gold chain connecting the steps in reading order
+    for (let k = 0; k < galaxySats.length - 1; k++) {
+      const a = galaxySats[k], b = galaxySats[k+1];
+      const mx = (a.x+b.x)/2, my = (a.y+b.y)/2;
+      const dx = b.x-a.x, dy = b.y-a.y;
+      const dist = Math.sqrt(dx*dx+dy*dy)||1;
+      const bow = Math.min(30, dist*0.15);
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.quadraticCurveTo(mx - dy/dist*bow, my + dx/dist*bow, b.x, b.y);
+      ctx.strokeStyle = 'rgba(227,179,65,0.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // direction arrowhead at midpoint
+      const ang = Math.atan2(b.y-a.y, b.x-a.x);
+      ctx.beginPath();
+      ctx.moveTo(mx + 5*Math.cos(ang), my + 5*Math.sin(ang));
+      ctx.lineTo(mx - 4*Math.cos(ang-0.5), my - 4*Math.sin(ang-0.5));
+      ctx.lineTo(mx - 4*Math.cos(ang+0.5), my - 4*Math.sin(ang+0.5));
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(227,179,65,0.6)';
+      ctx.fill();
+    }
+
+    // Satellite hexes
+    for (const s of galaxySats) {
+      const n = resources[s.i];
+      const isTarget = goal.target === s.i;
+      const isDone = n._st === 'done';
+      ctx.shadowColor = 'rgba(227,179,65,0.35)';
+      ctx.shadowBlur = isTarget ? 20 : 10;
+      drawHex(ctx, s.x, s.y, s.r);
+      ctx.fillStyle = isDone ? 'rgba(63,185,80,0.18)' : 'rgba(227,179,65,0.14)';
+      ctx.fill();
+      ctx.strokeStyle = isDone ? 'rgba(63,185,80,0.7)' : 'rgba(227,179,65,0.75)';
+      ctx.lineWidth = isTarget ? 2 : 1.3;
+      ctx.stroke();
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      if (isDone) { ctx.fillStyle = '#3fb950'; ctx.font = '700 11px Inter'; ctx.fillText('✓', s.x, s.y); }
+      else if (isTarget) { ctx.font = '400 12px Inter'; ctx.fillText('🎯', s.x, s.y); }
+      else {
+        const icons = { paper:'📄', article:'📝', video:'🎬', docs:'📚', tweet:'🐦' };
+        ctx.font = '400 10px Inter';
+        ctx.fillText(icons[n.type] || '📄', s.x, s.y);
+      }
+      // Step badge
+      ctx.beginPath();
+      ctx.arc(s.x - s.r + 1, s.y - s.r + 1, 7, 0, Math.PI*2);
+      ctx.fillStyle = isDone ? 'rgba(63,185,80,0.9)' : '#e3b341';
+      ctx.fill();
+      ctx.fillStyle = '#0a0c10';
+      ctx.font = '800 8px Inter';
+      ctx.fillText(String(s.step), s.x - s.r + 1, s.y - s.r + 1.5);
+      // Label
+      ctx.font = '500 8.5px Inter';
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.fillText(truncText(n.title, 18), s.x, s.y + s.r + 11);
+    }
+  } else if (topPickIdx >= 0) {
+    // No goal: pin the ★ NEXT pick to the world map as a single satellite
+    const n = resources[topPickIdx];
+    const orb = byDom[n.domain];
+    if (orb) {
+      const s = { i: topPickIdx, step: 0, x: orb.x, y: orb.y - orb.r - 34, r: 15 };
+      galaxySats.push(s);
+      ctx.shadowColor = 'rgba(227,179,65,0.4)';
+      ctx.shadowBlur = 14;
+      drawHex(ctx, s.x, s.y, s.r);
+      ctx.fillStyle = 'rgba(227,179,65,0.14)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(227,179,65,0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const icons = { paper:'📄', article:'📝', video:'🎬', docs:'📚', tweet:'🐦' };
+      ctx.font = '400 10px Inter';
+      ctx.fillText(icons[n.type] || '📄', s.x, s.y);
+      ctx.font = '800 8px Inter';
+      ctx.fillStyle = '#e3b341';
+      ctx.fillText('★ NEXT', s.x, s.y - s.r - 9);
+      ctx.font = '500 8.5px Inter';
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.fillText(truncText(n.title, 18), s.x, s.y + s.r + 11);
+    }
+  }
 }
 
 function drawBranch() {
@@ -876,6 +1003,10 @@ function hitTest(ex, ey) {
   if (ex < SIDEBAR_W) return null;
   const wx = (ex-cam.x)/cam.z, wy = (ey-cam.y)/cam.z;
   if (view.mode === 'galaxy') {
+    for (const s of galaxySats) {
+      const dx = wx-s.x, dy = wy-s.y;
+      if (dx*dx + dy*dy <= (s.r+5)*(s.r+5)) return { node: resources[s.i] };
+    }
     for (const g of galaxyNodes) {
       const dx = wx-g.x, dy = wy-g.y;
       if (dx*dx + dy*dy <= (g.r+8)*(g.r+8)) return { orb: g };
