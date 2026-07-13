@@ -13,7 +13,7 @@ concepts:: [[Agent-Computer Interface]], [[Code Navigation]], [[Tool Design]], [
 tags:: agents, devin
 source:: https://arxiv.org/abs/2401.04088
 ingested:: [[2026-07-09]]
-priority:: 41
+priority:: 40
 
 ## Summary
 Research on using LLMs as autonomous software engineering agents. Introduces Agent-Computer Interface (ACI) design, showing that how the agent interacts with the codebase matters as much as the model. Achieves strong results on SWE-bench by giving agents file navigation, search, and edit tools.

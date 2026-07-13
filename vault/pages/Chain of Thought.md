@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Frameworks]]
 topic:: [[Prompt Engineering]]
-referenced-by:: [[DSPy - Programming Language Models]]
+referenced-by:: [[DSPy - Programming Language Models]], [[How to Think Step-by-Step: A Mechanistic Understanding of Chain-of-Thought Reasoning]]
 priority:: 33
 
 ## About

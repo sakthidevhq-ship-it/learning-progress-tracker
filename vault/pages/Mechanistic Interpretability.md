@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
-referenced-by:: [[Physics of Language Models: Knowledge Storage and Extraction]]
+referenced-by:: [[Physics of Language Models: Knowledge Storage and Extraction]], [[How to Think Step-by-Step: A Mechanistic Understanding of Chain-of-Thought Reasoning]]
 priority:: 34
 
 ## About

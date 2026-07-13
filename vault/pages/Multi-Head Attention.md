@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
-referenced-by:: [[Attention Is All You Need]]
+referenced-by:: [[Attention Is All You Need]], [[How to Think Step-by-Step: A Mechanistic Understanding of Chain-of-Thought Reasoning]]
 priority:: 34
 
 ## About
