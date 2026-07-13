@@ -13,7 +13,7 @@ concepts:: [[Cross-Compilation]], [[Model Quantization]], [[llama.cpp]], [[ARM N
 tags:: r36s, llm, edge
 source:: https://r36s-llm-experiments
 ingested:: [[2026-07-09]]
-priority:: 26
+priority:: 25
 
 ## Summary
 Experimenting with running small language models on the R36S handheld (Allwinner H700, 1GB RAM). Explores llama.cpp cross-compilation for ARM, model quantization to fit in memory, and practical limitations of edge inference on ultra-low-power devices.

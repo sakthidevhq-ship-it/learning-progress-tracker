@@ -13,7 +13,7 @@ concepts:: [[Lexing]], [[Parsing]], [[AST]], [[Bytecode]], [[Virtual Machine]], 
 tags:: interpreters, book
 source:: https://craftinginterpreters.com
 ingested:: [[2026-07-09]]
-priority:: 28
+priority:: 27
 
 ## Summary
 Bob Nystrom's guide to building two complete interpreters: a tree-walk interpreter in Java (jlox) and a bytecode VM in C (clox). Covers scanning, parsing, name resolution, control flow, functions, closures, classes, inheritance, and garbage collection.

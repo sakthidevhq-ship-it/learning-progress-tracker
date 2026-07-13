@@ -13,7 +13,7 @@ concepts:: [[Tokenization]], [[Word Embeddings]], [[N-gram Models]], [[Attention
 tags:: nlp, attention, embeddings
 source:: https://github.com/ml-curriculum/nlp-attention
 ingested:: [[2026-07-09]]
-priority:: 29
+priority:: 28
 
 ## Summary
 A curriculum module tracing the evolution of NLP techniques from tokenization and n-gram models through word embeddings to early attention mechanisms like Bahdanau and Luong attention in encoder-decoder architectures.

@@ -13,7 +13,7 @@ concepts:: [[IO-Aware Algorithms]], [[GPU Memory Hierarchy]], [[Attention Tiling
 tags:: flash-attention, optimization
 source:: https://arxiv.org/abs/2205.14135
 ingested:: [[2026-07-08]]
-priority:: 38
+priority:: 37
 
 ## Summary
 Introduces FlashAttention, an IO-aware exact attention algorithm that reduces memory usage from quadratic to linear while being 2-4x faster than standard attention. Achieves this by tiling the attention computation to avoid materializing the full N×N attention matrix in GPU HBM, instead keeping working data in fast SRAM.

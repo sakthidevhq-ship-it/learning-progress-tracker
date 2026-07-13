@@ -13,7 +13,7 @@ concepts:: [[Backpropagation]], [[Tokenization]], [[GPT Implementation]], [[Neur
 tags:: karpathy, gpt
 source:: https://youtube.com/@andrejkarpathy
 ingested:: [[2026-07-09]]
-priority:: 30
+priority:: 29
 
 ## Summary
 Andrej Karpathy's video lecture series building neural networks and GPT-style language models from scratch in Python, starting from micrograd's autodiff engine through to a working GPT implementation with tokenization.

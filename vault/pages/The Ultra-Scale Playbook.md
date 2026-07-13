@@ -13,7 +13,7 @@ concepts:: [[Tensor Parallelism]], [[Pipeline Parallelism]], [[Data Parallelism]
 tags:: parallelism, training
 source:: https://huggingface.co/spaces/nanotron/ultrascale-playbook
 ingested:: [[2026-07-09]]
-priority:: 37
+priority:: 36
 
 ## Summary
 A Hugging Face guide to training large language models across thousands of GPUs, covering data/tensor/pipeline parallelism, ZeRO optimizer sharding, and activation recomputation strategies for maximizing throughput at scale.

@@ -13,7 +13,7 @@ concepts:: [[Paxos Consensus]], [[Multi-Paxos]], [[Quorum]], [[Proposer-Acceptor
 tags:: paxos, consensus, lamport
 source:: /private/tmp/paxos.md
 ingested:: [[2026-07-09]]
-priority:: 32
+priority:: 31
 
 ## Summary
 The family of Paxos consensus papers: Lamport's 'The Part-Time Parliament' (original), 'Paxos Made Simple' (accessible rewrite), 'Paxos Made Live' (Google's engineering experience), and 'Paxos Made Practical'. Covers single-decree Paxos, Multi-Paxos, and the gap between theory and production implementation.

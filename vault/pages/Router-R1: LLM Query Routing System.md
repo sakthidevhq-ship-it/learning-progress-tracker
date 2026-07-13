@@ -12,7 +12,7 @@ prerequisites:: [[LLM Basics]], [[Model Inference Fundamentals]]
 concepts:: [[Model Routing]], [[Cost Optimization]], [[Quality-Cost Tradeoff]], [[Load Balancing]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 40
+priority:: 39
 
 ## Summary
 Research paper on routing queries to optimal models with cost-quality tradeoffs. Presents system design for automatically selecting appropriate models based on query characteristics and inference constraints.

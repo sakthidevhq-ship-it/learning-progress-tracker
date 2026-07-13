@@ -13,7 +13,7 @@ concepts:: [[Voice Activity Detection]], [[Endpointing]], [[Barge-in Detection]]
 tags:: vad, endpointing
 source:: https://github.com/snakers4/silero-vad
 ingested:: [[2026-07-09]]
-priority:: 31
+priority:: 30
 
 ## Summary
 Documentation and code for Silero VAD, a lightweight, pre-trained voice activity detection model used for endpointing and barge-in detection in real-time speech applications.

@@ -12,7 +12,7 @@ prerequisites:: [[LLM Basics]], [[Prompt Engineering Fundamentals]]
 concepts:: [[Agent Architecture]], [[Planning Strategies]], [[Tool Use]], [[Evaluation]], [[ReAct Pattern]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 39
+priority:: 38
 
 ## Summary
 University course on AI agents and foundation models. Covers agent architecture, planning strategies, tool use patterns, and system evaluation methodologies for building effective autonomous AI agents.

@@ -13,7 +13,7 @@ concepts:: [[Process Profiling]], [[Flame Graphs]], [[dtrace]], [[Instruments]],
 tags:: profiling, macos, debugging
 source:: /private/tmp/proc.md
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 How to find and diagnose resource-hogging processes on macOS. Covers top, ps, Activity Monitor internals, Instruments.app for CPU/memory profiling, dtrace/dtruss for syscall tracing, sample and spindump for hang diagnosis, and how to read flame graphs. Understanding what your system is actually doing when it feels slow.

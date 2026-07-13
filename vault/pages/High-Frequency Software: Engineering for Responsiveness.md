@@ -11,7 +11,7 @@ medium:: article
 concepts:: [[Responsiveness]], [[Latency Budgets]], [[System Design]], [[Performance]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 Philosophy of building responsive software systems with tight latency budgets. Discusses techniques for maintaining system responsiveness, managing latency budgets, and designing for fast user feedback loops.

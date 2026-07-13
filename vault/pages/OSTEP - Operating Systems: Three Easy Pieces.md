@@ -13,7 +13,7 @@ concepts:: [[Process Scheduling]], [[Virtual Memory]], [[Page Tables]], [[File S
 tags:: ostep, book
 source:: https://pages.cs.wisc.edu/~remzi/OSTEP/
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 Free online textbook covering the three core OS concepts: virtualization (processes, address spaces), concurrency (threads, locks, condition variables), and persistence (file systems, devices). Includes homework simulations.

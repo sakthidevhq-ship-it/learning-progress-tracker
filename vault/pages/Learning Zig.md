@@ -13,7 +13,7 @@ concepts:: [[Comptime]], [[Explicit Allocation]], [[C Interop]], [[Error Unions]
 tags:: zig, systems
 source:: https://ziglearn.org
 ingested:: [[2026-07-09]]
-priority:: 28
+priority:: 27
 
 ## Summary
 Introduction to the Zig programming language — a systems language focused on simplicity, explicit allocation, comptime metaprogramming, and C interop. No hidden control flow, no hidden allocations, no garbage collector.

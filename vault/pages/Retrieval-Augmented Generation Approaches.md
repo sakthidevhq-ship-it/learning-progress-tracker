@@ -13,7 +13,7 @@ concepts:: [[Retrieval Augmented Generation]], [[Vector Search]], [[Chunking Str
 tags:: rag, retrieval
 source:: https://github.com/ml-curriculum/rag-approaches
 ingested:: [[2026-07-09]]
-priority:: 35
+priority:: 34
 
 ## Summary
 A survey of RAG architectural patterns for grounding LLM outputs in external knowledge, covering retriever design, chunking strategies, and approaches for combining retrieval with generation.

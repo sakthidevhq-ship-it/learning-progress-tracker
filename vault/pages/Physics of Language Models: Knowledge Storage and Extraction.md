@@ -13,7 +13,7 @@ concepts:: [[Mechanistic Interpretability]], [[Knowledge Storage]], [[Transforme
 tags:: knowledge, internals
 source:: https://arxiv.org/abs/2309.14316
 ingested:: [[2026-07-09]]
-priority:: 39
+priority:: 38
 
 ## Summary
 Part of the Physics of Language Models series, this work uses controlled synthetic experiments to study how transformer language models internally store and retrieve factual knowledge, revealing structure behind memorization and generalization.

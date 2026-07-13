@@ -12,7 +12,7 @@ prerequisites:: [[Database Basics]]
 concepts:: [[Schema Migrations]], [[Lock Timeouts]], [[Zero-Downtime Deploys]], [[Advisory Locks]], [[Database Fundamentals]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 Practical guide to performing safe schema migrations on production Postgres databases. Covers lock timeout strategies, retry patterns, and advisory lock usage for achieving zero-downtime deployments.

@@ -13,7 +13,7 @@ concepts:: [[Logic Gates]], [[ALU Design]], [[CPU Architecture]], [[Assembly Lan
 tags:: nand2tetris, hardware
 source:: https://www.nand2tetris.org
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 Build a complete computer system from NAND gates up: logic gates, ALU, CPU, memory, assembler, VM, compiler, and OS. Each layer builds on the previous, demystifying how software meets hardware.

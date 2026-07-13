@@ -13,7 +13,7 @@ concepts:: [[Counterfactual Regret Minimization]], [[Nash Equilibrium]], [[Bluep
 tags:: pluribus, poker, talk
 source:: https://youtube.com/noam-brown-pluribus
 ingested:: [[2026-07-09]]
-priority:: 33
+priority:: 32
 
 ## Summary
 Talk on building superhuman poker AI. Covers counterfactual regret minimization (CFR), search in imperfect-information games, blueprint strategies, and real-time search. Key insight: in imperfect info games, you can't just look ahead — you need to reason about what opponents believe.

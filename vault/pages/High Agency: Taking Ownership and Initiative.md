@@ -11,7 +11,7 @@ medium:: article
 concepts:: [[High Agency]], [[Ownership]], [[Initiative]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 33
+priority:: 32
 
 ## Summary
 Essay on developing high agency mindset for personal growth. Explores how ownership mentality, proactive problem-solving, and initiative-taking compound into long-term success and capability development.

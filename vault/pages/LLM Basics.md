@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Frameworks]]
 topic:: [[Prompt Engineering]]
-referenced-by:: [[DSPy - Programming Language Models]], [[Survey of LLM-Based Autonomous Agents]], [[Pokemon TCG Agent - LLM Agentic Approach]], [[SmolAgents — Lightweight AI Agent Framework]]
+referenced-by:: [[DSPy - Programming Language Models]], [[Survey of LLM-Based Autonomous Agents]], [[Pokemon TCG Agent - LLM Agentic Approach]], [[SmolAgents — Lightweight AI Agent Framework]], [[DRS & GRS — Fairness Metrics for LLM Recommendations]]
 priority:: 34
 
 ## About

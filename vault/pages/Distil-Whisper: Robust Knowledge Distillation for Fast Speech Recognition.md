@@ -13,7 +13,7 @@ concepts:: [[Knowledge Distillation]], [[Streaming ASR]], [[Chunked Inference]]
 tags:: whisper, streaming
 source:: https://arxiv.org/abs/2311.01899
 ingested:: [[2026-07-09]]
-priority:: 29
+priority:: 28
 
 ## Summary
 Distil-Whisper distills OpenAI's Whisper into a smaller model that runs significantly faster with minimal accuracy loss, and explores chunked inference strategies for streaming ASR with favorable latency-accuracy tradeoffs.

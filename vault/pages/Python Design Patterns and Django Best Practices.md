@@ -13,7 +13,7 @@ concepts:: [[Design Patterns]], [[State Machines]], [[WSGI]], [[Django Migration
 tags:: patterns, python, django
 source:: /private/tmp/patterns.md
 ingested:: [[2026-07-09]]
-priority:: 28
+priority:: 27
 
 ## Summary
 Design patterns applied to Python: factory, observer, strategy, state machines (FSM), decorator. Django-specific patterns: WSGI internals, zero-downtime migrations, cached_property, and deployment with Fabric. Understanding how Django serves requests from WSGI to response.

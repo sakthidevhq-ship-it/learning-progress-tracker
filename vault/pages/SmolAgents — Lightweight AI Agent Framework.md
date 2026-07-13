@@ -13,7 +13,7 @@ concepts:: [[Code Agents]], [[Tool Calling]], [[Multi-Step Reasoning]], [[Lightw
 tags:: agents, tweet
 source:: https://x.com/SergioPaniego/status/2074863503312044499
 ingested:: [[2026-07-09]]
-priority:: 41
+priority:: 40
 
 ## Summary
 Thread on SmolAgents, Hugging Face's lightweight agent framework. Covers building agents with minimal code, tool calling, code-based agents vs JSON-based, multi-step reasoning, and integration with any LLM. Demonstrates the shift from heavy frameworks to simple, composable agent patterns.

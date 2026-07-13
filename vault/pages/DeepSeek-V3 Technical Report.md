@@ -13,7 +13,7 @@ concepts:: [[Mixture of Experts]], [[KV Cache]], [[Multi-Head Attention]], [[Tra
 tags:: deepseek, moe
 source:: https://arxiv.org/abs/2412.19437
 ingested:: [[2026-07-09]]
-priority:: 39
+priority:: 38
 
 ## Summary
 DeepSeek-V3 is a 671B-parameter (37B active) mixture-of-experts language model that introduces Multi-head Latent Attention for KV cache compression and multi-token prediction as an auxiliary training objective, achieving strong performance at relatively low training cost.

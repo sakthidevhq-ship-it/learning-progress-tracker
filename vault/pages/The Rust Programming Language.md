@@ -13,7 +13,7 @@ concepts:: [[Ownership]], [[Borrowing]], [[Lifetimes]], [[Pattern Matching]], [[
 tags:: rust, book
 source:: https://doc.rust-lang.org/book/
 ingested:: [[2026-07-09]]
-priority:: 28
+priority:: 27
 
 ## Summary
 The official Rust book. Covers ownership, borrowing, lifetimes, pattern matching, traits, generics, error handling, concurrency, and unsafe Rust. A systems programming language focused on safety and performance without garbage collection.
