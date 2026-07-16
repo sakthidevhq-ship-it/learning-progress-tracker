@@ -3,8 +3,8 @@ type:: video
 domain:: [[ML/Foundations]]
 topic:: [[Neural Networks]]
 engagement:: implement
-status:: unread
-progress:: 0
+status:: in-progress
+progress:: 25
 complexity:: intermediate
 size:: deep-dive
 medium:: video

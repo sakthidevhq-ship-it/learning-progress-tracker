@@ -1,9 +1,9 @@
-title:: Adam Optimizer
+title:: Regularization
 type:: concept
 status:: stub
 domain:: [[ML/Foundations]]
 topic:: [[Neural Networks]]
-referenced-by:: [[Neural Networks: Foundations]], [[Deep Learning (Goodfellow) — Part II-a: Feedforward Nets, Regularization & Optimization]]
+referenced-by:: [[Deep Learning (Goodfellow) — Part II-a: Feedforward Nets, Regularization & Optimization]]
 priority:: 22
 
 ## About

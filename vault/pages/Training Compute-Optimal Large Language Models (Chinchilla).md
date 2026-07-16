@@ -3,8 +3,8 @@ type:: paper
 domain:: [[ML/Infrastructure]]
 topic:: [[Scaling Laws]]
 engagement:: read
-status:: completed
-progress:: 100
+status:: unread
+progress:: 0
 complexity:: advanced
 size:: medium
 medium:: paper

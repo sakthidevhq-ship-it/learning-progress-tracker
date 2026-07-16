@@ -3,8 +3,8 @@ type:: paper
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
 engagement:: read
-status:: in-progress
-progress:: 40
+status:: unread
+progress:: 0
 complexity:: advanced
 size:: medium
 medium:: paper

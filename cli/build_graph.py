@@ -47,6 +47,7 @@ def parse_page(path):
         "progress": props.get("progress", ""),
         "complexity": props.get("complexity", ""),
         "size": props.get("size", ""),
+        "goal": props.get("goal", ""),
         "priority": props.get("priority", ""),
         "engagement": props.get("engagement", ""),
         "prerequisites": props.get("prerequisites", ""),

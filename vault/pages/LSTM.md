@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Foundations]]
 topic:: [[Sequence Models]]
-referenced-by:: [[Recurrent Neural Networks: RNN, LSTM, GRU]]
+referenced-by:: [[Recurrent Neural Networks: RNN, LSTM, GRU]], [[Deep Learning (Goodfellow) — Part II-b: CNNs, RNNs & Practical Methodology]]
 priority:: 22
 
 ## About

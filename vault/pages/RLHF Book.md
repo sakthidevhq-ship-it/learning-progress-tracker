@@ -3,8 +3,8 @@ type:: docs
 domain:: [[ML/Foundations]]
 topic:: [[RLHF]]
 engagement:: read
-status:: completed
-progress:: 100
+status:: unread
+progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: docs

@@ -3,8 +3,8 @@ type:: paper
 domain:: [[ML/Voice]]
 topic:: [[Speech Models]]
 engagement:: read
-status:: completed
-progress:: 100
+status:: unread
+progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: paper

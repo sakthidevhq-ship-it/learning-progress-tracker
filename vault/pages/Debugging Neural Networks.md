@@ -1,9 +1,9 @@
-title:: Adam Optimizer
+title:: Debugging Neural Networks
 type:: concept
 status:: stub
 domain:: [[ML/Foundations]]
 topic:: [[Neural Networks]]
-referenced-by:: [[Neural Networks: Foundations]], [[Deep Learning (Goodfellow) — Part II-a: Feedforward Nets, Regularization & Optimization]]
+referenced-by:: [[Deep Learning (Goodfellow) — Part II-b: CNNs, RNNs & Practical Methodology]]
 priority:: 22
 
 ## About

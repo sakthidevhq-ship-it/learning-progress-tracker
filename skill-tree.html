@@ -1143,7 +1143,13 @@ allDomains.forEach(d => { const o = document.createElement('option'); o.value = 
 
 window.addEventListener('resize', () => { resize(); init(); requestDraw(); });
 resize();
-document.fonts.ready.then(() => { init(); requestDraw(); });
+document.fonts.ready.then(() => {
+  init();
+  // Persistent goal: a page marked `goal:: true` in the vault auto-activates
+  const gi = resources.findIndex(n => n.goal === 'true' && n._st !== 'done');
+  if (gi >= 0) setGoal(gi);
+  requestDraw();
+});
 </script>
 </body>
 </html>

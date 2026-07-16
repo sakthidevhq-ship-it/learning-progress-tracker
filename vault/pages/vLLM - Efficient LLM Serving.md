@@ -3,8 +3,8 @@ type:: docs
 domain:: [[ML/Infrastructure]]
 topic:: [[LLM Serving]]
 engagement:: read
-status:: in-progress
-progress:: 20
+status:: unread
+progress:: 0
 complexity:: intermediate
 size:: deep-dive
 medium:: docs
