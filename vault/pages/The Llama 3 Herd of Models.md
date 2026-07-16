@@ -13,7 +13,7 @@ concepts:: [[Post-Training]], [[Direct Preference Optimization]], [[Supervised F
 tags:: llama3, post-training
 source:: https://arxiv.org/abs/2407.21783
 ingested:: [[2026-07-09]]
-priority:: 35
+priority:: 34
 
 ## Summary
 Meta's Llama 3.1 paper details the full training recipe for the Llama 3 herd, including pretraining data curation, architecture choices, and a multi-stage post-training pipeline combining supervised fine-tuning, rejection sampling, and DPO.

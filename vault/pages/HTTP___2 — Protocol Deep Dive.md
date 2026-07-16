@@ -13,7 +13,7 @@ concepts:: [[HTTP/2]], [[Multiplexing]], [[Binary Framing]], [[Header Compressio
 tags:: http2, web
 source:: /private/tmp/http2.md
 ingested:: [[2026-07-09]]
-priority:: 28
+priority:: 27
 
 ## Summary
 Understanding HTTP/2: multiplexing, server push, header compression (HPACK), binary framing, stream prioritization. How it solves head-of-line blocking, reduces latency, and changes best practices for web performance (no more domain sharding, spriting, or concatenation).

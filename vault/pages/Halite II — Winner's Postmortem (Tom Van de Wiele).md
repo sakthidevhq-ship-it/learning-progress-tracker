@@ -13,7 +13,7 @@ concepts:: [[Heuristic Design]], [[Simulation-Based Evaluation]], [[Meta-Game St
 tags:: halite, competition
 source:: https://tomvandewiele.com/halite2
 ingested:: [[2026-07-09]]
-priority:: 30
+priority:: 29
 
 ## Summary
 Detailed writeup of the winning strategy for Halite II competition. Covers heuristic design, bot architecture, simulation-based evaluation, and the meta-game of competing against evolving opponents on a live leaderboard.

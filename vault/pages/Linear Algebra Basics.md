@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
-referenced-by:: [[Attention Is All You Need]]
+referenced-by:: [[Attention Is All You Need]], [[Matryoshka Representation Learning]]
 priority:: 35
 
 ## About

@@ -13,7 +13,7 @@ concepts:: [[Positional Encoding]], [[Multi-Head Attention]], [[Grouped Query At
 tags:: transformers, positional-encoding, mha
 source:: https://github.com/ml-curriculum/transformer-deep-dive
 ingested:: [[2026-07-09]]
-priority:: 39
+priority:: 38
 
 ## Summary
 An in-depth curriculum module on modern Transformer internals: positional encoding schemes (RoPE, ALiBi), attention variants (MHA, MQA, GQA), FlashAttention, feed-forward network improvements, and how these pieces compose in production LLM architectures.

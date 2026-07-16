@@ -11,3 +11,4 @@ type:: domain
 - [[Sequence Models]]
 - [[Philosophy]]
 - [[Interpretability]]
+- [[Representation Learning]]
