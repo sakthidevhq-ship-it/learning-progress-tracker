@@ -13,7 +13,7 @@ concepts:: [[Streaming Speech Models]], [[Neural Audio Codec]], [[Inner Monologu
 tags:: moshi, voice
 source:: https://arxiv.org/abs/2410.00037
 ingested:: [[2026-07-09]]
-priority:: 27
+priority:: 26
 
 ## Summary
 The Moshi paper introduces a full-duplex spoken dialogue model that jointly models an inner text monologue alongside audio tokens from a neural codec, enabling low-latency, natural-sounding real-time conversation without a separate ASR/TTS pipeline.

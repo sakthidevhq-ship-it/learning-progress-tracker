@@ -13,7 +13,7 @@ concepts:: [[Transformer Architecture]], [[Self-Attention]], [[Multi-Head Attent
 tags:: transformers, foundational
 source:: https://arxiv.org/abs/1706.03762
 ingested:: [[2026-07-08]]
-priority:: 42
+priority:: 41
 goal:: true
 
 ## Summary

@@ -13,7 +13,7 @@ concepts:: [[Gossip Protocol]], [[Consensus]], [[CRDTs]], [[Linearizability]], [
 tags:: gossip-glomers, distributed
 source:: https://fly.io/dist-sys/
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 Fly.io's hands-on distributed systems challenges using Maelstrom. Build increasingly complex distributed systems: echo, unique ID generation, broadcast, counter, Kafka-style log, transactions. Tests with fault injection and network partitions.

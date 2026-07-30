@@ -13,7 +13,7 @@ concepts:: [[Matryoshka Embeddings]], [[Nested Representations]], [[Adaptive Ret
 tags:: embeddings, matryoshka, retrieval
 source:: https://arxiv.org/abs/2205.13147
 ingested:: [[2026-07-16]]
-priority:: 26
+priority:: 25
 
 ## Summary
 Introduces Matryoshka Representation Learning (MRL): training embeddings so that nested prefixes of a single vector are themselves valid, high-quality representations at multiple granularities — like nesting dolls. One 2048-d embedding contains usable 8, 16, ... 1024-d embeddings, letting you trade accuracy for compute/storage at inference time without retraining. Powers adaptive retrieval (coarse shortlist with tiny prefixes, rerank with full vectors) and is used in production embedding APIs (e.g. OpenAI text-embedding-3 dimension truncation).

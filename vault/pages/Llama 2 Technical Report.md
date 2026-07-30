@@ -13,7 +13,7 @@ concepts:: [[Grouped Query Attention]], [[RLHF]], [[Ghost Attention]], [[Rejecti
 tags:: llama2, meta
 source:: https://arxiv.org/abs/2307.09288
 ingested:: [[2026-07-09]]
-priority:: 38
+priority:: 37
 
 ## Summary
 Meta's technical report on Llama 2, covering pretraining at scale, supervised fine-tuning, RLHF with rejection sampling, Ghost Attention for multi-turn consistency, and safety evaluation. Trained on 2T tokens with context length of 4096.

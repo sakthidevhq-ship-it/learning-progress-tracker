@@ -12,7 +12,7 @@ prerequisites:: [[Transformer Architecture]], [[Self-Attention]], [[Multi-Head A
 concepts:: [[Masked Language Modeling]], [[Bidirectional Context]], [[Pre-training]], [[Fine-tuning]], [[Transformer Architecture]], [[Self-Attention]], [[Multi-Head Attention]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 31
+priority:: 30
 
 ## Summary
 Devlin et al.'s BERT paper introducing bidirectional pre-training for language understanding. Demonstrates masked language modeling and demonstrates state-of-the-art results on diverse NLP benchmarks through fine-tuning.

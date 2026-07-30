@@ -13,7 +13,7 @@ concepts:: [[Mechanistic Interpretability]], [[Chain of Thought]], [[Activation 
 tags:: cot, interpretability, mechanistic
 source:: https://arxiv.org/abs/2402.18312
 ingested:: [[2026-07-14]]
-priority:: 26
+priority:: 25
 
 ## Summary
 Mechanistic interpretability study of how LLMs actually perform chain-of-thought reasoning. Probes internal activations during multi-step fictional-ontology reasoning to locate where and how the model decomposes tasks, finding that CoT emerges from parallel processing pathways rather than strictly sequential computation — the model uses distinct functional components: an early copying/induction circuit, mid-layer decision heads, and later answer-writing heads operating in parallel across reasoning steps.

@@ -12,7 +12,7 @@ prerequisites:: [[Neural Network Fundamentals]], [[Audio Processing Basics]]
 concepts:: [[STT Learning Loop]], [[Active Learning]], [[Error Correction]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 28
+priority:: 27
 
 ## Summary
 Research on creating feedback loops in speech-to-text systems for continuous improvement. Discusses active learning approaches and error correction mechanisms that enable ASR models to improve from real-world usage.

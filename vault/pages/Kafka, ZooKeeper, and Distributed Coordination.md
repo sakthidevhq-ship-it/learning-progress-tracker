@@ -13,7 +13,7 @@ concepts:: [[Log-Structured Storage]], [[Atomic Broadcast]], [[Distributed Coord
 tags:: kafka, zookeeper, atomic-broadcast
 source:: /private/tmp/kafka-dist.md
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 The distributed systems infrastructure stack: Kafka's log-based message broker with ZooKeeper's atomic broadcast protocol (Zab), Omega's flexible cluster scheduling, and Thialfi's client notification service. Covers how these systems achieve high-throughput, fault-tolerant coordination at internet scale.

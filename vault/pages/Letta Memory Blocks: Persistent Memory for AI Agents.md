@@ -12,7 +12,7 @@ prerequisites:: [[LLM Basics]], [[Agent Architecture]]
 concepts:: [[Agent Memory Systems]], [[Memory Blocks]], [[Stateful Agents]], [[Long-Term Memory]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 35
+priority:: 34
 
 ## Summary
 Guide to implementing persistent memory systems in LLM agents using memory blocks. Explains how to build stateful agents with long-term memory capabilities, enabling agents to maintain context and learn across multiple conversations.

@@ -12,7 +12,7 @@ prerequisites:: [[Neural Network Fundamentals]], [[RNN basics]]
 concepts:: [[Attention Mechanisms]], [[Encoder-Decoder]], [[Alignment]], [[Self-Attention]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 29
+priority:: 28
 
 ## Summary
 Bahdanau et al.'s landmark paper introducing the attention mechanism. Demonstrates how attention enables seq2seq models to focus on relevant input parts, dramatically improving translation quality and enabling longer sequences.

@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
-referenced-by:: [[Gemma 3 Technical Report]], [[FlashAttention - Fast and Memory-Efficient Attention]], [[How to Think Step-by-Step: A Mechanistic Understanding of Chain-of-Thought Reasoning]]
+referenced-by:: [[Gemma 3 Technical Report]], [[FlashAttention - Fast and Memory-Efficient Attention]], [[How to Think Step-by-Step: A Mechanistic Understanding of Chain-of-Thought Reasoning]], [[Don't Quant the KV Cache — Local LLM Field Notes]]
 priority:: 35
 
 ## About

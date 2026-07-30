@@ -13,7 +13,7 @@ concepts:: [[Distributed Self-Play]], [[Experience Replay]], [[Centralized Train
 tags:: handyrl, self-play
 source:: https://github.com/DeNA/HandyRL
 ingested:: [[2026-07-09]]
-priority:: 30
+priority:: 29
 
 ## Summary
 DeNA's framework for distributed reinforcement learning with self-play. Clean architecture for training game-playing agents across multiple workers. Key patterns: centralized training with distributed rollout workers, experience replay, and parallel environment stepping.

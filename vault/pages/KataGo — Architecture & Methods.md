@@ -13,7 +13,7 @@ concepts:: [[Monte Carlo Tree Search]], [[Auxiliary Training Targets]], [[Owners
 tags:: katago, go
 source:: https://github.com/lightvector/KataGo
 ingested:: [[2026-07-09]]
-priority:: 28
+priority:: 27
 
 ## Summary
 Deep dive into KataGo, one of the strongest open-source Go engines. The KataGoMethods.md document explains innovations: auxiliary policy targets, ownership prediction, dynamic komi, playout cap randomization. Achieves superhuman play with 50x less compute than AlphaZero.

@@ -13,7 +13,7 @@ concepts:: [[Non-Autoregressive Generation]], [[Neural Audio Codec]], [[Parallel
 tags:: soundstorm, tts
 source:: https://arxiv.org/abs/2305.09636
 ingested:: [[2026-07-09]]
-priority:: 26
+priority:: 25
 
 ## Summary
 SoundStorm introduces a non-autoregressive, parallel decoding scheme for generating audio tokens from a neural codec, using an iterative masked-token approach that produces long-form audio far faster than autoregressive TTS models.

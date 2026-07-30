@@ -13,7 +13,7 @@ concepts:: [[Linux Embedded Systems]], [[RetroArch]], [[Emulation]], [[ARM Archi
 tags:: arkos, retro
 source:: https://github.com/ArkOS-Project
 ingested:: [[2026-07-09]]
-priority:: 30
+priority:: 29
 
 ## Summary
 Hands-on exploration of ArkOS, a custom Linux distribution for retro gaming handhelds (RG35XX, R36S, etc.). Covers flashing, configuration, emulator setup, RetroArch tuning, custom themes, and PortMaster for native Linux game ports.

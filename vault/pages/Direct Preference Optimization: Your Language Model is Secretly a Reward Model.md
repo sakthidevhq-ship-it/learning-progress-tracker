@@ -13,7 +13,7 @@ concepts:: [[Direct Preference Optimization]], [[RLHF]], [[Reward Models]]
 tags:: dpo
 source:: https://arxiv.org/abs/2305.18290
 ingested:: [[2026-07-09]]
-priority:: 27
+priority:: 26
 
 ## Summary
 The DPO paper shows that the RLHF objective can be reformulated as a simple classification loss directly over a language model's policy, eliminating the need for a separate reward model and unstable RL training like PPO.

@@ -13,7 +13,7 @@ concepts:: [[PagedAttention]], [[Continuous Batching]], [[Speculative Decoding]]
 tags:: vllm, serving
 source:: https://docs.vllm.ai/en/latest/
 ingested:: [[2026-07-08]]
-priority:: 42
+priority:: 41
 
 ## Summary
 Documentation and architecture guide for vLLM, the high-throughput LLM serving engine. Covers PagedAttention (its core innovation), continuous batching, speculative decoding, prefix caching, multi-GPU support via tensor/pipeline parallelism, and integration with HuggingFace models.

@@ -12,7 +12,7 @@ concepts:: [[Linear Algebra Basics]], [[Probability Theory]], [[Information Theo
 tags:: goodfellow, book
 source:: https://www.deeplearningbook.org/contents/part_basics.html
 ingested:: [[2026-07-16]]
-priority:: 31
+priority:: 30
 
 ## Summary
 Chapters 2-5 of the Goodfellow/Bengio/Courville book: linear algebra (vectors, matrices, eigendecomposition, SVD), probability and information theory, numerical computation (gradient-based optimization, conditioning), and machine learning fundamentals (capacity, over/underfitting, MLE, bias-variance). The mathematical bedrock everything else in deep learning stands on.

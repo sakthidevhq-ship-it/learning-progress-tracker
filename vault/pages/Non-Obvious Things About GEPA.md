@@ -12,7 +12,7 @@ prerequisites:: [[LLM Basics]], [[Prompt Engineering Fundamentals]]
 concepts:: [[Prompt Optimization]], [[Validation Composition]], [[Test-Driven Prompting]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 Exploration of validation composition and per-example frontiers in test-driven prompt optimization. Discusses how to structure prompt optimization as a composition of validators and leverage test-driven approaches to find better prompts incrementally.

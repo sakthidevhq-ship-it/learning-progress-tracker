@@ -13,7 +13,7 @@ concepts:: [[Perceptrons]], [[Backpropagation]], [[Activation Functions]], [[Gra
 tags:: nn, backprop, fundamentals
 source:: https://github.com/ml-curriculum/neural-networks
 ingested:: [[2026-07-09]]
-priority:: 31
+priority:: 30
 
 ## Summary
 A curriculum module covering the building blocks of neural networks — perceptrons, forward and backward propagation, activation functions, and optimization algorithms like SGD and Adam. Includes worked derivations of backprop through simple architectures.

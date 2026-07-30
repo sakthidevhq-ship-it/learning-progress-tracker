@@ -13,7 +13,7 @@ concepts:: [[Oracle Guiding]], [[Global Reward Prediction]], [[Imperfect Informa
 tags:: suphx, mahjong
 source:: https://arxiv.org/abs/2003.13590
 ingested:: [[2026-07-09]]
-priority:: 28
+priority:: 27
 
 ## Summary
 Microsoft Research's Suphx achieves superhuman performance in Mahjong on the Tenhou platform. Notable for handling a game with imperfect information, stochastic elements, and 4 players. Uses oracle guiding and global reward prediction.

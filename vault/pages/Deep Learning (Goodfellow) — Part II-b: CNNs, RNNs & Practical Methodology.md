@@ -13,7 +13,7 @@ concepts:: [[Convolutional Networks]], [[RNN Fundamentals]], [[LSTM]], [[BPTT]],
 tags:: goodfellow, book
 source:: https://www.deeplearningbook.org/contents/convnets.html
 ingested:: [[2026-07-16]]
-priority:: 28
+priority:: 27
 
 ## Summary
 Chapters 9-12: convolutional networks (convolution, pooling, parameter sharing), sequence modeling with RNNs/LSTMs (BPTT, gating, long-term dependencies), practical methodology (performance metrics, baselines, hyperparameter tuning, debugging strategies) and applications. The architectures chapter-set that preceded transformers.

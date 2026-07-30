@@ -13,7 +13,7 @@ concepts:: [[Transformer Architecture]], [[Fine-Tuning]], [[Quantization]], [[Di
 tags:: huggingface, videos
 source:: https://www.youtube.com/@HuggingFace/videos
 ingested:: [[2026-07-09]]
-priority:: 36
+priority:: 35
 
 ## Summary
 Hugging Face's official YouTube channel covering transformers, diffusion models, fine-tuning, RLHF, quantization, inference optimization, and new model releases. Mix of deep technical talks, hands-on tutorials, and community demos. Good for staying current on the open-source ML ecosystem.

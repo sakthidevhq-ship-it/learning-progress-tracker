@@ -13,7 +13,7 @@ concepts:: [[Raft Consensus]], [[Leader Election]], [[Log Replication]], [[Repli
 tags:: raft, consensus
 source:: /private/tmp/raft.md
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 The Raft consensus algorithm, designed for understandability. Covers leader election, log replication, safety guarantees, membership changes, and log compaction. The go-to alternative to Paxos for building replicated state machines. Used in etcd, CockroachDB, and TiKV.

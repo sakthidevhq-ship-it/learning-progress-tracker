@@ -13,7 +13,7 @@ concepts:: [[Strategic Reasoning]], [[Natural Language Negotiation]], [[Planning
 tags:: cicero, diplomacy, talk
 source:: https://youtube.com/noam-brown-cicero
 ingested:: [[2026-07-09]]
-priority:: 33
+priority:: 32
 
 ## Summary
 Talk on CICERO, the first AI to achieve human-level play in Diplomacy — a game requiring natural language negotiation. Bridges game AI and LLM reasoning: uses a language model for dialogue and a planning algorithm for strategy. Shows how LLMs can ground reasoning in strategic objectives.

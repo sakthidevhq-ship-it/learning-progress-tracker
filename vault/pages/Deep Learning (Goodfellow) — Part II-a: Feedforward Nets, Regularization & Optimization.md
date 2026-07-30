@@ -13,7 +13,7 @@ concepts:: [[Neural Network Fundamentals]], [[Backpropagation]], [[Regularizatio
 tags:: goodfellow, book
 source:: https://www.deeplearningbook.org/contents/mlp.html
 ingested:: [[2026-07-16]]
-priority:: 30
+priority:: 29
 
 ## Summary
 Chapters 6-8: deep feedforward networks (architecture, hidden units, backpropagation derived properly), regularization (L1/L2, dropout, early stopping, data augmentation), and optimization for training (SGD variants, momentum, adaptive methods, batch norm, initialization strategies). The core of how neural networks are actually trained.

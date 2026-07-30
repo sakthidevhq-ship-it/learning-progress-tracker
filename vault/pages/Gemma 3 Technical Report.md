@@ -13,7 +13,7 @@ concepts:: [[Mixture of Experts]], [[RLHF]], [[Distillation]], [[Multi-Modal Mod
 tags:: gemma, google
 source:: https://arxiv.org/abs/2503.19786
 ingested:: [[2026-07-08]]
-priority:: 38
+priority:: 37
 
 ## Summary
 Google DeepMind's technical report on the Gemma 3 family of models. Covers the architecture (dense and MoE variants), training methodology, RLHF alignment, multimodal capabilities, and benchmark results. Introduces ShieldGemma for safety filtering and RecurrentGemma for efficient inference.

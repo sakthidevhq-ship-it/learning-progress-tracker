@@ -11,7 +11,7 @@ medium:: article
 concepts:: [[Scaling Hypothesis]], [[Compute vs Engineering]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 32
+priority:: 31
 
 ## Summary
 Richard Sutton's influential essay arguing that in AI research, methods exploiting compute and data scale consistently outperform hand-crafted domain-specific solutions. Advocates for general learning algorithms over hardcoded knowledge.

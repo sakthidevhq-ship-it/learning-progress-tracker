@@ -13,7 +13,7 @@ concepts:: [[RLHF]], [[Reward Models]], [[PPO]], [[Direct Preference Optimizatio
 tags:: rlhf, dpo, book
 source:: https://rlhfbook.com
 ingested:: [[2026-07-09]]
-priority:: 27
+priority:: 26
 
 ## Summary
 Nathan Lambert's comprehensive book on reinforcement learning from human feedback, covering the full post-training pipeline: reward modeling, PPO, and Direct Preference Optimization as a simpler alternative.

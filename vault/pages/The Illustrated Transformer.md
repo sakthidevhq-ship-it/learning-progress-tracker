@@ -13,7 +13,7 @@ concepts:: [[Self-Attention]], [[Multi-Head Attention]], [[Positional Encoding]]
 tags:: transformers, visual
 source:: https://jalammar.github.io/illustrated-transformer/
 ingested:: [[2026-07-09]]
-priority:: 36
+priority:: 35
 
 ## Summary
 Jay Alammar's widely-used visual walkthrough of the Transformer architecture, breaking down self-attention, multi-head attention, positional encoding, and the encoder-decoder stack with intuitive diagrams.

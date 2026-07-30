@@ -13,7 +13,7 @@ concepts:: [[ReAct Pattern]], [[Chain of Thought]], [[Tool Use]], [[Thought-Acti
 tags:: react, reasoning
 source:: https://arxiv.org/abs/2210.11416
 ingested:: [[2026-07-09]]
-priority:: 39
+priority:: 38
 
 ## Summary
 The foundational paper on interleaving reasoning traces and actions in LLMs. Shows that letting models think step-by-step AND take actions (search, lookup) outperforms either reasoning or acting alone. Introduced the Thought-Action-Observation loop.

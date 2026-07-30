@@ -13,7 +13,7 @@ concepts:: [[Event Streaming]], [[Thread-Per-Core]], [[Raft Consensus]], [[Log-S
 tags:: kafka, streaming
 source:: https://github.com/redpanda-data/redpanda
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 Exploration of Redpanda, a Kafka-compatible streaming platform written in C++ using Seastar. Covers its architecture: thread-per-core design, no JVM/ZooKeeper dependency, Raft for replication, and how it achieves lower latency than Kafka.

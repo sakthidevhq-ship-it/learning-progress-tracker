@@ -12,7 +12,7 @@ concepts:: [[Twelve-Factor App]], [[Config Management]], [[Stateless Processes]]
 tags:: 12factor, saas, heroku
 source:: /private/tmp/12factor.md
 ingested:: [[2026-07-09]]
-priority:: 36
+priority:: 35
 
 ## Summary
 Heroku's methodology for building SaaS applications. Twelve principles: codebase, dependencies, config, backing services, build/release/run, processes, port binding, concurrency, disposability, dev/prod parity, logs, admin processes. The foundation of modern cloud-native application design.

@@ -13,7 +13,7 @@ concepts:: [[Replication]], [[Partitioning]], [[Consistency Models]], [[Stream P
 tags:: book, ddia
 source:: https://dataintensive.net
 ingested:: [[2026-07-09]]
-priority:: 34
+priority:: 33
 
 ## Summary
 Martin Kleppmann's comprehensive guide to the principles and practices behind reliable, scalable, and maintainable data systems. Covers data models, storage engines, encoding, replication, partitioning, transactions, consistency, batch/stream processing, and the future of data systems.

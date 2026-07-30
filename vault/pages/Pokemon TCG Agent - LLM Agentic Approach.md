@@ -13,7 +13,7 @@ concepts:: [[Game State Representation]], [[Action Space Design]], [[Multi-Step 
 tags:: pokemon, agents
 source:: https://github.com/pokemon-tcg-llm-agent
 ingested:: [[2026-07-08]]
-priority:: 36
+priority:: 35
 
 ## Summary
 A project exploring building an LLM-powered agent that can play the Pokemon Trading Card Game. Involves game state representation, action space design, multi-step reasoning for card combos, and opponent modeling. Demonstrates practical agentic patterns: tool use, memory, planning, and evaluation.

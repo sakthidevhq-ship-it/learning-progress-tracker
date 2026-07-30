@@ -13,7 +13,7 @@ concepts:: [[Neural Audio Codec]], [[Zero-Shot Voice Cloning]], [[LLM Basics]]
 tags:: vall-e, tts
 source:: https://arxiv.org/abs/2301.02111
 ingested:: [[2026-07-09]]
-priority:: 27
+priority:: 26
 
 ## Summary
 VALL-E treats text-to-speech as a conditional language modeling problem over discrete neural codec tokens, enabling zero-shot voice cloning from a short audio prompt without speaker-specific fine-tuning.
