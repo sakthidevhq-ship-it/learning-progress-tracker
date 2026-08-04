@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[Game AI]]
 topic:: [[Self-Play Systems]]
-referenced-by:: [[KataGo — Accelerating Self-Play Learning in Go]], [[KataGo — Architecture & Methods]]
+referenced-by:: [[KataGo — Accelerating Self-Play Learning in Go]], [[KataGo — Architecture & Methods]], [[Tribes — Strategy Game AI Framework (Polytopia)]]
 priority:: 25
 
 ## About
