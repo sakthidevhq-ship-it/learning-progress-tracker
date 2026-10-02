@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Foundations]]
 topic:: [[Mathematics]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: beginner
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Calculus]], [[Linear Algebra]], [[Probability]], [[Gradient Descent
 tags:: math, calculus, linear-algebra
 source:: https://github.com/ml-curriculum/math-foundations
 ingested:: [[2026-07-09]]
-priority:: 29
+state:: collected
 
 ## Summary
 A curriculum module reviewing the calculus, linear algebra, and probability needed to understand ML algorithms, including gradients, matrix operations, and computational graphs for automatic differentiation.
@@ -26,4 +24,4 @@ A curriculum module reviewing the calculus, linear algebra, and probability need
 ## Prerequisites
 - [[Linear Algebra Basics]]
 
-## My Notes
+## Notes

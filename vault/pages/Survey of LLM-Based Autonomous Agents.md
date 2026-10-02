@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Agents]]
 topic:: [[Agentic Systems]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: deep-dive
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Agent Architecture]], [[Agent Memory Systems]], [[Planning Strategi
 tags:: agents, survey
 source:: https://arxiv.org/abs/2309.06180
 ingested:: [[2026-07-08]]
-priority:: 40
+state:: collected
 
 ## Summary
 A comprehensive survey covering the landscape of LLM-based autonomous agents. Categorizes agent architectures by their core components: profiling, memory, planning, and action modules. Reviews applications across software engineering, scientific research, and real-world interaction. Discusses evaluation frameworks and open challenges.
@@ -27,4 +25,4 @@ A comprehensive survey covering the landscape of LLM-based autonomous agents. Ca
 - [[LLM Basics]]
 - [[Prompt Engineering Fundamentals]]
 
-## My Notes
+## Notes

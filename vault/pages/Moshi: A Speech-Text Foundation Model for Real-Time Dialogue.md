@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Voice]]
 topic:: [[Speech Models]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Streaming Speech Models]], [[Neural Audio Codec]], [[Inner Monologu
 tags:: moshi, voice
 source:: https://arxiv.org/abs/2410.00037
 ingested:: [[2026-07-09]]
-priority:: 25
+state:: collected
 
 ## Summary
 The Moshi paper introduces a full-duplex spoken dialogue model that jointly models an inner text monologue alongside audio tokens from a neural codec, enabling low-latency, natural-sounding real-time conversation without a separate ASR/TTS pipeline.
@@ -27,4 +25,4 @@ The Moshi paper introduces a full-duplex spoken dialogue model that jointly mode
 - [[Transformer Architecture]]
 - [[LLM Basics]]
 
-## My Notes
+## Notes

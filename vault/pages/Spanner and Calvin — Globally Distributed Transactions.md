@@ -3,8 +3,6 @@ type:: paper
 domain:: [[Systems]]
 topic:: [[Distributed Databases]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[External Consistency]], [[TrueTime]], [[Deterministic Transactions]
 tags:: spanner, google, transactions
 source:: /private/tmp/spanner.md
 ingested:: [[2026-07-09]]
-priority:: 30
+state:: collected
 
 ## Summary
 Google Spanner's globally distributed database with external consistency via TrueTime (GPS + atomic clocks), and Calvin's deterministic transaction ordering as an alternative approach. Covers the spectrum from strong consistency (Spanner) to deterministic execution (Calvin) to multi-datacenter consistency (MDCC).
@@ -29,4 +27,4 @@ Google Spanner's globally distributed database with external consistency via Tru
 - [[Transactions]]
 - [[Networking Fundamentals]]
 
-## My Notes
+## Notes

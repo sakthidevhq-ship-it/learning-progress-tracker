@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Agents]]
 topic:: [[Agent Memory]]
 engagement:: implement
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -12,7 +10,7 @@ prerequisites:: [[LLM Basics]], [[Agent Architecture]]
 concepts:: [[Agent Memory Systems]], [[Memory Blocks]], [[Stateful Agents]], [[Long-Term Memory]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 34
+state:: collected
 
 ## Summary
 Guide to implementing persistent memory systems in LLM agents using memory blocks. Explains how to build stateful agents with long-term memory capabilities, enabling agents to maintain context and learn across multiple conversations.
@@ -26,4 +24,4 @@ Guide to implementing persistent memory systems in LLM agents using memory block
 - [[LLM Basics]]
 - [[Agent Architecture]]
 
-## My Notes
+## Notes

@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
 engagement:: implement
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Chain-of-Thought]], [[Reinforcement Learning Basics]], [[LLM Basics
 tags:: raschka, reasoning
 source:: https://www.manning.com/books/build-a-reasoning-model-from-scratch
 ingested:: [[2026-07-09]]
-priority:: 39
+state:: collected
 
 ## Summary
 Sebastian Raschka's follow-up book focused on implementing reasoning-capable language models from scratch, covering techniques like chain-of-thought training, reinforcement learning for reasoning, and inference-time compute scaling.
@@ -28,4 +26,4 @@ Sebastian Raschka's follow-up book focused on implementing reasoning-capable lan
 - [[Reinforcement Learning Basics]]
 - [[Transformer Architecture]]
 
-## My Notes
+## Notes

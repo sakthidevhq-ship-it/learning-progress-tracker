@@ -3,8 +3,6 @@ type:: video
 domain:: [[ML/Infrastructure]]
 topic:: [[Inference Optimization]]
 engagement:: background
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: video
@@ -13,7 +11,7 @@ concepts:: [[Continuous Batching]], [[PagedAttention]], [[KV Cache]], [[GPU Memo
 tags:: video, inference
 source:: https://www.youtube.com/watch?v=HN8aSSDQlEU
 ingested:: [[2026-07-08]]
-priority:: 44
+state:: collected
 
 ## Summary
 A comprehensive video walkthrough of how modern GPU inference pipelines work — from batching strategies to KV cache management, continuous batching, and PagedAttention. Covers the full stack from model weights to serving requests at scale.
@@ -27,4 +25,4 @@ A comprehensive video walkthrough of how modern GPU inference pipelines work —
 - [[Transformer Architecture]]
 - [[GPU Computing Basics]]
 
-## My Notes
+## Notes

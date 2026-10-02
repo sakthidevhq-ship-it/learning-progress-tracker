@@ -3,8 +3,6 @@ type:: docs
 domain:: [[Systems]]
 topic:: [[Computer Architecture]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: deep-dive
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Memory Hierarchy]], [[Cache Architecture]], [[Virtual Memory]], [[x
 tags:: csapp, cmu, book
 source:: /private/tmp/csapp.md
 ingested:: [[2026-07-09]]
-priority:: 32
+state:: collected
 
 ## Summary
 CMU's comprehensive systems textbook covering the entire stack a programmer interacts with: data representation, machine-level programming (x86-64), processor architecture, memory hierarchy (caches, virtual memory), linking, exceptional control flow, system-level I/O, network programming, and concurrency. The canonical systems book.
@@ -27,4 +25,4 @@ CMU's comprehensive systems textbook covering the entire stack a programmer inte
 - [[C Basics]]
 - [[Data Structures]]
 
-## My Notes
+## Notes

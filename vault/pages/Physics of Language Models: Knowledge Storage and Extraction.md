@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Mechanistic Interpretability]], [[Knowledge Storage]], [[Transforme
 tags:: knowledge, internals
 source:: https://arxiv.org/abs/2309.14316
 ingested:: [[2026-07-09]]
-priority:: 37
+state:: collected
 
 ## Summary
 Part of the Physics of Language Models series, this work uses controlled synthetic experiments to study how transformer language models internally store and retrieve factual knowledge, revealing structure behind memorization and generalization.
@@ -27,4 +25,4 @@ Part of the Physics of Language Models series, this work uses controlled synthet
 - [[Transformer Architecture]]
 - [[LLM Basics]]
 
-## My Notes
+## Notes

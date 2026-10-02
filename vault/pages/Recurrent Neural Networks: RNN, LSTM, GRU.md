@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Foundations]]
 topic:: [[Sequence Models]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Simple RNN]], [[LSTM]], [[GRU]], [[Backpropagation Through Time]], 
 tags:: rnn, lstm, gru
 source:: https://github.com/ml-curriculum/rnns
 ingested:: [[2026-07-09]]
-priority:: 27
+state:: collected
 
 ## Summary
 A curriculum module on sequence modeling with recurrent architectures, covering vanilla RNNs, LSTM and GRU gating mechanisms, backpropagation through time, and the vanishing/exploding gradient problem.
@@ -27,4 +25,4 @@ A curriculum module on sequence modeling with recurrent architectures, covering 
 - [[Neural Network Fundamentals]]
 - [[Linear Algebra Basics]]
 
-## My Notes
+## Notes

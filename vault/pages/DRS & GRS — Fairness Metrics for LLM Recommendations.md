@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Evaluation]]
 topic:: [[Fairness Metrics]]
 engagement:: implement
-status:: completed
-progress:: 100
 complexity:: advanced
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Fairness Evaluation]], [[Demographic Representation Score]], [[Geog
 tags:: fairness, metrics, personal-work
 source:: /private/tmp/drs-grs.md
 ingested:: [[2026-07-14]]
-priority:: 25
+state:: collected
 
 ## Summary
 Personal research work: developed two novel metrics for evaluating fairness in LLM-generated recommendations. Demographic Representation Score (DRS) measures how equitably recommendations represent demographic groups; Geographic Representation Score (GRS) measures geographic distribution bias. Together they quantify whether an LLM's recommendation outputs systematically over- or under-represent populations, enabling measurable fairness evaluation instead of anecdotal spot-checks.
@@ -27,4 +25,4 @@ Personal research work: developed two novel metrics for evaluating fairness in L
 - [[LLM Basics]]
 - [[Prompt Engineering Fundamentals]]
 
-## My Notes
+## Notes

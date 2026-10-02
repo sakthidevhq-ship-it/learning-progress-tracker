@@ -3,8 +3,6 @@ type:: article
 domain:: [[Networking]]
 topic:: [[Telecom Protocols]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: deep-dive
 medium:: article
@@ -13,7 +11,7 @@ concepts:: [[SIP Protocol]], [[SDP Negotiation]], [[RTP Media]], [[PSTN Intercon
 tags:: sip, pstn, voip
 source:: https://tools.ietf.org/html/rfc3261
 ingested:: [[2026-07-09]]
-priority:: 26
+state:: collected
 
 ## Summary
 Understanding Session Initiation Protocol (SIP) and the Public Switched Telephone Network (PSTN) at the network level. Covers SIP message flow, registration, call setup/teardown, SDP negotiation, RTP media, PSTN interconnects via SIP trunking, codec negotiation, and NAT traversal challenges.
@@ -28,4 +26,4 @@ Understanding Session Initiation Protocol (SIP) and the Public Switched Telephon
 - [[TCP/IP Basics]]
 - [[UDP]]
 
-## My Notes
+## Notes

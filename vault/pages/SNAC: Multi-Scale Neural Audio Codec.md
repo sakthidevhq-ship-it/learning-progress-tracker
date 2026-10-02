@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Voice]]
 topic:: [[Audio Codecs]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: quick-read
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Neural Audio Codec]], [[Residual Vector Quantization]], [[Multi-Sca
 tags:: snac, codec
 source:: https://arxiv.org/abs/2410.02981
 ingested:: [[2026-07-09]]
-priority:: 27
+state:: collected
 
 ## Summary
 SNAC introduces a neural audio codec that encodes speech into hierarchical, multi-scale discrete tokens at different temporal resolutions, improving compression efficiency and downstream generative modeling compared to flat residual vector quantization codecs.
@@ -26,4 +24,4 @@ SNAC introduces a neural audio codec that encodes speech into hierarchical, mult
 ## Prerequisites
 - [[Neural Network Fundamentals]]
 
-## My Notes
+## Notes

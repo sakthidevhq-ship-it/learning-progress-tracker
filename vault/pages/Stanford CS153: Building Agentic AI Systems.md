@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Agents]]
 topic:: [[Agentic Systems]]
 engagement:: implement
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: docs
@@ -12,7 +10,7 @@ prerequisites:: [[LLM Basics]], [[Prompt Engineering Fundamentals]]
 concepts:: [[Agent Architecture]], [[Planning Strategies]], [[Tool Use]], [[Evaluation]], [[ReAct Pattern]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 37
+state:: collected
 
 ## Summary
 University course on AI agents and foundation models. Covers agent architecture, planning strategies, tool use patterns, and system evaluation methodologies for building effective autonomous AI agents.
@@ -26,4 +24,4 @@ University course on AI agents and foundation models. Covers agent architecture,
 - [[LLM Basics]]
 - [[Prompt Engineering Fundamentals]]
 
-## My Notes
+## Notes

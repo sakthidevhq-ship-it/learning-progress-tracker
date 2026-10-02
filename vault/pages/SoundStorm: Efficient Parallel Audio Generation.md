@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Voice]]
 topic:: [[Speech Synthesis]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Non-Autoregressive Generation]], [[Neural Audio Codec]], [[Parallel
 tags:: soundstorm, tts
 source:: https://arxiv.org/abs/2305.09636
 ingested:: [[2026-07-09]]
-priority:: 25
+state:: collected
 
 ## Summary
 SoundStorm introduces a non-autoregressive, parallel decoding scheme for generating audio tokens from a neural codec, using an iterative masked-token approach that produces long-form audio far faster than autoregressive TTS models.
@@ -27,4 +25,4 @@ SoundStorm introduces a non-autoregressive, parallel decoding scheme for generat
 - [[Transformer Architecture]]
 - [[Neural Network Fundamentals]]
 
-## My Notes
+## Notes

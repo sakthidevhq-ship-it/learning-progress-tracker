@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Voice]]
 topic:: [[ASR]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Knowledge Distillation]], [[Streaming ASR]], [[Chunked Inference]]
 tags:: whisper, streaming
 source:: https://arxiv.org/abs/2311.01899
 ingested:: [[2026-07-09]]
-priority:: 27
+state:: collected
 
 ## Summary
 Distil-Whisper distills OpenAI's Whisper into a smaller model that runs significantly faster with minimal accuracy loss, and explores chunked inference strategies for streaming ASR with favorable latency-accuracy tradeoffs.
@@ -27,4 +25,4 @@ Distil-Whisper distills OpenAI's Whisper into a smaller model that runs signific
 - [[Neural Network Fundamentals]]
 - [[Transformer Architecture]]
 
-## My Notes
+## Notes

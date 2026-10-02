@@ -3,8 +3,6 @@ type:: article
 domain:: [[Game AI]]
 topic:: [[Competition Strategy]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: article
@@ -13,7 +11,7 @@ concepts:: [[Heuristic Design]], [[Simulation-Based Evaluation]], [[Meta-Game St
 tags:: halite, competition
 source:: https://tomvandewiele.com/halite2
 ingested:: [[2026-07-09]]
-priority:: 28
+state:: collected
 
 ## Summary
 Detailed writeup of the winning strategy for Halite II competition. Covers heuristic design, bot architecture, simulation-based evaluation, and the meta-game of competing against evolving opponents on a live leaderboard.
@@ -27,4 +25,4 @@ Detailed writeup of the winning strategy for Halite II competition. Covers heuri
 - [[Python]]
 - [[Game Theory Basics]]
 
-## My Notes
+## Notes

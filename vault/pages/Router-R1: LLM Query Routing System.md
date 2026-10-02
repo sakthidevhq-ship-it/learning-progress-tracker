@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Infrastructure]]
 topic:: [[LLM Serving]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: paper
@@ -12,7 +10,7 @@ prerequisites:: [[LLM Basics]], [[Model Inference Fundamentals]]
 concepts:: [[Model Routing]], [[Cost Optimization]], [[Quality-Cost Tradeoff]], [[Load Balancing]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 38
+state:: collected
 
 ## Summary
 Research paper on routing queries to optimal models with cost-quality tradeoffs. Presents system design for automatically selecting appropriate models based on query characteristics and inference constraints.
@@ -26,4 +24,4 @@ Research paper on routing queries to optimal models with cost-quality tradeoffs.
 - [[LLM Basics]]
 - [[Model Inference Fundamentals]]
 
-## My Notes
+## Notes

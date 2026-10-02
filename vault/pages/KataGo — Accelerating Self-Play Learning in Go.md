@@ -3,8 +3,6 @@ type:: paper
 domain:: [[Game AI]]
 topic:: [[Self-Play Systems]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Self-Play Acceleration]], [[Auxiliary Training Targets]], [[Data Au
 tags:: katago, paper
 source:: https://arxiv.org/abs/1902.10565
 ingested:: [[2026-07-09]]
-priority:: 27
+state:: collected
 
 ## Summary
 The paper behind KataGo's training innovations. Shows how auxiliary training targets, game outcome prediction, and various data augmentation techniques can accelerate self-play training by 50x compared to AlphaZero-style approaches.
@@ -28,4 +26,4 @@ The paper behind KataGo's training innovations. Shows how auxiliary training tar
 - [[Neural Network Fundamentals]]
 - [[Monte Carlo Tree Search]]
 
-## My Notes
+## Notes

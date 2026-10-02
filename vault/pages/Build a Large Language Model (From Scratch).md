@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Foundations]]
 topic:: [[Neural Networks]]
 engagement:: implement
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: deep-dive
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Tokenization]], [[Self-Attention]], [[Transformer Architecture]], [
 tags:: raschka, book
 source:: https://www.manning.com/books/build-a-large-language-model-from-scratch
 ingested:: [[2026-07-09]]
-priority:: 28
+state:: collected
 
 ## Summary
 Sebastian Raschka's book walking through the full implementation of a GPT-style LLM in PyTorch, covering tokenization, attention, transformer blocks, pretraining, and fine-tuning for classification and instruction-following.
@@ -27,4 +25,4 @@ Sebastian Raschka's book walking through the full implementation of a GPT-style 
 - [[Neural Network Fundamentals]]
 - [[Transformer Architecture]]
 
-## My Notes
+## Notes

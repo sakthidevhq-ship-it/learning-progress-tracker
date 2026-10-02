@@ -3,8 +3,6 @@ type:: paper
 domain:: [[Systems]]
 topic:: [[Distributed Replication]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[CRDTs]], [[Eventual Consistency]], [[Conflict Resolution]], [[Causa
 tags:: crdt, replication, eventual-consistency
 source:: /private/tmp/crdt.md
 ingested:: [[2026-07-09]]
-priority:: 30
+state:: collected
 
 ## Summary
 Convergent and Commutative Replicated Data Types (CRDTs) — data structures that can be replicated across nodes and updated independently, with mathematical guarantees of eventual convergence without coordination. Covers G-Counters, PN-Counters, OR-Sets, LWW-Registers, and the theory of optimistic replication with causal consistency.
@@ -28,4 +26,4 @@ Convergent and Commutative Replicated Data Types (CRDTs) — data structures tha
 - [[Concurrency Basics]]
 - [[Consistency Models]]
 
-## My Notes
+## Notes

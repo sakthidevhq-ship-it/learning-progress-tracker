@@ -3,8 +3,6 @@ type:: article
 domain:: [[ML/Foundations]]
 topic:: [[Model Architecture]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: beginner
 size:: medium
 medium:: article
@@ -13,7 +11,7 @@ concepts:: [[Self-Attention]], [[Multi-Head Attention]], [[Positional Encoding]]
 tags:: transformers, visual
 source:: http://jalammar.github.io/illustrated-transformer/
 ingested:: [[2026-07-09]]
-priority:: 34
+state:: collected
 
 ## Summary
 A visual, intuitive walkthrough of the Transformer architecture from 'Attention Is All You Need'. Uses diagrams to explain self-attention, multi-head attention, positional encoding, encoder-decoder structure, and how information flows through the model. The go-to resource for building intuition before reading the paper.
@@ -27,4 +25,4 @@ A visual, intuitive walkthrough of the Transformer architecture from 'Attention 
 - [[Neural Network Fundamentals]]
 - [[Linear Algebra Basics]]
 
-## My Notes
+## Notes

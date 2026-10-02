@@ -3,8 +3,6 @@ type:: docs
 domain:: [[Systems]]
 topic:: [[Compression]]
 engagement:: background
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: quick-read
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Information Theory]], [[Prediction-Compression Duality]], [[Multi-A
 tags:: compression, information-theory, personal-notes
 source:: /private/tmp/compression-notes.md
 ingested:: [[2026-07-09]]
-priority:: 36
+state:: collected
 
 ## Summary
 Personal brainstorm connecting compression theory to LLMs and GPU architecture. Core insight: prediction and compression are mathematically equivalent — better prediction means fewer bits. Explores multi-algorithm compression (already used in HTTP, PNG, video codecs), how GPUs use the exact same per-block mode-selection pattern at hardware level for memory bandwidth, and how LLM inference optimizations (quantization, KV-cache compression, hardware sparsity) are all fundamentally 'send less data between memory and compute' tricks.
@@ -28,4 +26,4 @@ Personal brainstorm connecting compression theory to LLMs and GPU architecture. 
 - [[GPU Computing Basics]]
 - [[Neural Network Fundamentals]]
 
-## My Notes
+## Notes

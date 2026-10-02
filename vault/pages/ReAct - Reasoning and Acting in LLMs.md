@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Frameworks]]
 topic:: [[Prompt Engineering]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[ReAct Pattern]], [[Chain of Thought]], [[Tool Use]], [[Thought-Acti
 tags:: react, reasoning
 source:: https://arxiv.org/abs/2210.11416
 ingested:: [[2026-07-09]]
-priority:: 38
+state:: collected
 
 ## Summary
 The foundational paper on interleaving reasoning traces and actions in LLMs. Shows that letting models think step-by-step AND take actions (search, lookup) outperforms either reasoning or acting alone. Introduced the Thought-Action-Observation loop.
@@ -27,4 +25,4 @@ The foundational paper on interleaving reasoning traces and actions in LLMs. Sho
 - [[LLM Basics]]
 - [[Prompt Engineering Fundamentals]]
 
-## My Notes
+## Notes

@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Frameworks]]
 topic:: [[Prompt Engineering]]
 engagement:: implement
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: deep-dive
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Prompt Optimization]], [[Teleprompters]], [[LM Modules]], [[Chain o
 tags:: dspy, stanford
 source:: https://arxiv.org/abs/2310.03714
 ingested:: [[2026-07-08]]
-priority:: 38
+state:: collected
 
 ## Summary
 Stanford NLP's framework for algorithmically optimizing LM prompts and weights. Replaces hand-written prompts with declarative modules (ChainOfThought, ReAct, etc.) that are automatically compiled into optimized prompt chains or fine-tuning recipes. Introduces teleprompters for automated prompt optimization.
@@ -28,4 +26,4 @@ Stanford NLP's framework for algorithmically optimizing LM prompts and weights. 
 - [[Prompt Engineering Fundamentals]]
 - [[Python]]
 
-## My Notes
+## Notes

@@ -4,7 +4,6 @@ status:: stub
 domain:: [[Programming/Compilers]]
 topic:: [[Language Implementation]]
 referenced-by:: [[Crafting Interpreters]], [[Tribes — Strategy Game AI Framework (Polytopia)]]
-priority:: 23
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.

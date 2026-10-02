@@ -3,8 +3,6 @@ type:: video
 domain:: [[ML/Foundations]]
 topic:: [[Neural Networks]]
 engagement:: implement
-status:: in-progress
-progress:: 25
 complexity:: intermediate
 size:: deep-dive
 medium:: video
@@ -13,7 +11,7 @@ concepts:: [[Backpropagation]], [[Tokenization]], [[GPT Implementation]], [[Neur
 tags:: karpathy, gpt
 source:: https://youtube.com/@andrejkarpathy
 ingested:: [[2026-07-09]]
-priority:: 28
+state:: collected
 
 ## Summary
 Andrej Karpathy's video lecture series building neural networks and GPT-style language models from scratch in Python, starting from micrograd's autodiff engine through to a working GPT implementation with tokenization.
@@ -27,4 +25,4 @@ Andrej Karpathy's video lecture series building neural networks and GPT-style la
 - [[Neural Network Fundamentals]]
 - [[Linear Algebra Basics]]
 
-## My Notes
+## Notes

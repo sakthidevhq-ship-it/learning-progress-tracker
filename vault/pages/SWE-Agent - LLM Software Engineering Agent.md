@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Agents]]
 topic:: [[Agentic Systems]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Agent-Computer Interface]], [[Code Navigation]], [[Tool Design]], [
 tags:: agents, devin
 source:: https://arxiv.org/abs/2401.04088
 ingested:: [[2026-07-09]]
-priority:: 39
+state:: collected
 
 ## Summary
 Research on using LLMs as autonomous software engineering agents. Introduces Agent-Computer Interface (ACI) design, showing that how the agent interacts with the codebase matters as much as the model. Achieves strong results on SWE-bench by giving agents file navigation, search, and edit tools.
@@ -29,4 +27,4 @@ Research on using LLMs as autonomous software engineering agents. Introduces Age
 - [[Tool Use]]
 - [[Python]]
 
-## My Notes
+## Notes

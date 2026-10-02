@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Infrastructure]]
 topic:: [[Training Optimization]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: quick-read
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[LoRA]], [[Quantization]], [[Memory-Efficient Training]], [[Fine-Tun
 tags:: unsloth, fine-tuning
 source:: https://unsloth.ai
 ingested:: [[2026-07-09]]
-priority:: 35
+state:: collected
 
 ## Summary
 Documentation for Unsloth, a library that accelerates and reduces the memory footprint of LLM fine-tuning through custom Triton kernels, optimized backward passes, and quantization-aware training tricks.
@@ -27,4 +25,4 @@ Documentation for Unsloth, a library that accelerates and reduces the memory foo
 - [[Neural Network Fundamentals]]
 - [[LLM Basics]]
 
-## My Notes
+## Notes

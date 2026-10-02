@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Infrastructure]]
 topic:: [[Inference Optimization]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Sparse MoE]], [[Expert Routing]], [[Load Balancing]], [[Top-K Gatin
 tags:: mixtral, moe
 source:: https://arxiv.org/abs/2312.10997
 ingested:: [[2026-07-09]]
-priority:: 39
+state:: collected
 
 ## Summary
 Mistral AI's Mixtral 8x7B model using sparse Mixture of Experts. Each token is routed to 2 of 8 expert FFN layers, achieving quality matching Llama 2 70B at 6x lower inference cost. Covers routing, load balancing, and expert specialization.
@@ -28,4 +26,4 @@ Mistral AI's Mixtral 8x7B model using sparse Mixture of Experts. Each token is r
 - [[Mixture of Experts]]
 - [[Attention Mechanisms]]
 
-## My Notes
+## Notes

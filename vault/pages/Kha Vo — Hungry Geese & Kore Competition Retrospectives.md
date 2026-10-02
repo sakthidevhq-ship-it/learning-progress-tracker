@@ -3,8 +3,6 @@ type:: article
 domain:: [[Game AI]]
 topic:: [[Competition Strategy]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: article
@@ -13,7 +11,7 @@ concepts:: [[Reward Shaping]], [[Rule-Based vs Learned Agents]], [[Competition M
 tags:: hungry-geese, kore, competition
 source:: https://kaggle.com/khahuras
 ingested:: [[2026-07-09]]
-priority:: 29
+state:: collected
 
 ## Summary
 Solution writeups from top Kaggle competitor covering Hungry Geese and Kore 2022. Discusses rule-based vs learned approaches, reward shaping for RL agents, and practical tricks for game AI competitions.
@@ -27,4 +25,4 @@ Solution writeups from top Kaggle competitor covering Hungry Geese and Kore 2022
 - [[Reinforcement Learning Basics]]
 - [[Python]]
 
-## My Notes
+## Notes

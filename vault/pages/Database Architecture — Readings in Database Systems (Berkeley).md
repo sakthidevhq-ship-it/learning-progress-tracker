@@ -3,8 +3,6 @@ type:: paper
 domain:: [[Systems]]
 topic:: [[Databases]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Storage Engines]], [[Query Optimization]], [[Column Stores]], [[MVC
 tags:: database, architecture, berkeley
 source:: /private/tmp/db-architecture.md
 ingested:: [[2026-07-09]]
-priority:: 30
+state:: collected
 
 ## Summary
 Peter Bailis and Joe Hellerstein's curated collection of foundational database papers. Covers traditional RDBMS, new architectures (column stores, NewSQL), large-scale dataflow, weak isolation, query optimization, interactive analytics, and data integration. The canonical graduate-level database reading list.
@@ -28,4 +26,4 @@ Peter Bailis and Joe Hellerstein's curated collection of foundational database p
 - [[Transactions]]
 - [[Consistency Models]]
 
-## My Notes
+## Notes

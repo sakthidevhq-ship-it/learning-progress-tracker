@@ -3,8 +3,6 @@ type:: docs
 domain:: [[Game AI]]
 topic:: [[Self-Play Systems]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Monte Carlo Tree Search]], [[Auxiliary Training Targets]], [[Owners
 tags:: katago, go
 source:: https://github.com/lightvector/KataGo
 ingested:: [[2026-07-09]]
-priority:: 27
+state:: collected
 
 ## Summary
 Deep dive into KataGo, one of the strongest open-source Go engines. The KataGoMethods.md document explains innovations: auxiliary policy targets, ownership prediction, dynamic komi, playout cap randomization. Achieves superhuman play with 50x less compute than AlphaZero.
@@ -28,4 +26,4 @@ Deep dive into KataGo, one of the strongest open-source Go engines. The KataGoMe
 - [[Neural Network Fundamentals]]
 - [[Game Theory Basics]]
 
-## My Notes
+## Notes

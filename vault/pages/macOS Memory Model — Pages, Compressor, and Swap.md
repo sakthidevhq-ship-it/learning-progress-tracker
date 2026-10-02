@@ -3,8 +3,6 @@ type:: docs
 domain:: [[Systems]]
 topic:: [[Operating Systems]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Virtual Memory]], [[Memory Pages]], [[Memory Compressor]], [[Swap M
 tags:: macos, memory, vm
 source:: /private/tmp/macos-mem.md
 ingested:: [[2026-07-09]]
-priority:: 32
+state:: collected
 
 ## Summary
 How macOS manages memory differently from Linux. Covers Mach VM pages (free, active, inactive, speculative, wired, compressor), why 'free memory' being low is normal, how the in-RAM compressor works before swap kicks in, when swap thrashing happens and how to detect it, unified memory on Apple Silicon, and memory pressure as the real health signal.
@@ -27,4 +25,4 @@ How macOS manages memory differently from Linux. Covers Mach VM pages (free, act
 - [[Memory Management Concepts]]
 - [[Linux Basics]]
 
-## My Notes
+## Notes

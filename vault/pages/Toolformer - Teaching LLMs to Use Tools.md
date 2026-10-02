@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Agents]]
 topic:: [[Agentic Systems]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Self-Supervised Tool Learning]], [[API Call Insertion]], [[Tool Sel
 tags:: toolformer, tool-use
 source:: https://arxiv.org/abs/2305.10601
 ingested:: [[2026-07-09]]
-priority:: 39
+state:: collected
 
 ## Summary
 Meta's paper on training LLMs to autonomously decide when and how to use external tools (calculator, search, calendar, translator). Self-supervised approach: the model learns to insert API calls where they improve prediction.
@@ -28,4 +26,4 @@ Meta's paper on training LLMs to autonomously decide when and how to use externa
 - [[Prompt Engineering Fundamentals]]
 - [[ReAct Pattern]]
 
-## My Notes
+## Notes

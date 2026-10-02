@@ -3,8 +3,6 @@ type:: docs
 domain:: [[Systems]]
 topic:: [[Operating Systems]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Process Lifecycle]], [[Orphan Processes]], [[Zombie Processes]], [[
 tags:: processes, orphan, zombie
 source:: /private/tmp/orphan.md
 ingested:: [[2026-07-09]]
-priority:: 32
+state:: collected
 
 ## Summary
 What happens when a parent process dies but its children keep running. Covers Unix process lifecycle (fork, exec, wait, exit), how orphans get reparented to init/launchd, how zombies retain PIDs and entries in the process table, why orphaned language servers and build tools silently accumulate and eat memory, and how to find and clean them up.
@@ -27,4 +25,4 @@ What happens when a parent process dies but its children keep running. Covers Un
 - [[C Basics]]
 - [[Linux Basics]]
 
-## My Notes
+## Notes

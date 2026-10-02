@@ -3,8 +3,6 @@ type:: article
 domain:: [[Game AI]]
 topic:: [[Competition Strategy]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: article
@@ -13,7 +11,7 @@ concepts:: [[Imitation Learning]], [[Leaderboard Mining]], [[Self-Play Fine-Tuni
 tags:: lux-ai, imitation-learning
 source:: https://kaggle.com/lux-ai-toad-brigade
 ingested:: [[2026-07-09]]
-priority:: 29
+state:: collected
 
 ## Summary
 Writeup of the winning Lux AI strategy using imitation learning from leaderboard replays. Instead of training from scratch, they learned to imitate the best bots on the leaderboard, then fine-tuned with self-play.
@@ -27,4 +25,4 @@ Writeup of the winning Lux AI strategy using imitation learning from leaderboard
 - [[Reinforcement Learning Basics]]
 - [[Neural Network Fundamentals]]
 
-## My Notes
+## Notes

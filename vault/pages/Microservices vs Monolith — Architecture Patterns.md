@@ -3,8 +3,6 @@ type:: docs
 domain:: [[Systems]]
 topic:: [[Architecture]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Microservices]], [[Monolith Architecture]], [[Service Boundaries]],
 tags:: microservices, monolith, netflix
 source:: /private/tmp/microservices.md
 ingested:: [[2026-07-09]]
-priority:: 32
+state:: collected
 
 ## Summary
 Survey of microservice and monolith architecture patterns. Covers Martin Fowler's definition, Netflix's migration journey, the 'monolith first' approach, communication patterns (sync REST, async messaging), and practical questions to ask before splitting services.
@@ -26,4 +24,4 @@ Survey of microservice and monolith architecture patterns. Covers Martin Fowler'
 ## Prerequisites
 - [[Networking Fundamentals]]
 
-## My Notes
+## Notes

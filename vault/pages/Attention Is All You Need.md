@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: paper
@@ -13,8 +11,7 @@ concepts:: [[Transformer Architecture]], [[Self-Attention]], [[Multi-Head Attent
 tags:: transformers, foundational
 source:: https://arxiv.org/abs/1706.03762
 ingested:: [[2026-07-08]]
-priority:: 41
-goal:: true
+state:: collected
 
 ## Summary
 The foundational paper introducing the Transformer architecture. Proposes replacing recurrence and convolution entirely with self-attention mechanisms. Introduces multi-head attention, positional encoding, and the encoder-decoder structure that became the basis for GPT, BERT, and virtually all modern language models.
@@ -28,4 +25,4 @@ The foundational paper introducing the Transformer architecture. Proposes replac
 - [[Linear Algebra Basics]]
 - [[Neural Network Fundamentals]]
 
-## My Notes
+## Notes

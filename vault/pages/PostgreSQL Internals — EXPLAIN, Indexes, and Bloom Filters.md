@@ -3,8 +3,6 @@ type:: docs
 domain:: [[Systems]]
 topic:: [[Databases]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: deep-dive
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Query Planning]], [[EXPLAIN ANALYZE]], [[Index Design]], [[Bloom Fi
 tags:: postgres, explain, internals
 source:: /private/tmp/pg.md
 ingested:: [[2026-07-09]]
-priority:: 32
+state:: collected
 
 ## Summary
 Deep dive into PostgreSQL internals: reading and visualizing EXPLAIN ANALYZE output, understanding query planner decisions, lateral joins, following a SELECT through Postgres internals, index maintenance strategies, monitoring unused indexes, and using Bloom filters for probabilistic membership testing.
@@ -26,4 +24,4 @@ Deep dive into PostgreSQL internals: reading and visualizing EXPLAIN ANALYZE out
 ## Prerequisites
 - [[Database Basics]]
 
-## My Notes
+## Notes

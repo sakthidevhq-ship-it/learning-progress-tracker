@@ -4,7 +4,6 @@ status:: stub
 domain:: [[Embedded/Gaming]]
 topic:: [[Edge AI]]
 referenced-by:: [[Running LLMs on R36S]], [[Don't Quant the KV Cache — Local LLM Field Notes]]
-priority:: 23
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.

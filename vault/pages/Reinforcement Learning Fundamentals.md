@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Foundations]]
 topic:: [[RL]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Markov Decision Processes]], [[Policy Gradients]], [[Value Function
 tags:: rl, rlhf
 source:: https://github.com/ml-curriculum/reinforcement-learning
 ingested:: [[2026-07-09]]
-priority:: 27
+state:: collected
 
 ## Summary
 A curriculum module covering core RL concepts — MDPs, value functions, policy gradients, and reward modeling — framed as groundwork for understanding RLHF pipelines used to align language models.
@@ -27,4 +25,4 @@ A curriculum module covering core RL concepts — MDPs, value functions, policy 
 - [[Reinforcement Learning Basics]]
 - [[Probability]]
 
-## My Notes
+## Notes

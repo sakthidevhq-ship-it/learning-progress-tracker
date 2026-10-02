@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Agents]]
 topic:: [[Context Engineering]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -12,7 +10,7 @@ prerequisites:: [[LLM Basics]], [[Tool Use]], [[Prompt Engineering Fundamentals]
 concepts:: [[Context Compaction]], [[Token Management]], [[System Prompts]], [[Tool Results Pruning]], [[Agent Architecture]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 34
+state:: collected
 
 ## Summary
 Anthropic engineering guide on effective context management for AI agents. Covers context compaction strategies, token optimization, system prompt design, and intelligent tool result pruning to maximize agent capabilities within token limits.
@@ -27,4 +25,4 @@ Anthropic engineering guide on effective context management for AI agents. Cover
 - [[Tool Use]]
 - [[Prompt Engineering Fundamentals]]
 
-## My Notes
+## Notes

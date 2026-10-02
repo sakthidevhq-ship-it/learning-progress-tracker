@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Foundations]]
 topic:: [[Representation Learning]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Autoencoders]], [[Representation Learning]], [[Variational Inferenc
 tags:: goodfellow, book
 source:: https://www.deeplearningbook.org/contents/generative_models.html
 ingested:: [[2026-07-16]]
-priority:: 25
+state:: collected
 
 ## Summary
 Chapters 13-20: the research frontier as of the book — linear factor models, autoencoders, representation learning, structured probabilistic models, Monte Carlo methods, the partition function, approximate inference, and deep generative models (Boltzmann machines, VAEs, GANs). The conceptual foundations of generative AI.
@@ -28,4 +26,4 @@ Chapters 13-20: the research frontier as of the book — linear factor models, a
 - [[Probability Theory]]
 - [[Information Theory Basics]]
 
-## My Notes
+## Notes

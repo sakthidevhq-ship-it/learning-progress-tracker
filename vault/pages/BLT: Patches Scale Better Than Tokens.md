@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: paper
@@ -12,7 +10,7 @@ prerequisites:: [[Transformer Architecture]], [[Attention Mechanisms]], [[Neural
 concepts:: [[Byte-Level Processing]], [[Patch Embeddings]], [[Token-Free Models]], [[Transformer Architecture]]
 source:: unknown
 ingested:: [[2026-07-09]]
-priority:: 37
+state:: collected
 
 ## Summary
 Research comparing patch-based and token-based approaches to model inputs. Demonstrates that byte-level or patch-level processing can be more efficient and scalable than traditional tokenization for foundation models.
@@ -27,4 +25,4 @@ Research comparing patch-based and token-based approaches to model inputs. Demon
 - [[Attention Mechanisms]]
 - [[Neural Network Fundamentals]]
 
-## My Notes
+## Notes

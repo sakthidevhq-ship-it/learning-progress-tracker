@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Infrastructure]]
 topic:: [[Inference Optimization]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Speculative Decoding]], [[Draft Model]], [[Token Verification]], [[
 tags:: speculative-decoding
 source:: https://arxiv.org/abs/2305.18290
 ingested:: [[2026-07-09]]
-priority:: 39
+state:: collected
 
 ## Summary
 Technique to speed up LLM inference by using a small draft model to propose multiple tokens, then verifying them in parallel with the large model. Achieves 2-3x speedup with mathematically guaranteed identical output distribution.
@@ -29,4 +27,4 @@ Technique to speed up LLM inference by using a small draft model to propose mult
 - [[Attention Mechanisms]]
 - [[Autoregressive Decoding]]
 
-## My Notes
+## Notes

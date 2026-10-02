@@ -3,8 +3,6 @@ type:: docs
 domain:: [[Programming/Python]]
 topic:: [[Design Patterns]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Design Patterns]], [[State Machines]], [[WSGI]], [[Django Migration
 tags:: patterns, python, django
 source:: /private/tmp/patterns.md
 ingested:: [[2026-07-09]]
-priority:: 26
+state:: collected
 
 ## Summary
 Design patterns applied to Python: factory, observer, strategy, state machines (FSM), decorator. Django-specific patterns: WSGI internals, zero-downtime migrations, cached_property, and deployment with Fabric. Understanding how Django serves requests from WSGI to response.
@@ -26,4 +24,4 @@ Design patterns applied to Python: factory, observer, strategy, state machines (
 ## Prerequisites
 - [[Python]]
 
-## My Notes
+## Notes

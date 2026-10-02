@@ -3,8 +3,6 @@ type:: paper
 domain:: [[Game AI]]
 topic:: [[Imperfect Information Games]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: deep-dive
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Monte Carlo CFR]], [[Depth-Limited Search]], [[Blueprint Strategy]]
 tags:: pluribus, poker, paper
 source:: https://science.org/pluribus-2019
 ingested:: [[2026-07-09]]
-priority:: 26
+state:: collected
 
 ## Summary
 The Science 2019 paper on Pluribus, the first AI to beat professional poker players in 6-player no-limit Texas Hold'em. Introduces depth-limited search in imperfect-information games and a novel blueprint strategy computed via Monte Carlo CFR.
@@ -28,4 +26,4 @@ The Science 2019 paper on Pluribus, the first AI to beat professional poker play
 - [[Reinforcement Learning Basics]]
 - [[Counterfactual Regret Minimization]]
 
-## My Notes
+## Notes

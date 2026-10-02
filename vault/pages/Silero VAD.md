@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Voice]]
 topic:: [[Voice Activity]]
 engagement:: implement
-status:: unread
-progress:: 0
 complexity:: beginner
 size:: quick-read
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Voice Activity Detection]], [[Endpointing]], [[Barge-in Detection]]
 tags:: vad, endpointing
 source:: https://github.com/snakers4/silero-vad
 ingested:: [[2026-07-09]]
-priority:: 29
+state:: collected
 
 ## Summary
 Documentation and code for Silero VAD, a lightweight, pre-trained voice activity detection model used for endpointing and barge-in detection in real-time speech applications.
@@ -26,4 +24,4 @@ Documentation and code for Silero VAD, a lightweight, pre-trained voice activity
 ## Prerequisites
 - [[Neural Network Fundamentals]]
 
-## My Notes
+## Notes

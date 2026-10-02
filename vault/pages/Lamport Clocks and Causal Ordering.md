@@ -3,8 +3,6 @@ type:: paper
 domain:: [[Systems]]
 topic:: [[Distributed Systems]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Lamport Clocks]], [[Happens-Before Relation]], [[Logical Clocks]], 
 tags:: lamport, clocks, ordering
 source:: /private/tmp/lamport-clocks.md
 ingested:: [[2026-07-09]]
-priority:: 32
+state:: collected
 
 ## Summary
 Lamport's foundational 'Time, Clocks, and the Ordering of Events in a Distributed System'. Defines happens-before relation, logical clocks, and total ordering in distributed systems. The paper that established how to reason about time and causality when there's no global clock.
@@ -26,4 +24,4 @@ Lamport's foundational 'Time, Clocks, and the Ordering of Events in a Distribute
 ## Prerequisites
 - [[Concurrency Basics]]
 
-## My Notes
+## Notes

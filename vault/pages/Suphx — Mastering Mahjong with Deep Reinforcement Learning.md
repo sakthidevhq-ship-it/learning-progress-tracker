@@ -3,8 +3,6 @@ type:: paper
 domain:: [[Game AI]]
 topic:: [[Imperfect Information Games]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[Oracle Guiding]], [[Global Reward Prediction]], [[Imperfect Informa
 tags:: suphx, mahjong
 source:: https://arxiv.org/abs/2003.13590
 ingested:: [[2026-07-09]]
-priority:: 27
+state:: collected
 
 ## Summary
 Microsoft Research's Suphx achieves superhuman performance in Mahjong on the Tenhou platform. Notable for handling a game with imperfect information, stochastic elements, and 4 players. Uses oracle guiding and global reward prediction.
@@ -28,4 +26,4 @@ Microsoft Research's Suphx achieves superhuman performance in Mahjong on the Ten
 - [[Neural Network Fundamentals]]
 - [[Game Theory Basics]]
 
-## My Notes
+## Notes

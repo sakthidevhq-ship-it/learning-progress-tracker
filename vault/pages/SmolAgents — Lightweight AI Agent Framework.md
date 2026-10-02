@@ -3,8 +3,6 @@ type:: tweet
 domain:: [[ML/Agents]]
 topic:: [[Agentic Systems]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: quick-read
 medium:: tweet
@@ -13,7 +11,7 @@ concepts:: [[Code Agents]], [[Tool Calling]], [[Multi-Step Reasoning]], [[Lightw
 tags:: agents, tweet
 source:: https://x.com/SergioPaniego/status/2074863503312044499
 ingested:: [[2026-07-09]]
-priority:: 39
+state:: collected
 
 ## Summary
 Thread on SmolAgents, Hugging Face's lightweight agent framework. Covers building agents with minimal code, tool calling, code-based agents vs JSON-based, multi-step reasoning, and integration with any LLM. Demonstrates the shift from heavy frameworks to simple, composable agent patterns.
@@ -28,4 +26,4 @@ Thread on SmolAgents, Hugging Face's lightweight agent framework. Covers buildin
 - [[Tool Use]]
 - [[Python]]
 
-## My Notes
+## Notes

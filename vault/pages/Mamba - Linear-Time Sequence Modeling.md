@@ -3,8 +3,6 @@ type:: paper
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: advanced
 size:: medium
 medium:: paper
@@ -13,7 +11,7 @@ concepts:: [[State Space Models]], [[Selective Scan]], [[Linear Attention]], [[H
 tags:: mamba, ssm
 source:: https://arxiv.org/abs/2402.17764
 ingested:: [[2026-07-09]]
-priority:: 36
+state:: collected
 
 ## Summary
 Introduces Mamba, a selective state space model that matches Transformer quality while scaling linearly with sequence length. Replaces attention with a hardware-aware selective scan algorithm. Shows strong results on language, audio, and genomics.
@@ -28,4 +26,4 @@ Introduces Mamba, a selective state space model that matches Transformer quality
 - [[Linear Algebra Basics]]
 - [[GPU Computing Basics]]
 
-## My Notes
+## Notes

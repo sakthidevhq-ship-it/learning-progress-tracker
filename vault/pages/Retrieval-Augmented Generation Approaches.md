@@ -3,8 +3,6 @@ type:: docs
 domain:: [[ML/Frameworks]]
 topic:: [[RAG]]
 engagement:: implement
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Retrieval Augmented Generation]], [[Vector Search]], [[Chunking Str
 tags:: rag, retrieval
 source:: https://github.com/ml-curriculum/rag-approaches
 ingested:: [[2026-07-09]]
-priority:: 33
+state:: collected
 
 ## Summary
 A survey of RAG architectural patterns for grounding LLM outputs in external knowledge, covering retriever design, chunking strategies, and approaches for combining retrieval with generation.
@@ -27,4 +25,4 @@ A survey of RAG architectural patterns for grounding LLM outputs in external kno
 - [[LLM Basics]]
 - [[Prompt Engineering Fundamentals]]
 
-## My Notes
+## Notes

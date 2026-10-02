@@ -3,8 +3,6 @@ type:: docs
 domain:: [[Systems]]
 topic:: [[Developer Tooling]]
 engagement:: read
-status:: unread
-progress:: 0
 complexity:: intermediate
 size:: medium
 medium:: docs
@@ -13,7 +11,7 @@ concepts:: [[Language Server Protocol]], [[JSON-RPC]], [[AST]], [[Editor Archite
 tags:: lsp, vscode, ide
 source:: /private/tmp/lsp.md
 ingested:: [[2026-07-09]]
-priority:: 32
+state:: collected
 
 ## Summary
 Understanding LSP end-to-end: what a language server is, how editors launch and communicate with them (JSON-RPC over stdio/socket), what capabilities they provide (completion, diagnostics, go-to-definition, rename), how they parse and hold ASTs in memory, why they're the biggest memory consumers in any editor, and how to profile/debug them when they misbehave.
@@ -27,4 +25,4 @@ Understanding LSP end-to-end: what a language server is, how editors launch and 
 - [[Networking Fundamentals]]
 - [[Data Structures]]
 
-## My Notes
+## Notes
