@@ -26,8 +26,7 @@ def write_resource_page(vault_path: Path, metadata: dict, job: dict) -> Path:
         props.append(f"topic:: [[{topic}]]")
     if engagement:
         props.append(f"engagement:: {engagement}")
-    props.append("status:: unread")
-    props.append("progress:: 0")
+    props.append("state:: collected")
     if metadata.get("complexity"):
         props.append(f"complexity:: {metadata['complexity']}")
     if metadata.get("size"):
@@ -56,7 +55,7 @@ def write_resource_page(vault_path: Path, metadata: dict, job: dict) -> Path:
     if prerequisites:
         items = "\n".join(f"- [[{p}]]" for p in prerequisites)
         body_parts.append(f"## Prerequisites\n{items}")
-    body_parts.append("## My Notes\n")
+    body_parts.append("## Notes\n")
 
     content = "\n".join(props) + "\n\n" + "\n\n".join(body_parts)
 

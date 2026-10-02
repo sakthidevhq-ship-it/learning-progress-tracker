@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import yaml
-
 
 @dataclass
 class Config:
@@ -14,6 +12,8 @@ class Config:
 
 
 def load_config(path: str | None = None) -> Config:
+    import yaml  # lazy: the CI site build imports this module without PyYAML
+
     if path is None:
         path = "config.yaml"
     with open(path) as f:

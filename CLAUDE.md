@@ -1,115 +1,134 @@
-# Learning Progress Tracker
+# Learning Workbench
 
-A CLI tool (`lpt`) that tracks learning resources as markdown files and visualizes them as an interactive knowledge graph. Hosted via GitHub Pages — push to `main` triggers a rebuild.
+A CLI (`lpt`) and a web app for a personal learning library: collect things, pick them up, log time, keep notes and
+checklists, plan the month, look back over six weeks. Everything is stored as markdown in `vault/pages/`.
+GitHub Pages serves a read-only copy: pushing to `main` rebuilds it when `vault/pages/`, `graph.html` or
+`cli/build_graph.py` change (the workflow runs `cli/build_graph.py ./vault graph.html knowledge-graph.html`).
+A change to `ui/workbench.html` alone doesn't trigger a deploy; run the workflow by hand or include a vault change.
+
+Specs: `docs/specs/2026-10-03-workbench-requirements.md`, `docs/specs/2026-10-03-workbench-design.md`.
 
 ## Directory Structure
 
 ```
-learning-tracker/
-├── vault/pages/              # Markdown files — the database (git-tracked)
-├── inbox/                    # Pending jobs (lpt add creates these)
-├── config.yaml               # Vault path, domain/topic weights
-├── graph.html                # Graph HTML template
-├── cli/                      # Python CLI + graph builder
+├── vault/pages/              # Markdown pages: items, plus concept/topic/domain stubs (git-tracked)
+├── config.yaml               # Vault path, domain weights (= career focus in Insights)
+├── ui/workbench.html         # The app: Workbench / Plan / Library / Insights tabs
+├── cli/
 │   ├── main.py               # CLI entry point
-│   ├── build_graph.py        # Builds knowledge-graph.html from vault
-│   ├── config.py             # Config loader
-│   ├── page_writer.py        # Writes markdown pages
-│   ├── page_reader.py        # Reads/parses markdown pages
-│   ├── priority.py           # Priority scoring
-│   └── progress.py           # Progress tracking
-├── tests/                    # Test suite
-├── .github/workflows/        # GitHub Actions — auto-deploy to Pages
-└── pyproject.toml            # Python package config
+│   ├── items.py              # Item model: states, dates, notes, checklist, time, plan, capture, migration
+│   ├── server.py             # `lpt serve`: the app plus a local JSON API that edits the vault
+│   ├── build_graph.py        # Builds site/index.html from the vault (also run by CI)
+│   ├── page_writer.py        # Concept/topic/domain stub pages (used when filing items)
+│   ├── page_reader.py, config.py
+├── tests/                    # pytest; tests/browser/ drives the real app in Chrome
+├── docs/                     # Specs and the original clickable mockup
+└── .github/workflows/        # Pages deploy (pushing workflow changes needs a token with `workflow` scope)
 ```
 
-**What gets deployed:** `vault/pages/*.md` → `cli/build_graph.py` → `knowledge-graph.html` → GitHub Pages
+Gitignored: `.venv/`, `site/` (built), `processed/` (old inbox archive), editor/conductor artifacts.
 
-**What's gitignored:** `.venv/`, `processed/`, `knowledge-graph.html` (built artifact), editor/conductor artifacts
+## Item pages
 
-## How to Add a New Resource
+An item is a page whose `type::` is paper, article, video, docs, tweet, **project** or **practice**.
 
-### Step 1: Add to inbox
-```bash
-lpt add <url-or-filepath> [--domain "Domain/Name"] [--topic "Topic"] [--engagement read|implement|background] [--tag TAG...]
+```
+title:: Raft — In Search of an Understandable Consensus Algorithm
+type:: paper
+domain:: [[Systems]]
+topic:: [[Distributed Consensus]]
+state:: picked                      # collected | picked | done | dropped
+picked:: [[2026-10-03]]             # also done:: / dropped:: when they happen
+planned:: 2026-10                   # month first planned; unfinished items carry over automatically
+my-priority:: soon                  # now | soon | someday (only ever set by the user)
+note:: why I saved it               # from capture
+enrich:: pending                    # captured but not filed yet
+ingested:: [[2026-07-09]]
+concepts:: [[Raft Consensus]], ...
+
+## Summary
+...
+## Notes
+free text, one running note
+## Checklist
+- [x] Read §5
+- [ ] Implement log replication
+## Time
+- 2026-10-03 · 1h30m               # one line per day
 ```
 
-### Step 2: Create the processor result
-Create `inbox/<job-id>.result.json`:
-```json
-{
-  "title": "Human-readable title",
-  "summary": "2-3 sentence description",
-  "medium": "paper|article|video|docs",
-  "complexity": "beginner|intermediate|advanced",
-  "size": "quick-read|medium|deep-dive",
-  "domain": "Domain/Subdomain",
-  "topic": "Specific Topic",
-  "concepts": ["What this resource teaches"],
-  "prerequisites": ["What you need to know first"],
-  "key_takeaways": ["Key insight 1", "Key insight 2"],
-  "engagement_suggestion": "read|implement|background"
-}
-```
+Rules (in `cli/items.py`): picking up or adding time puts an item in this month's plan; adding time to a collected
+item picks it up; Done fills `picked::` if missing; "back" returns it to collected but keeps it planned; dropped
+items stop counting towards coverage. Coverage = done ÷ (everything not dropped) per topic/area.
+There is no per-item percentage and no computed priority. Don't add them back.
 
-**Concept names for cross-linking** (use these exact names when they apply):
-
-Transformer Architecture, Attention Mechanisms, KV Cache, RLHF, Mixture of Experts, Multi-Head Attention, Self-Attention, LLM Basics, Prompt Engineering Fundamentals, Neural Network Fundamentals, Linear Algebra Basics, Reinforcement Learning Basics, Networking Fundamentals, TCP/IP Basics, Database Basics, Concurrency Basics, C Basics, Python, Memory Management Concepts, Linux Basics, Data Structures, Game Theory Basics, Consistency Models, Transactions, Raft Consensus, Agent Architecture, Tool Use, ReAct Pattern
-
-Resource-to-resource prerequisite edges are computed automatically: if Resource A's `concepts` includes "X" and Resource B's `prerequisites` includes "X", then the graph shows "read A before B."
-
-### Step 3: Write to vault and rebuild
-```bash
-lpt write --all
-lpt graph
-```
-
-### Step 4: Push to deploy
-```bash
-git add vault/pages/
-git commit -m "Add: Resource Title"
-git push
-```
-GitHub Actions rebuilds and deploys the graph automatically.
-
-## How to Update Progress
+## Everyday use
 
 ```bash
-lpt progress "Title" 50       # Set progress to 50% (fuzzy match)
-lpt done "Title"              # Mark as 100% complete
-lpt graph                     # Rebuild to see changes
+lpt serve                         # the app at http://127.0.0.1:8765 with editing (time, notes, checklist, plan, add)
+lpt graph                         # build site/ and open it read-only
 ```
 
-Then commit + push the updated vault files.
+Or from the terminal (titles match fuzzily):
 
-## Existing Domains
+```bash
+lpt add <url-or-title>... [--note "why"] [--type project|practice|article] [--prio now|soon|someday]
+pbpaste | lpt add                 # one item per line, e.g. a batch of links from WhatsApp
+lpt pick "raft"   ·   lpt done "raft"   ·   lpt drop "raft"   ·   lpt back "raft"
+lpt time "raft" [30m|1h|1h30m|-30m] [--date yesterday]
+lpt check "raft" "Implement log replication"   ·   lpt check "raft" --toggle 1   ·   --remove 1
+lpt note "raft" "Stopped at 5.4.1"
+lpt prio "raft" now|soon|someday|none
+lpt plan "raft" [next|2026-11|none]          # default: this month
+lpt show "raft"   ·   lpt ls [--state picked|--unsorted]   ·   lpt status
+```
 
-ML/Infrastructure, ML/Agents, ML/Frameworks, ML/Foundations, ML/Voice, Game AI, Systems, Networking, Programming/Rust, Programming/Zig, Programming/Python, Programming/Compilers, Embedded/Gaming, Mindset
+Then commit and push the changed `vault/pages/` files to update the read-only site.
 
-## CLI Reference
+## Filing Unsorted items (Claude's job)
 
-| Command | What it does |
-|---------|-------------|
-| `lpt add <source>` | Add URL or file to inbox |
-| `lpt write --all` | Write all processed jobs to vault |
-| `lpt status` | Show inbox counts |
-| `lpt progress "title" N` | Set progress (0-100) |
-| `lpt done "title"` | Mark complete |
-| `lpt recompute` | Recalculate all priorities |
-| `lpt graph` | Rebuild both views, open the map |
-| `lpt graph --view tree` | Rebuild both views, open the skill tree |
+Captured items land in Unsorted with `enrich:: pending`. To file them:
 
-## Graph Visualization
+1. `lpt enrich` lists them as JSON lines (`id`, `title`, `type`, `source`, `note`).
+2. For each one, read the source and write a result JSON:
+   ```json
+   {"title": "Human-readable title", "medium": "paper|article|video|docs",
+    "domain": "Systems", "topic": "Concurrency",
+    "complexity": "beginner|intermediate|advanced", "size": "quick-read|medium|deep-dive",
+    "concepts": ["What it teaches"], "prerequisites": ["What you need first"],
+    "summary": "2-3 sentences", "key_takeaways": ["...", "..."]}
+   ```
+3. `lpt enrich <id> --from result.json` fills the page, clears `enrich`, renames the file to the title and creates
+   concept/topic/domain stubs.
 
-Two views, cross-linked via a button in each HUD:
-- **Map** (`graph.html` → `knowledge-graph.html`) — force-directed relatedness map. Answers "where does this fit, what's related?"
-- **Skill Tree** (`skill-tree.html` → `knowledge-tree.html`) — RPG talent panels per domain with tiers, locks, and XP. Answers "what's my progress, what do I unlock next?"
+Use an existing domain where it fits; if nothing fits, leave the item in Unsorted (skip it) rather than inventing a
+new area. Never change `state::`, dates, `my-priority::`, `planned::`, Notes, Checklist or Time while filing.
+Projects and practice keep their type (`medium` is ignored for them).
 
-Map view details:
-- **Position = relatedness** — resources sharing concepts cluster together
-- **Color = status** — green (done), orange (in progress), blue (ready), dim (blocked)
-- **Solid edges** = prerequisite ("read A before B")
-- **Dashed edges** = siblings (shared prerequisites)
-- **Click** = side panel with full detail, selectable text
-- **Filters** = toggle by status, domain, engagement type, search
-- **Pan/zoom** = drag + scroll
+Existing domains: ML/Infrastructure, ML/Agents, ML/Frameworks, ML/Foundations, ML/Voice, ML/Evaluation, Game AI,
+Systems, Networking, Programming/Rust, Programming/Zig, Programming/Python, Programming/Compilers, Embedded/Gaming,
+Mindset
+
+Concept names for cross-linking (use these exact names when they apply): Transformer Architecture, Attention
+Mechanisms, KV Cache, RLHF, Mixture of Experts, Multi-Head Attention, Self-Attention, LLM Basics, Prompt Engineering
+Fundamentals, Neural Network Fundamentals, Linear Algebra Basics, Reinforcement Learning Basics, Networking
+Fundamentals, TCP/IP Basics, Database Basics, Concurrency Basics, C Basics, Python, Memory Management Concepts, Linux
+Basics, Data Structures, Game Theory Basics, Consistency Models, Transactions, Raft Consensus, Agent Architecture,
+Tool Use, ReAct Pattern
+
+## The app (`ui/workbench.html`)
+
+One self-contained file. The build replaces `VAULT_PLACEHOLDER` (item JSON from `cli/items.load_items`) and
+`META_PLACEHOLDER` (domain weights). On load it asks `/api/items`: if that answers (under `lpt serve`) the page is
+editable and every change goes through `POST /api/item {id, action, ...}` or `POST /api/add`; otherwise (a file, or
+GitHub Pages, or a phone) it is read-only and hides edit controls. Deep links: `#wb`, `#plan`, `#lib`, `#ins`,
+`#item=<id>`. On phones the tabs move to a bottom bar.
+
+## Tests
+
+```bash
+.venv/bin/python -m pytest -q          # model, CLI, server, build; round-trips every real vault page
+bash tests/browser/run.sh              # drives Chrome against `lpt serve` on a migrated copy of the vault
+```
+
+Run both after changing `items.py`, `server.py` or `ui/workbench.html`.

@@ -19,3 +19,6 @@ knowledge-tree.html
 
 # Processed jobs archive
 processed/
+
+# Built site (lpt graph / lpt serve)
+site/

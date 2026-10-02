@@ -1,146 +1,67 @@
+"""The two everyday flows end to end, through the CLI, on a copy of the real vault when available."""
 import json
+import shutil
+from datetime import date
 from pathlib import Path
 
 import pytest
 import yaml
 from click.testing import CliRunner
 
+from cli.items import load_items
 from cli.main import cli
-from cli.page_reader import read_page, list_pages
+
+REAL_VAULT = Path(__file__).resolve().parent.parent / "vault"
 
 
 @pytest.fixture
-def full_project(tmp_path):
-    vault = tmp_path / "vault"
-    vault.mkdir()
-    (vault / "pages").mkdir()
-    for d in ["inbox", "processed", "failed"]:
-        (tmp_path / d).mkdir()
-    config = {
-        "vault_path": str(vault),
-        "domain_weights": {"ML/Infrastructure": 0.9, "Systems": 0.5},
-        "topic_weights": {"Inference Optimization": 0.95, "Caching": 0.7},
-        "default_weight": 0.5,
-    }
-    (tmp_path / "config.yaml").write_text(yaml.dump(config))
+def project(tmp_path, monkeypatch):
+    if (REAL_VAULT / "pages").exists():
+        shutil.copytree(REAL_VAULT, tmp_path / "vault")
+    else:
+        (tmp_path / "vault" / "pages").mkdir(parents=True)
+        (tmp_path / "vault" / "pages" / "Raft Paper.md").write_text("title:: Raft Paper\ntype:: paper\nstatus:: unread\n")
+    (tmp_path / "config.yaml").write_text(yaml.dump({"vault_path": str(tmp_path / "vault")}))
+    monkeypatch.setenv("LPT_CONFIG", str(tmp_path / "config.yaml"))
     return tmp_path
 
 
-def env(project):
-    return {
-        "LPT_CONFIG": str(project / "config.yaml"),
-        "LPT_INBOX": str(project / "inbox"),
-        "LPT_PROCESSED": str(project / "processed"),
-    }
+def run(*args, input=None):
+    r = CliRunner().invoke(cli, list(args), input=input, catch_exceptions=False)
+    assert r.exit_code == 0, r.output
+    return r.output
 
 
-def test_full_flow(full_project):
-    runner = CliRunner()
-    e = env(full_project)
-    vault = full_project / "vault"
+def test_capture_then_evening_session(project, tmp_path):
+    run("migrate")
+    before = len(load_items(project / "vault"))
+    assert all(i["state"] == "collected" for i in load_items(project / "vault"))
 
-    # 1. Init
-    result = runner.invoke(cli, ["init"], env=e, catch_exceptions=False)
-    assert result.exit_code == 0
-    assert (vault / "pages" / "Learning Queue.md").exists()
+    # capture: a batch of links from WhatsApp
+    run("add", "--note", "from WhatsApp", input="https://example.com/event-loops\nhttps://example.com/tcp\n")
+    unsorted = [i for i in load_items(project / "vault") if i["area"] == "Unsorted"]
+    assert len(unsorted) == 2 and len(load_items(project / "vault")) == before + 2
 
-    # 2. Add two items
-    result = runner.invoke(cli, ["add", "https://example.com/gemma4", "--domain", "ML/Infrastructure",
-                                  "--topic", "Inference Optimization", "--tag", "llm"], env=e, catch_exceptions=False)
-    assert result.exit_code == 0
+    # file one with Claude's result
+    pending = [json.loads(l) for l in run("enrich").splitlines()]
+    result = tmp_path / "r.json"
+    result.write_text(json.dumps({"title": "Event Loops Explained", "medium": "article", "domain": "Systems",
+                                  "topic": "Concurrency", "concepts": ["Concurrency Basics"], "summary": "How loops work."}))
+    run("enrich", pending[0]["id"], "--from", str(result))
 
-    result = runner.invoke(cli, ["add", "https://example.com/kvcache", "--tag", "caching"], env=e, catch_exceptions=False)
-    assert result.exit_code == 0
+    # plan, pick up, work, finish
+    run("prio", "Event Loops Explained", "now")
+    run("plan", "Event Loops Explained")
+    run("time", "Event Loops Explained", "1h")
+    run("check", "Event Loops Explained", "Read others' implementations of the event loop")
+    run("note", "Event Loops Explained", "Read half, epoll next")
+    run("check", "Event Loops Explained", "--toggle", "1")
+    run("done", "Event Loops Explained")
 
-    # 3. Simulate processor output for both jobs
-    inbox = full_project / "inbox"
-    jobs = sorted(inbox.glob("*.json"))
-    assert len(jobs) == 2
-
-    job1 = json.loads(jobs[0].read_text())
-    result1 = {
-        "title": "Gemma 4 Technical Report",
-        "summary": "A technical report.",
-        "medium": "paper",
-        "complexity": "advanced",
-        "size": "deep-dive",
-        "domain": "ML/Infrastructure",
-        "topic": "Inference Optimization",
-        "concepts": ["MoE", "RLHF"],
-        "prerequisites": ["KV Cache", "Attention Mechanisms"],
-        "key_takeaways": ["Key finding"],
-        "engagement_suggestion": "read",
-    }
-    (inbox / f"{job1['id']}.result.json").write_text(json.dumps(result1))
-
-    job2 = json.loads(jobs[1].read_text())
-    result2 = {
-        "title": "Understanding KV Cache",
-        "summary": "Deep dive into KV cache.",
-        "medium": "article",
-        "complexity": "intermediate",
-        "size": "medium",
-        "domain": "ML/Infrastructure",
-        "topic": "Caching",
-        "concepts": ["KV Cache"],
-        "prerequisites": ["Attention Mechanisms"],
-        "key_takeaways": ["How caching works"],
-        "engagement_suggestion": "read",
-    }
-    (inbox / f"{job2['id']}.result.json").write_text(json.dumps(result2))
-
-    # 4. Write pages
-    result = runner.invoke(cli, ["write", "--all"], env=e, catch_exceptions=False)
-    assert result.exit_code == 0
-
-    # Verify pages created
-    gemma_page = read_page(vault, "Gemma 4 Technical Report")
-    assert gemma_page is not None
-    assert gemma_page.properties["type"] == "paper"
-    assert "[[KV Cache]]" in gemma_page.properties["prerequisites"]
-
-    kv_article = read_page(vault, "Understanding KV Cache")
-    assert kv_article is not None
-
-    # Verify stubs created
-    attn_stub = read_page(vault, "Attention Mechanisms")
-    assert attn_stub is not None
-    assert attn_stub.properties["status"] == "stub"
-
-    # Verify domain and topic pages
-    domain_page = read_page(vault, "ML/Infrastructure")
-    assert domain_page is not None
-
-    # Verify jobs moved to processed
-    assert len(list(inbox.glob("*.json"))) == 0
-    assert len(list((full_project / "processed").glob("*.json"))) == 4  # 2 jobs + 2 results
-
-    # 5. Check status
-    result = runner.invoke(cli, ["status"], env=e, catch_exceptions=False)
-    assert result.exit_code == 0
-
-    # 6. Update progress
-    result = runner.invoke(cli, ["progress", "Understanding KV Cache", "50"], env=e, catch_exceptions=False)
-    assert result.exit_code == 0
-    page = read_page(vault, "Understanding KV Cache")
-    assert page.properties["progress"] == "50"
-    assert page.properties["status"] == "in-progress"
-
-    # 7. Mark done
-    result = runner.invoke(cli, ["done", "Understanding KV Cache"], env=e, catch_exceptions=False)
-    assert result.exit_code == 0
-    page = read_page(vault, "Understanding KV Cache")
-    assert page.properties["status"] == "completed"
-
-    # 8. Generate dashboard
-    result = runner.invoke(cli, ["dashboard"], env=e, catch_exceptions=False)
-    assert result.exit_code == 0
-    dashboard = read_page(vault, "Learning Dashboard")
-    assert dashboard is not None
-    assert "ML/Infrastructure" in dashboard.body or "ML/Infrastructure" in str(dashboard.properties)
-
-    # 9. Recompute
-    result = runner.invoke(cli, ["recompute"], env=e, catch_exceptions=False)
-    assert result.exit_code == 0
-    gemma_page = read_page(vault, "Gemma 4 Technical Report")
-    assert "priority" in gemma_page.properties
+    it = next(i for i in load_items(project / "vault") if i["title"] == "Event Loops Explained")
+    today = date.today().isoformat()
+    assert (it["state"], it["done"], it["planned"], it["prio"]) == ("done", today, today[:7], "now")
+    assert it["sessions"] == [{"d": today, "m": 60}] and it["checks"][0]["done"]
+    assert it["notes"] == "Read half, epoll next"
+    page = (project / "vault" / "pages" / "Event Loops Explained.md").read_text()
+    assert "## Time\n- " + today + " · 1h" in page and "## Checklist\n- [x] Read others'" in page

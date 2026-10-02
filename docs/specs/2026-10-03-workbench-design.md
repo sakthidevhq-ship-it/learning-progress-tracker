@@ -83,22 +83,26 @@ Claude, and is easy to review in git. Insights reads the `## Time` lines from ev
 | `lpt pick "Title"` | pick up |
 | `lpt done "Title"` | finish |
 | `lpt drop "Title"` | drop |
-| `lpt shelve "Title"` | put back in the collection |
+| `lpt back "Title"` | put back: not started, stays in the plan |
 | `lpt time "Title" [+30m\|-30m\|1h]` | adds to or removes from today's line in `## Time` (default +30m) |
 | `lpt check "Title" "text"` / `lpt check "Title" --toggle N` | adds a checklist item / ticks or unticks one |
 | `lpt note "Title" "text"` | appends a line to `## Notes` |
 | `lpt plan "Title" [--month 2026-11]` / `lpt unplan "Title"` | defaults to next month |
 | `lpt prio "Title" now\|soon\|someday\|none` | my priority |
-| `lpt enrich` | lists `enrich=pending` items for Claude to fill in |
+| `lpt enrich` / `lpt enrich <id> --from result.json` | lists items waiting to be filed / files one (renames the file to its title) |
+| `lpt show "Title"`, `lpt ls`, `lpt status` | one item / in progress and this month's plan / counts |
 | `lpt migrate` | one-off conversion of the old properties (see §5) |
-| `lpt graph`, `lpt serve` | unchanged: build and open, or serve with live buttons |
+| `lpt graph`, `lpt serve` | build site/ and open it read-only, or serve the app with editing |
 
 **Retired:** `progress` (replaced by pick/done), `recompute`, `cli/priority.py` and `cli/levels.py`. The two-step
 inbox → `result.json` → `write` flow is replaced by direct writes plus `enrich`. The `processed/` folder is no longer used.
 
 **Server API** (`lpt serve`):
-- `POST /api/state {id, action}` for pick, done, drop and shelve.
-- `POST /api/time`, `/api/check`, `/api/notes`, `/api/plan`, `/api/prio` and `/api/add`.
+- `GET /api/items`: every item, fresh from disk. The page loads it on start; if it fails, the page is read-only.
+- `POST /api/item {id, action, ...}` with action pick, done, drop, back, time, check_add, check_toggle, check_remove,
+  notes, prio or plan. Returns the updated item.
+- `POST /api/add {text, note, type, prio}`: one item per line.
+- The Host header must be local (blocks DNS rebinding).
 - Same localhost-only and same-origin checks as today.
 - Opened as a plain file, the buttons copy the matching command, as they do now.
 

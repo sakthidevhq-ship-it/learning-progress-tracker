@@ -64,8 +64,8 @@ def test_write_resource_page_full(vault):
     assert page.properties["domain"] == "[[ML/Infrastructure]]"
     assert page.properties["topic"] == "[[Inference Optimization]]"
     assert page.properties["engagement"] == "read"
-    assert page.properties["status"] == "unread"
-    assert page.properties["progress"] == "0"
+    assert page.properties["state"] == "collected"
+    assert "progress" not in page.properties
     assert page.properties["complexity"] == "advanced"
     assert page.properties["size"] == "deep-dive"
     assert page.properties["medium"] == "paper"
@@ -77,7 +77,7 @@ def test_write_resource_page_full(vault):
     assert "transformers" in page.properties["tags"]
     assert "A report about Gemma 4." in page.body
     assert "Takeaway 1" in page.body
-    assert "## My Notes" in page.body
+    assert "## Notes" in page.body
 
 
 def test_write_resource_page_job_overrides_metadata(vault):
@@ -95,8 +95,8 @@ def test_write_resource_page_minimal_metadata(vault):
     path = write_resource_page(vault, metadata, job)
     page = parse_page(path.read_text())
     assert page.title == "Quick Note"
-    assert page.properties["status"] == "unread"
-    assert page.properties["progress"] == "0"
+    assert page.properties["state"] == "collected"
+    assert "progress" not in page.properties
 
 
 def test_write_concept_stub(vault):
@@ -157,7 +157,7 @@ def test_ensure_linked_pages_creates_stubs(vault):
 
 
 def test_ensure_linked_pages_skips_existing(vault):
-    (vault / "pages" / "MoE.md").write_text("title:: MoE\ntype:: paper\nstatus:: completed\n")
+    (vault / "pages" / "MoE.md").write_text("title:: MoE\ntype:: paper\nstate:: done\n")
     metadata = make_metadata(concepts=["MoE"], prerequisites=[])
     ensure_linked_pages(vault, metadata, "Gemma 4 Technical Report")
     page = read_page(vault, "MoE")

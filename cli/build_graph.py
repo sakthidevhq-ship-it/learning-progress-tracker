@@ -1,154 +1,84 @@
+"""Build the workbench from the vault.
+
+    python cli/build_graph.py --site ./vault site            # site/index.html (lpt graph / serve)
+    python cli/build_graph.py ./vault graph.html out.html     # one file (the Pages workflow)
+
+CI runs this with a bare Python: no click, thefuzz or PyYAML at import time.
+"""
+
 import json
-import re
 import sys
+from datetime import datetime
 from pathlib import Path
 
-PROP_RE = re.compile(r"^([a-zA-Z_-]+)::\s*(.*)$")
-LINK_RE = re.compile(r"\[\[([^\]]+)\]\]")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:  # when run as a script from CI
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-def parse_links(val):
-    return LINK_RE.findall(val) if val else []
+from cli.items import load_items  # noqa: E402
 
-def parse_page(path):
-    content = path.read_text()
-    props = {}
-    body_lines = []
-    in_body = False
-    for line in content.split("\n"):
-        if not in_body:
-            m = PROP_RE.match(line)
-            if m:
-                props[m.group(1)] = m.group(2).strip()
-            elif line.strip() == "":
-                continue
-            else:
-                in_body = True
-                body_lines.append(line)
-        else:
-            body_lines.append(line)
+TEMPLATE = PROJECT_ROOT / "ui" / "workbench.html"
 
-    summary = ""
-    in_summary = False
-    for line in body_lines:
-        if line.startswith("## Summary"):
-            in_summary = True
-            continue
-        elif line.startswith("## ") and in_summary:
-            break
-        elif in_summary and line.strip():
-            summary += line.strip() + " "
 
-    return {
-        "title": props.get("title", path.stem),
-        "type": props.get("type", ""),
-        "domain": props.get("domain", ""),
-        "topic": props.get("topic", ""),
-        "status": props.get("status", ""),
-        "progress": props.get("progress", ""),
-        "complexity": props.get("complexity", ""),
-        "size": props.get("size", ""),
-        "goal": props.get("goal", ""),
-        "priority": props.get("priority", ""),
-        "engagement": props.get("engagement", ""),
-        "prerequisites": props.get("prerequisites", ""),
-        "concepts": props.get("concepts", ""),
-        "referencedBy": props.get("referenced-by", ""),
-        "summary": summary.strip(),
-    }
+def render(template_text: str, items: list[dict], meta: dict | None = None) -> str:
+    meta = dict(meta or {})
+    meta.setdefault("builtAt", datetime.now().isoformat(timespec="seconds"))
+    # </script> inside a note or title must not end the script block
+    data = json.dumps(items, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    html = template_text.replace("VAULT_PLACEHOLDER", data)
+    return html.replace("META_PLACEHOLDER", json.dumps(meta).replace("</", "<\\/"))
 
-RES_TYPES = {"paper", "article", "video", "docs", "tweet"}
 
-def compute_resource_prereqs(data):
-    resources = [d for d in data if d["type"] in RES_TYPES]
+def build_site(vault_path, out_dir, meta=None) -> Path:
+    """Write out_dir/index.html. Returns its path."""
+    items = load_items(Path(vault_path))
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / "index.html"
+    path.write_text(render(TEMPLATE.read_text(), items, meta))
+    print(f"Built workbench: {path} ({len(items)} items)")
+    return path
 
-    # Build: concept -> list of resource titles that teach it
-    concept_teachers = {}
-    for r in resources:
-        for c in parse_links(r["concepts"]):
-            concept_teachers.setdefault(c, []).append(r["title"])
 
-    # For each resource, find which other resources teach its prerequisites
-    for r in resources:
-        prereq_concepts = parse_links(r["prerequisites"])
-        prereq_resources = set()
-        for pc in prereq_concepts:
-            for teacher in concept_teachers.get(pc, []):
-                if teacher != r["title"]:
-                    prereq_resources.add(teacher)
-        r["prereqResources"] = sorted(prereq_resources)
-
-    # Learning-depth levels: intrinsic floor + SCC-condensed chain propagation
+def load_meta(config_path="config.yaml") -> dict:
+    """Career focus weights for Insights."""
     try:
-        from cli.levels import assign_levels
-    except ImportError:
-        from levels import assign_levels
-    title_to_idx = {r["title"]: i for i, r in enumerate(resources)}
-    level_nodes = [
-        {
-            "complexity": r.get("complexity", ""),
-            "prereq_count": len(parse_links(r["prerequisites"])),
-            "size": r.get("size", ""),
-        }
-        for r in resources
-    ]
-    level_edges = []
-    for i, r in enumerate(resources):
-        for t in r["prereqResources"]:
-            j = title_to_idx.get(t)
-            if j is not None:
-                level_edges.append((j, i))
-    levels = assign_levels(level_nodes, level_edges)
-    for r, lv in zip(resources, levels):
-        r["level"] = round(lv, 2)
-
-    # Sibling edges: resources that share prerequisites (but no direct prereq link)
-    # These create weaker "related" connections
-    prereq_sets = {}
-    for r in resources:
-        prereq_sets[r["title"]] = set(parse_links(r["prerequisites"]))
-
-    siblings = []
-    titles = [r["title"] for r in resources]
-    for i in range(len(titles)):
-        for j in range(i + 1, len(titles)):
-            if not prereq_sets[titles[i]] or not prereq_sets[titles[j]]:
+        text = Path(config_path).read_text()
+    except OSError:
+        return {}
+    try:
+        import yaml
+        weights = (yaml.safe_load(text) or {}).get("domain_weights", {})
+    except ImportError:  # the Pages workflow has no PyYAML: read the one flat block by hand
+        weights, inside = {}, False
+        for line in text.splitlines():
+            if not line.strip() or line.lstrip().startswith("#"):
                 continue
-            shared = prereq_sets[titles[i]] & prereq_sets[titles[j]]
-            if len(shared) >= 2:
-                # Only if they don't already have a direct prereq edge
-                a_prereqs = set(next(r for r in resources if r["title"] == titles[i])["prereqResources"])
-                b_prereqs = set(next(r for r in resources if r["title"] == titles[j])["prereqResources"])
-                if titles[j] not in a_prereqs and titles[i] not in b_prereqs:
-                    siblings.append({"a": titles[i], "b": titles[j], "shared": sorted(shared)})
+            if not line.startswith((" ", "\t")):
+                inside = line.split(":")[0].strip() == "domain_weights"
+            elif inside and ":" in line:
+                key, _, value = line.strip().rpartition(":")
+                try:
+                    weights[key.strip().strip("'\"")] = float(value)
+                except ValueError:
+                    pass
+    return {"domainWeights": weights}
 
-    for r in resources:
-        r["siblingResources"] = [
-            {"title": s["b"] if s["a"] == r["title"] else s["a"], "shared": s["shared"]}
-            for s in siblings
-            if s["a"] == r["title"] or s["b"] == r["title"]
-        ]
 
-def build(vault_path, html_template, output_path):
-    pages_dir = Path(vault_path) / "pages"
-    data = []
-    for f in sorted(pages_dir.glob("*.md")):
-        page = parse_page(f)
-        if page["type"] in ("dashboard", "queries", ""):
-            continue
-        data.append(page)
+def build_file(vault_path, output_path, meta=None) -> Path:
+    """Write the workbench to a single file (the form the Pages workflow uses)."""
+    items = load_items(Path(vault_path))
+    out = Path(output_path)
+    out.write_text(render(TEMPLATE.read_text(), items, meta))
+    print(f"Built workbench: {out} ({len(items)} items)")
+    return out
 
-    compute_resource_prereqs(data)
-
-    html = Path(html_template).read_text()
-    html = html.replace("VAULT_PLACEHOLDER", json.dumps(data, indent=2))
-    Path(output_path).write_text(html)
-
-    res_count = sum(1 for d in data if d["type"] in RES_TYPES)
-    prereq_edges = sum(len(d.get("prereqResources", [])) for d in data)
-    print(f"Built graph: {output_path} ({len(data)} nodes, {res_count} resources, {prereq_edges} prerequisite edges)")
 
 if __name__ == "__main__":
-    vault = sys.argv[1] if len(sys.argv) > 1 else "/Users/sakthi/logseq"
-    template = sys.argv[2] if len(sys.argv) > 2 else "graph.html"
-    output = sys.argv[3] if len(sys.argv) > 3 else "knowledge-graph.html"
-    build(vault, template, output)
+    args = sys.argv[1:]
+    if args and args[0] == "--site":
+        # build_graph.py --site [vault] [out_dir]
+        build_site(args[1] if len(args) > 1 else "./vault", args[2] if len(args) > 2 else "site", load_meta())
+    else:
+        # build_graph.py [vault] [template, ignored] [output.html]: what .github/workflows/deploy.yml runs
+        build_file(args[0] if args else "./vault", args[2] if len(args) > 2 else "knowledge-graph.html", load_meta())

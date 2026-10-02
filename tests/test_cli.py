@@ -1,211 +1,156 @@
-import json
-import os
-from pathlib import Path
+from datetime import date, timedelta
 
 import pytest
 import yaml
 from click.testing import CliRunner
 
+from cli.items import load_items
 from cli.main import cli
+
+TODAY = date.today().isoformat()
 
 
 @pytest.fixture
-def project(tmp_path):
-    vault = tmp_path / "vault"
-    vault.mkdir()
-    (vault / "pages").mkdir()
-    inbox = tmp_path / "inbox"
-    inbox.mkdir()
-    processed = tmp_path / "processed"
-    processed.mkdir()
-    config_file = tmp_path / "config.yaml"
-    config_file.write_text(yaml.dump({
-        "vault_path": str(vault),
-        "domain_weights": {"ML/Infrastructure": 0.9},
-        "topic_weights": {},
-        "default_weight": 0.5,
-    }))
+def project(tmp_path, monkeypatch):
+    pages = tmp_path / "vault" / "pages"
+    pages.mkdir(parents=True)
+    (pages / "Raft Paper.md").write_text(
+        "title:: Raft Paper\ntype:: paper\ndomain:: [[Systems]]\ntopic:: [[Distributed Consensus]]\n"
+        "state:: collected\ningested:: [[2026-07-09]]\n"
+    )
+    (pages / "Attention Is All You Need.md").write_text(
+        "title:: Attention Is All You Need\ntype:: paper\ndomain:: [[ML/Foundations]]\nstate:: collected\n"
+    )
+    config = tmp_path / "config.yaml"
+    config.write_text(yaml.dump({"vault_path": str(tmp_path / "vault")}))
+    monkeypatch.setenv("LPT_CONFIG", str(config))
     return tmp_path
 
 
-def run(project, args, env=None):
-    runner = CliRunner()
-    full_env = {"LPT_CONFIG": str(project / "config.yaml"),
-                "LPT_INBOX": str(project / "inbox"),
-                "LPT_PROCESSED": str(project / "processed")}
-    if env:
-        full_env.update(env)
-    return runner.invoke(cli, args, env=full_env, catch_exceptions=False)
+def run(*args, input=None):
+    result = CliRunner().invoke(cli, list(args), input=input, catch_exceptions=False)
+    return result
 
 
-def test_add_url(project):
-    result = run(project, ["add", "https://arxiv.org/abs/2504.00958", "--tag", "ml"])
-    assert result.exit_code == 0
-    assert "Added" in result.output
-    inbox = project / "inbox"
-    jobs = list(inbox.glob("*.json"))
-    assert len(jobs) == 1
-    job = json.loads(jobs[0].read_text())
-    assert job["source"] == "https://arxiv.org/abs/2504.00958"
-    assert job["source_type"] == "url"
-    assert "ml" in job["tags"]
+def items_by_title(project):
+    return {i["title"]: i for i in load_items(project / "vault")}
 
 
-def test_add_local_file(project):
-    local_file = project / "test.pdf"
-    local_file.write_text("fake pdf")
-    result = run(project, ["add", str(local_file)])
-    assert result.exit_code == 0
-    inbox = project / "inbox"
-    jobs = list(inbox.glob("*.json"))
-    assert len(jobs) == 1
-    job = json.loads(jobs[0].read_text())
-    assert job["source_type"] == "file"
+def test_add_entries_and_stdin(project):
+    r = run("add", "https://example.com/a", "Build a toy Raft", "--note", "from WhatsApp", "--prio", "soon")
+    assert r.exit_code == 0 and "Added 2 to Unsorted" in r.output
+    r = run("add", input="https://example.com/b\n\nhttps://example.com/a\n")
+    assert "Added 1 to Unsorted, skipped 1" in r.output
+    got = items_by_title(project)
+    assert got["Build a toy Raft"]["note"] == "from WhatsApp"
+    assert got["https://example.com/b"]["area"] == "Unsorted"
 
 
-def test_add_local_file_not_found(project):
-    result = run(project, ["add", "/nonexistent/file.pdf"])
-    assert result.exit_code != 0
-    assert "not found" in result.output.lower() or "does not exist" in result.output.lower()
+def test_add_project_type(project):
+    run("add", "Write an HTTP/2 parser", "--type", "project")
+    assert items_by_title(project)["Write an HTTP/2 parser"]["type"] == "project"
 
 
-def test_add_with_domain_topic_engagement(project):
-    result = run(project, ["add", "https://example.com",
-                           "--domain", "ML/Infrastructure",
-                           "--topic", "Inference",
-                           "--engagement", "implement"])
-    assert result.exit_code == 0
-    inbox = project / "inbox"
-    job = json.loads(list(inbox.glob("*.json"))[0].read_text())
-    assert job["domain"] == "ML/Infrastructure"
-    assert job["topic"] == "Inference"
-    assert job["engagement"] == "implement"
+def test_pick_done_drop_back(project):
+    assert "Picked up 'Raft Paper'" in run("pick", "raft").output
+    assert items_by_title(project)["Raft Paper"]["planned"] == TODAY[:7]
+    run("back", "raft")
+    assert items_by_title(project)["Raft Paper"]["state"] == "collected"
+    run("done", "raft")
+    assert items_by_title(project)["Raft Paper"]["state"] == "done"
+    run("drop", "attention")
+    assert items_by_title(project)["Attention Is All You Need"]["state"] == "dropped"
 
 
-def test_status_empty(project):
-    result = run(project, ["status"])
-    assert result.exit_code == 0
-    assert "0" in result.output
+def test_unknown_item_errors(project):
+    r = CliRunner().invoke(cli, ["pick", "zzz quantum basket"])
+    assert r.exit_code != 0 and "No item matching" in r.output
 
 
-def test_status_with_jobs(project):
-    job = {"id": "test-001", "source": "https://example.com", "status": "pending"}
-    (project / "inbox" / "test-001.json").write_text(json.dumps(job))
-    result_file = {"title": "Example"}
-    (project / "inbox" / "test-001.result.json").write_text(json.dumps(result_file))
-    result = run(project, ["status"])
-    assert result.exit_code == 0
+def test_time_default_custom_negative_and_date(project):
+    run("time", "raft")
+    r = run("time", "raft", "1h")
+    assert "1h30m on" in r.output
+    run("time", "raft", "-30m")
+    yesterday = (date.today() - timedelta(days=1)).isoformat()
+    run("time", "raft", "45m", "--date", "yesterday")
+    s = {x["d"]: x["m"] for x in items_by_title(project)["Raft Paper"]["sessions"]}
+    assert s == {TODAY: 60, yesterday: 45}
+    assert items_by_title(project)["Raft Paper"]["state"] == "picked"
 
 
-def test_write_single_job(project):
-    job = {
-        "id": "20260708-143022-a1b2",
-        "source": "https://example.com/paper",
-        "source_type": "url",
-        "domain": None,
-        "topic": None,
-        "engagement": None,
-        "tags": ["ml"],
-        "created_at": "2026-07-08T14:30:22",
-        "status": "pending",
-    }
-    result_data = {
-        "title": "Example Paper",
-        "summary": "A paper.",
-        "medium": "paper",
-        "complexity": "beginner",
-        "size": "quick-read",
-        "domain": "ML/Infrastructure",
-        "topic": "Inference Optimization",
-        "concepts": ["A"],
-        "prerequisites": [],
-        "key_takeaways": ["T1"],
-        "engagement_suggestion": "read",
-    }
-    (project / "inbox" / "20260708-143022-a1b2.json").write_text(json.dumps(job))
-    (project / "inbox" / "20260708-143022-a1b2.result.json").write_text(json.dumps(result_data))
-    result = run(project, ["write", "20260708-143022-a1b2"])
-    assert result.exit_code == 0
-    vault = project / "vault"
-    assert (vault / "pages" / "Example Paper.md").exists()
-    assert (project / "processed" / "20260708-143022-a1b2.json").exists()
-    assert not (project / "inbox" / "20260708-143022-a1b2.json").exists()
+def test_time_rejects_bad_amount(project):
+    r = CliRunner().invoke(cli, ["time", "raft", "lots"])
+    assert r.exit_code != 0
 
 
-def test_write_missing_result(project):
-    job = {"id": "test-002", "source": "https://example.com", "status": "pending"}
-    (project / "inbox" / "test-002.json").write_text(json.dumps(job))
-    result = run(project, ["write", "test-002"])
-    assert result.exit_code != 0
-    assert "result" in result.output.lower()
+def test_check_add_toggle_remove_and_list(project):
+    run("check", "raft", "Read §5")
+    run("check", "raft", "Implement it")
+    r = run("check", "raft", "--toggle", "1")
+    assert "1. [x] Read §5" in r.output and "2. [ ] Implement it" in r.output
+    r = run("check", "raft", "--remove", "1")
+    assert "Read §5" not in r.output
+    assert "1. [ ] Implement it" in run("check", "raft").output
 
 
-def test_init(project):
-    vault = project / "vault"
-    result = run(project, ["init"])
-    assert result.exit_code == 0
-    assert (vault / "pages" / "Learning Queue.md").exists()
-    content = (vault / "pages" / "Learning Queue.md").read_text()
-    assert "{{query" in content
+def test_note_appends(project):
+    run("note", "raft", "Read half of §5")
+    run("note", "raft", "Stopped at 5.4.1")
+    assert items_by_title(project)["Raft Paper"]["notes"] == "Read half of §5\nStopped at 5.4.1"
 
 
-def test_init_idempotent(project):
-    run(project, ["init"])
-    result = run(project, ["init"])
-    assert result.exit_code == 0
+def test_prio_and_plan(project):
+    run("prio", "raft", "now")
+    run("plan", "raft", "next")
+    it = items_by_title(project)["Raft Paper"]
+    assert it["prio"] == "now"
+    assert it["planned"] > TODAY[:7]
+    run("plan", "raft", "none")
+    assert items_by_title(project)["Raft Paper"]["planned"] == ""
 
 
-def _write_page(project, title, **props):
-    from cli.config import title_to_filename
-    defaults = {"type": "paper", "status": "unread", "progress": "0"}
-    defaults.update(props)
-    lines = [f"title:: {title}"]
-    for k, v in defaults.items():
-        lines.append(f"{k}:: {v}")
-    vault = project / "vault"
-    (vault / "pages" / title_to_filename(title)).write_text("\n".join(lines) + "\n")
+def test_show_ls_status(project):
+    run("pick", "raft")
+    run("time", "raft", "1h")
+    run("check", "raft", "Read §5")
+    out = run("show", "raft").output
+    assert "Systems / Distributed Consensus" in out and "time: 1h" in out and "[ ] Read §5" in out
+    assert "picked" in run("ls").output
+    assert "Attention" in run("ls", "--state", "collected").output
+    out = run("status").output
+    assert "picked     1" in out and "collected  1" in out
 
 
-def test_progress_command(project):
-    _write_page(project, "Test Paper")
-    result = run(project, ["progress", "Test Paper", "50"])
-    assert result.exit_code == 0
-    content = (project / "vault" / "pages" / "Test Paper.md").read_text()
-    assert "progress:: 50" in content
-    assert "status:: in-progress" in content
+def test_enrich_lists_and_files(project, tmp_path):
+    run("add", "https://example.com/event-loops")
+    out = run("enrich").output
+    assert "example.com/event-loops" in out
+    import json
+    item_id = json.loads(out.splitlines()[0])["id"]
+    result = tmp_path / "r.json"
+    result.write_text(json.dumps({"title": "Event Loops", "medium": "article", "domain": "Systems",
+                                  "topic": "Concurrency", "concepts": ["Concurrency Basics"], "summary": "Loops."}))
+    r = run("enrich", item_id, "--from", str(result))
+    assert "Filed 'Event Loops' under Systems / Concurrency" in r.output
+    assert "Nothing waiting" in run("enrich").output
 
 
-def test_progress_command_no_match(project):
-    result = run(project, ["progress", "Nonexistent Page", "50"])
-    assert result.exit_code != 0
+def test_migrate_command(project):
+    (project / "vault" / "pages" / "Old.md").write_text("title:: Old\ntype:: docs\nstatus:: completed\nprogress:: 100\n")
+    assert "Migrated 1 items" in run("migrate").output
+    assert items_by_title(project)["Old"]["state"] == "collected"
 
 
-def test_done_command(project):
-    _write_page(project, "Test Paper", status="in-progress", progress="40")
-    result = run(project, ["done", "Test Paper"])
-    assert result.exit_code == 0
-    content = (project / "vault" / "pages" / "Test Paper.md").read_text()
-    assert "progress:: 100" in content
-    assert "status:: completed" in content
-
-
-def test_done_command_no_match(project):
-    result = run(project, ["done", "Nonexistent Page"])
-    assert result.exit_code != 0
-
-
-def test_dashboard_command(project):
-    _write_page(project, "Test Paper", domain="[[ML/Infrastructure]]")
-    result = run(project, ["dashboard"])
-    assert result.exit_code == 0
-    dashboard_file = project / "vault" / "pages" / "Learning Dashboard.md"
-    assert dashboard_file.exists()
-    assert "Learning Dashboard" in dashboard_file.read_text()
-
-
-def test_recompute_command(project):
-    _write_page(project, "Test Paper", domain="[[ML/Infrastructure]]")
-    result = run(project, ["recompute"])
-    assert result.exit_code == 0
-    content = (project / "vault" / "pages" / "Test Paper.md").read_text()
-    assert "priority::" in content
+def test_graph_builds_site(project, monkeypatch):
+    from cli import main
+    monkeypatch.setattr(main, "PROJECT_ROOT", project)
+    (project / "ui").mkdir()
+    import shutil
+    from pathlib import Path
+    shutil.copy(Path(__file__).resolve().parent.parent / "ui" / "workbench.html", project / "ui" / "workbench.html")
+    monkeypatch.setattr("cli.build_graph.TEMPLATE", project / "ui" / "workbench.html")
+    r = run("graph", "--no-open")
+    assert r.exit_code == 0
+    html = (project / "site" / "index.html").read_text()
+    assert "Raft Paper" in html and "VAULT_PLACEHOLDER" not in html
