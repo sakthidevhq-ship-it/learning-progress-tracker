@@ -1,9 +1,9 @@
-title:: PagedAttention
+title:: RadixAttention
 type:: concept
 status:: stub
 domain:: [[ML/Infrastructure]]
 topic:: [[LLM Serving]]
-referenced-by:: [[vLLM - Efficient LLM Serving]], [[GPU Inference Deep Dive]], [[vLLM PRs]], [[GPU kernels and inference: open-source roadmap]]
+referenced-by:: [[SGLang PRs]]
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.

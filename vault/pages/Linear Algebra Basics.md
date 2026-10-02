@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
-referenced-by:: [[Attention Is All You Need]], [[Matryoshka Representation Learning]], [[Deep Learning (Goodfellow) — Part I: Math & Machine Learning Basics]], [[Deep Learning (Goodfellow) — Part II-a: Feedforward Nets, Regularization & Optimization]]
+referenced-by:: [[Attention Is All You Need]], [[Matryoshka Representation Learning]], [[Deep Learning (Goodfellow) — Part I: Math & Machine Learning Basics]], [[Deep Learning (Goodfellow) — Part II-a: Feedforward Nets, Regularization & Optimization]], [[JAX and Pallas]], [[How to Scale Your Model (JAX Scaling Book)]], [[The Little Book of Deep Learning]]
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.
