@@ -18,5 +18,5 @@ Contribute to vLLM: get it running locally with a small model, land a first PR f
 
 ## Checklist
 - [x] Set up vLLM locally and run a small model
-- [ ] Pick a "good first issue", or add support for a new model
+- [x] Pick a "good first issue", or add support for a new model
 - [ ] Move on to latency work (speculative decoding, scheduling) or kernel work through FlashInfer
