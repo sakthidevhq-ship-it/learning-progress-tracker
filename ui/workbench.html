@@ -500,6 +500,8 @@ function similar(it){
 function openItem(k, keep){
   const i = K(k); if (!i) return;
   const dr = $('#drawer'), sc0 = keep ? dr.scrollTop : 0;
+  // keep whatever is mid-typing in the subtask box across a refresh
+  const nc = keep && $('#newCheck'), ncVal = nc ? nc.value : '', ncFocus = nc && document.activeElement === nc;
   if (!keep) flushNotes();
   drawerK = k;
   const btn = (a,l,p) => `<button class="btn ${p?'pri':''} ed" onclick="state(${k},'${a}')">${l}</button>`;
@@ -523,7 +525,7 @@ function openItem(k, keep){
       <textarea class="notes" id="notesBox" ${LIVE?'':'readonly'} placeholder="${LIVE?'Anything worth remembering: where you stopped, what clicked, links…':'No notes'}" oninput="notesChanged(${k})" onblur="flushNotes()">${esc(i.notes)}</textarea>
       <div class="wl">Checklist ${i.checks.length?`<span class="muted num">${i.checks.filter(c=>c.done).length}/${i.checks.length}</span>`:''}</div>
       <div class="checks">${i.checks.map((c,n)=>`<div class="ck ${c.done?'done':''}"><input type="checkbox" ${c.done?'checked':''} ${LIVE?'':'disabled'} onchange="act(${k},'check_toggle',{index:${n}})"><span onclick="${LIVE?`act(${k},'check_toggle',{index:${n}})`:''}">${esc(c.t)}</span><button class="x2 ed" onclick="act(${k},'check_remove',{index:${n}})" title="Remove">✕</button></div>`).join('') || (LIVE?'':'<div class="muted" style="font-size:13px">Empty</div>')}
-        <input class="inp addck ed" id="newCheck" placeholder="+ Add a subtask, press Enter" onkeydown="if(event.key==='Enter'&&this.value.trim()){act(${k},'check_add',{text:this.value.trim()}).then(()=>$('#newCheck')?.focus())}">
+        <input class="inp addck ed" id="newCheck" placeholder="+ Add a subtask, press Enter" onkeydown="if(event.key==='Enter'&&this.value.trim()){const v=this.value.trim();this.value='';act(${k},'check_add',{text:v})}">
       </div>
       <button class="btn sm ghost ed" style="margin-top:12px" onclick="openAdd()">+ Save something for later to the library</button>
     </div>` : `<div class="tbtns ed" style="margin:-8px 0 20px"><button class="btn sm logbtn" onclick="addTime(${k},30)">+30m</button> <span class="muted" style="font-size:12px">logging time picks it up</span></div>`}
@@ -536,6 +538,7 @@ function openItem(k, keep){
   document.body.classList.add('dr');
   dr.setAttribute('aria-hidden','false');
   dr.scrollTop = sc0;
+  if (keep && (ncVal || ncFocus)) { const n = $('#newCheck'); if (n) { n.value = ncVal; if (ncFocus) n.focus(); } }
   if (!keep) history.replaceState(null, '', '#item=' + encodeURIComponent(i.id));
 }
 function closeItem(){ flushNotes(); drawerK = null; document.body.classList.remove('dr'); $('#drawer').setAttribute('aria-hidden','true'); history.replaceState(null, '', '#' + curTab); }

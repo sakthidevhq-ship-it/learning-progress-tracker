@@ -60,10 +60,9 @@ try {
   check((await text('#notesState')) === 'saved', 'notes show "saved"');
   await click('#newCheck');
   await type('Read §5 log replication\n');
-  await sleep(400);
-  await type('Implement it in Rust\n');
+  await type('Implement it in Rust\n');  // straight away, while the first save is in flight
   await sleep(500);
-  check((await item('Raft —')).checks.length === 2, 'two checklist items added with Enter');
+  check(JSON.stringify((await item('Raft —')).checks.map(c => c.t)) === JSON.stringify(['Read §5 log replication', 'Implement it in Rust']), 'two checklist items added with Enter, typed back to back');
   check(await evaluate(`document.activeElement && document.activeElement.id === 'newCheck'`), 'focus stays in the subtask box');
   await click('#drawer .ck span', 'Read §5');
   check((await item('Raft —')).checks[0].done === true, 'ticking a checklist item saves');

@@ -6,6 +6,8 @@
 CI runs this with a bare Python: no click, thefuzz or PyYAML at import time.
 """
 
+from __future__ import annotations
+
 import json
 import sys
 from datetime import datetime

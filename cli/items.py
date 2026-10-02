@@ -14,6 +14,8 @@ All state lives on the item's own page so the vault stays plain, hand-editable m
 Imported by the CI site build, which only has PyYAML, so keep third-party imports lazy.
 """
 
+from __future__ import annotations
+
 import re
 from datetime import date
 from pathlib import Path

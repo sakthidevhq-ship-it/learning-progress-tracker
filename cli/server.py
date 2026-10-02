@@ -9,6 +9,8 @@ and DNS-rebinding tricks can't drive it.
     POST /api/add   {text, note, type, prio}   capture, one item per line -> {ok, added, skipped}
 """
 
+from __future__ import annotations
+
 import json
 import socket
 import threading
