@@ -1,6 +1,6 @@
 title:: GPU kernels and inference: open-source roadmap
 type:: project
-state:: collected
+state:: picked
 ingested:: [[2026-10-03]]
 note:: An alternate roadmap from earlier: open source first, academic route (part-time PhD / IISc M.Tech Research) second.
 domain:: [[ML/Infrastructure]]
@@ -9,6 +9,8 @@ complexity:: advanced
 size:: deep-dive
 concepts:: [[Triton]], [[GPU Computing Basics]], [[Nsight Compute]], [[Continuous Batching]], [[PagedAttention]]
 prerequisites:: [[Python]], [[GPU Computing Basics]]
+picked:: [[2026-10-03]]
+planned:: 2026-10
 
 ## Summary
 Path into inference and kernel work through open source: Triton before CUDA, PMPP and roofline foundations, a benchmarked kernel ladder up to flash attention, then contributions to CUTLASS/CuPy, vLLM and SGLang. Angle: real-time and streaming inference, plus the less crowded AMD side.
