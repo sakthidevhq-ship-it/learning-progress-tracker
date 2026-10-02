@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workbench</title>
+<style>
+:root{
+  --bg:#0e1013;--bg2:#13161b;--panel:#171a20;--panel2:#1c2027;--line:#262b33;--line2:#323843;
+  --tx:#e8eaed;--tx2:#a3a9b3;--tx3:#6c737e;--acc:#e9c46a;--ok:#5fcf8f;--warn:#e9a15a;--bad:#e06c6c;
+  --r:10px;--sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;--serif:"Iowan Old Style","Charter",Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+/* header */
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:28px;height:58px;padding:0 28px;background:rgba(14,16,19,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font:600 15px var(--sans);letter-spacing:.01em}
+.brand i{width:18px;height:18px;border-radius:5px;background:linear-gradient(135deg,var(--acc),#c98a3a);display:inline-block}
+nav{display:flex;gap:4px;height:100%}
+nav button{background:none;border:0;padding:0 14px;height:100%;color:var(--tx2);font-weight:500;position:relative;display:flex;align-items:center;gap:8px}
+nav button:hover{color:var(--tx)}
+nav button.on{color:var(--tx)}
+nav button.on::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--acc);border-radius:2px}
+.badge{font-size:11px;font-weight:600;padding:1px 7px;border-radius:9px;background:var(--panel2);color:var(--tx2)}
+.badge.new{background:rgba(233,196,106,.16);color:var(--acc)}
+.hsp{flex:1}
+.search{display:flex;align-items:center;gap:8px;width:280px;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg2);color:var(--tx3);font-size:13px}
+.search kbd,.k{font:11px var(--sans);border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--tx3);margin-left:auto}
+.btn{height:34px;padding:0 14px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);font-weight:500;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:#4a5260}
+.btn.pri{background:var(--acc);color:#1b1608;border-color:transparent;font-weight:600}
+.btn.sm{height:28px;padding:0 10px;font-size:12.5px}
+.btn.ghost{background:none;border-color:transparent;color:var(--tx2)}
+.btn.ghost:hover{color:var(--tx);background:var(--panel)}
+main{max-width:1280px;margin:0 auto;padding:30px 28px 80px}
+.tab{display:none}.tab.on{display:block}
+h1{font:400 30px/1.15 var(--serif);margin:0;letter-spacing:-.01em}
+h2{font:600 11.5px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin:0 0 12px;display:flex;align-items:center;gap:10px}
+h2 .c{color:var(--tx2);letter-spacing:0}
+h2 .r{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500;color:var(--tx3)}
+.sub{color:var(--tx2);margin-top:6px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none;background:var(--c,#888)}
+.chip{white-space:nowrap;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line2);color:var(--tx2)}
+.chip.project{color:#9fd1ff;border-color:rgba(159,209,255,.35)}
+.chip.practice{color:#c9a7ff;border-color:rgba(201,167,255,.35)}
+.muted{color:var(--tx3)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+/* workbench */
+.wbhead{display:flex;align-items:flex-end;gap:20px;margin-bottom:28px}
+.wbhead .stats{margin-left:auto;display:flex;gap:28px}
+.stat b{display:block;font:500 22px var(--sans)}.stat span{font-size:12px;color:var(--tx3)}
+.wbgrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px}
+.picked{display:flex;flex-direction:column;gap:10px}
+.pc{padding:16px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 18px;border-left:3px solid var(--c)}
+.pc .where{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--tx2)}
+.pc .ttl{font:500 16px/1.35 var(--sans);grid-column:1;cursor:pointer}
+.pc .ttl:hover{text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px}
+.pc .meta{grid-column:1;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--tx3)}
+.pc .age{grid-column:2;grid-row:1/3;text-align:right;align-self:start}
+.pc .age b{font:500 20px var(--sans);display:block}.pc .age span{font-size:11.5px;color:var(--tx3)}
+.pc .age.stale b{color:var(--warn)}
+.pc .acts{grid-column:2;display:flex;gap:6px;justify-content:flex-end}
+.side .card{padding:16px 18px;margin-bottom:16px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.row .t:hover{color:#fff}
+.planbar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--panel2);margin:6px 0 4px}
+.planbar i{display:block}
+.libcard{display:flex;align-items:center;gap:14px;cursor:pointer}
+.libcard:hover{border-color:var(--line2)}
+.lastlog{grid-column:1;font-size:13px;color:var(--tx2);margin-top:4px;padding:7px 10px;background:var(--bg2);border-radius:7px;border:1px solid var(--line)}
+.pc .acts{grid-row:4}
+.logbtn{border-color:rgba(233,196,106,.45);color:var(--acc)}
+.logbox{grid-column:1/-1;margin-top:10px;padding:14px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);display:flex;flex-direction:column;gap:10px}
+.lrow{display:flex;align-items:center;gap:12px}.lrow .lbl{width:44px;font-size:12px;color:var(--tx3)}.lrow .inp{margin:0;height:34px;font-size:13px;flex:1}
+.weeks{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:20px 10px 16px;margin-bottom:30px}
+.wk{display:flex;flex-direction:column;align-items:center;padding:0 10px;border-left:1px solid var(--line)}.wk:first-child{border-left:0}
+.wk .hh{font:500 15px var(--sans);margin-bottom:8px}
+.wk .col{height:150px;width:34px;display:flex;flex-direction:column-reverse;gap:2px;background:linear-gradient(var(--panel2),var(--panel2)) bottom/100% 1px no-repeat}
+.wk .col i{display:block;border-radius:3px;min-height:3px}
+.wk .wl{font-size:12px;color:var(--tx3);margin-top:10px}.wk.cur .wl{color:var(--acc)}
+.wk .wd{display:flex;flex-direction:column;gap:3px;margin-top:10px;min-height:20px;width:100%;text-align:center}
+.wk .wd span{font-size:11.5px;color:var(--ok);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arow{display:grid;grid-template-columns:minmax(0,1fr) 170px 64px 70px;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px}
+.arow.head{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);border-top:0;padding-top:0}
+.tb{display:flex;align-items:center;gap:8px}.tb i{display:block;height:6px;border-radius:3px}.tb em{white-space:nowrap;font-style:normal;font-size:12.5px;color:var(--tx2)}
+.psec{padding:16px 18px;margin-bottom:16px}
+.leftover{border-color:#4a4330;background:rgba(233,196,106,.035)}
+.prow{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.psec h2+.prow{border-top:0}
+.pt{flex:1;min-width:0}.pt .t{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pt .t:hover{color:#fff}
+.ps{font-size:12px;color:var(--tx3);margin-top:2px}
+.pa{display:flex;gap:6px}
+.fit{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.fit div{padding:10px 12px;border-radius:8px;background:var(--bg2)}
+.fit b{display:block;font:500 22px var(--sans)}.fit span{font-size:11.5px;color:var(--tx3)}.fit .now{outline:1px solid rgba(233,196,106,.4)}.fit .now b{color:var(--acc)}
+.insights{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:30px}
+.ins{padding:16px 18px;font-size:14.5px;line-height:1.5;color:var(--tx2)}.ins b{color:var(--tx);font-weight:600}
+.ins2{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px}
+.lb{width:34px;height:3px;border-radius:2px;background:var(--panel2);margin-top:8px;overflow:hidden}.lb i{display:block;height:100%;background:var(--ok)}
+.lbk{display:inline-block;width:14px;height:3px;background:var(--ok);border-radius:2px}
+.lg{display:none}
+.split{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px}.split i{display:block}
+.splitl{display:flex;justify-content:space-between;margin-top:10px;font-size:13px;color:var(--tx2)}.splitl b{color:var(--tx);font-weight:600}
+.drow{display:grid;grid-template-columns:minmax(0,1fr) 70px 260px 70px 80px;align-items:center;gap:14px;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px}
+.drow.head{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);border-top:0}
+.drow.dim{color:var(--tx3)}
+.fdots{display:flex;gap:3px}.fdots i{width:14px;height:5px;border-radius:2px;background:var(--panel2)}.fdots i.on{background:var(--acc)}
+@media (max-width:820px){
+  header{height:52px;backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}.search{display:none}
+  nav{position:fixed;left:0;right:0;bottom:0;height:auto;z-index:25;background:rgba(19,22,27,.97);backdrop-filter:blur(10px);border-top:1px solid var(--line2);padding:4px 4px calc(6px + env(safe-area-inset-bottom));gap:0}
+  nav button{flex:1;flex-direction:column;justify-content:center;gap:3px;height:52px;padding:0;font-size:12px}
+  nav button.on::after{top:-5px;bottom:auto;left:30%;right:30%}
+  nav .badge{position:absolute;top:4px;right:calc(50% - 30px);font-size:9.5px;padding:0 5px}nav .badge.new{display:none}
+  main{padding-bottom:90px!important}.toast{bottom:84px}
+  #addBtn .al,#addBtn .k{display:none}#addBtn{width:36px;justify-content:center;padding:0;font-size:18px}
+  h1{font-size:25px}.wbhead{margin-bottom:18px}
+  .pc{padding:13px 14px}.pc .age{display:none}.pc .acts{position:absolute;right:12px;top:12px}.pc{position:relative}.pc .where{padding-right:64px}
+  .item{grid-template-columns:20px minmax(0,1fr) auto;padding:9px 4px}.item .dt,.item .plc{display:none}.item .pp.none{display:none}
+  .libtools{flex-wrap:wrap}.libtools .hsp,.libtools>span{display:none}.ahead .bar{display:none}.ahead h3{font-size:18px}
+  .unsorted{padding:12px}
+  .prow{flex-wrap:nowrap}.prow .btn{display:none}.ps{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side .row .btn.ghost{display:none}
+  .weeks{padding:14px 2px}.wk{padding:0 3px}.wk .col{width:22px;height:110px}.wk .wd{display:none}.wk .hh{font-size:12px}.wk .wl{font-size:10.5px}
+  .tbox .tbtns .btn{padding:0 12px}
+  .drawer{padding:20px 16px}.drawer h1{font-size:22px}
+  .insights,.ins2{grid-template-columns:minmax(0,1fr)}.drow{grid-template-columns:minmax(0,1fr) 50px 120px}.drow>span:nth-child(4),.drow>span:nth-child(5){display:none}.prow{flex-wrap:wrap}}
+.steps{grid-column:1;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg2)}
+.next{display:flex;align-items:center;gap:10px;padding:8px 11px;cursor:pointer;font-size:13.5px}
+.next .nl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+.next .nt{flex:1;min-width:0}.next .sc{font-size:12px;color:var(--tx3);white-space:nowrap}
+.slist{border-top:1px solid var(--line);padding:6px 11px 10px}
+.step{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13px;cursor:pointer}
+.step input{accent-color:var(--ok);width:14px;height:14px;margin:0}
+.step.done span{color:var(--tx3);text-decoration:line-through;text-decoration-color:var(--line2)}
+.step em{margin-left:auto;font-style:normal;font-size:11.5px;color:var(--tx3)}
+.addstep .inp{height:32px;font-size:12.5px;margin:6px 0 0;background:transparent;border-style:dashed}
+.lrow.top{align-items:flex-start}.lrow.top .lbl{padding-top:5px}
+.ticks{display:flex;flex-direction:column}
+.modal.today{width:720px;top:6vh;max-height:88vh;display:flex;flex-direction:column;padding:22px 24px 16px;outline:none}
+.modal.today .tdl{overflow:auto;min-height:0;flex:1;padding-right:4px}
+.modal.today .mfoot{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+body.td #today{opacity:1;pointer-events:auto;transform:translateX(-50%)}body.td #tscrim{opacity:1;pointer-events:auto}
+.tdh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.tdl{display:flex;flex-direction:column;gap:10px}
+.tdi{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:var(--panel)}
+.tdi.on{border-color:rgba(233,196,106,.4)}
+.tdt{display:flex;align-items:center;gap:9px;font-weight:500;min-width:0}.tdt .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdn{font-weight:400;font-size:12px;margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+.work{border:1px solid var(--line2);border-radius:12px;padding:16px;margin:4px 0 22px;background:var(--panel)}
+.tbox{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 18px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.tbox .tl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3)}
+.tbox .tv{font:500 28px var(--sans);color:var(--acc)}
+.tbox .tbtns{display:flex;gap:8px;justify-content:flex-end}.tbox .tbtns .btn{height:38px;padding:0 16px;font-size:14px}.tbox .tbtns .btn:disabled{opacity:.35;cursor:default}
+.tbox .tt{grid-column:1/-1;font-size:12.5px}
+.wl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);margin:6px 0 8px;display:flex;gap:8px}
+.notes{width:100%;min-height:110px;resize:vertical;background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:10px 12px;color:var(--tx);font:13.5px/1.55 var(--sans);margin-bottom:12px}
+.notes:focus{outline:0;border-color:var(--acc)}
+.ck{display:flex;align-items:center;gap:10px;padding:6px 4px;border-radius:6px;font-size:13.5px}
+.ck:hover{background:var(--panel2)}.ck input{accent-color:var(--ok);width:15px;height:15px;margin:0}.ck span{flex:1;cursor:pointer}
+.ck.done span{color:var(--tx3);text-decoration:line-through;text-decoration-color:var(--line2)}
+.x2{background:none;border:0;color:var(--tx3);opacity:0;font-size:11px}.ck:hover .x2{opacity:1}
+.addck{height:34px;font-size:13px;margin:6px 0 0;background:transparent;border-style:dashed}
+.pc{cursor:pointer}.pc:hover{border-color:var(--line2)}
+.pp{font-size:11.5px;font-weight:600;border:1px solid var(--line2);background:none;border-radius:6px;padding:2px 8px;white-space:nowrap}
+.pp.none{color:var(--tx3);border-style:dashed;font-weight:500}.pp.now{color:var(--acc);border-color:rgba(233,196,106,.4)}.pp.soon{color:#9fd1ff;border-color:rgba(159,209,255,.35)}.pp.someday{color:var(--tx2)}
+.item .pp.none,.prow .pp.none,.acts2 .pp.none{opacity:.0}.item:hover .pp.none,.prow:hover .pp.none,.acts2:hover .pp.none{opacity:1}
+.acts2 .pp.none{opacity:.6}
+.plc{display:flex;justify-content:flex-end}.pls{display:flex;gap:4px;opacity:0}.item:hover .pls{opacity:1}
+.inpl{font-size:11.5px;color:var(--acc);font-weight:500}
+.from{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:#c9b27a;border:1px solid #4a4330;border-radius:5px;padding:1px 6px;margin-left:4px}
+.gl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);margin:14px 0 2px}
+.psec h2+.gl{margin-top:4px}
+.acts2{align-items:center}
+/* library */
+.libgrid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px}
+.areas{position:sticky;top:88px;align-self:start}
+.ar{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 10px;border-radius:8px}
+.ar:hover,.ar.on{background:var(--panel)}
+.ar .n{display:flex;align-items:center;gap:8px;font-weight:500;font-size:13.5px}
+.ar .n em{margin-left:auto;font-style:normal;font-size:12px;color:var(--tx3)}
+.bar{height:4px;border-radius:2px;background:var(--panel2);margin-top:6px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.libtools{display:flex;gap:8px;align-items:center;margin-bottom:18px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:none;border:0;padding:6px 11px;font-size:12.5px;color:var(--tx2)}
+.seg button.on{background:var(--panel2);color:var(--tx)}
+.unsorted{padding:14px 18px;margin-bottom:26px;border-style:dashed;border-color:#4a4330;background:rgba(233,196,106,.04)}
+.asec{margin-bottom:30px}
+.ahead{display:flex;align-items:center;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line2);margin-bottom:4px}
+.ahead h3{margin:0;font:400 21px var(--serif)}
+.ahead .cov{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--tx2)}
+.ahead .bar{width:160px;margin:0;height:6px}
+.topic{margin-top:14px}
+.th{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--tx2);margin-bottom:4px;font-weight:500}
+.th .mini{width:60px;height:3px;margin:0}
+.item{display:grid;grid-template-columns:22px minmax(0,1fr) 92px 96px 150px;align-items:center;gap:10px;padding:7px 8px;border-radius:7px;cursor:pointer}
+.item:hover{background:var(--panel)}
+.item .tt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item.done .tt{color:var(--tx3)}
+.item .ty,.item .dt{font-size:12px;color:var(--tx3)}
+.st{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line2)}
+.st.picked{border-color:var(--warn);background:radial-gradient(circle,var(--warn) 0 3px,transparent 3.5px)}
+.st.done{border-color:var(--ok);background:var(--ok)}
+.st.dropped{border-color:var(--tx3);background:linear-gradient(45deg,transparent 45%,var(--tx3) 45% 55%,transparent 55%)}
+.pr{font-size:11.5px;font-weight:600}
+.pr.now{color:var(--acc)}.pr.soon{color:#9fd1ff}.pr.someday{color:var(--tx3)}
+.newtag{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--acc)}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:560px;z-index:31;background:var(--bg2);border-left:1px solid var(--line2);transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);overflow-y:auto;padding:26px 28px}
+body.dr .scrim{opacity:1;pointer-events:auto}body.dr .drawer{transform:none}
+.drawer .x{position:absolute;right:18px;top:18px}
+.drawer h1{font-size:26px;margin:10px 0 12px;padding-right:30px}
+.drawer p{color:var(--tx2);margin:0 0 18px}
+.dl{display:grid;grid-template-columns:110px 1fr;gap:8px 12px;font-size:13px;margin:18px 0}
+.dl dt{color:var(--tx3)}.dl dd{margin:0}
+.timeline{display:flex;gap:0;margin:18px 0 22px;font-size:12px}
+.timeline div{flex:1;padding-top:10px;border-top:2px solid var(--line2);color:var(--tx3)}
+.timeline div.on{border-color:var(--acc);color:var(--tx)}
+.timeline b{display:block;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.acts2{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.sim{margin-top:6px}
+.sim .row .t{font-size:13.5px}
+.note{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--tx2);font-style:italic;margin-bottom:16px}
+/* review */
+.rvhead{display:flex;align-items:flex-end;gap:20px;margin-bottom:22px}
+.rvhead .r{margin-left:auto;display:flex;gap:8px}
+.strip{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:28px}
+.strip div{background:var(--panel);padding:16px 18px}
+.strip b{font:500 26px var(--sans);display:flex;align-items:center;gap:10px}
+.strip span{font-size:12px;color:var(--tx3)}
+.grid6{width:100%;border-collapse:collapse;margin-bottom:10px;table-layout:fixed}
+.grid6 th{font:600 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);text-align:left;padding:0 8px 10px}
+.grid6 th small{display:block;font-weight:500;letter-spacing:0;text-transform:none;color:var(--tx3);font-size:11px;margin-top:2px}
+.grid6 td{border-top:1px solid var(--line);padding:9px 8px;vertical-align:middle;height:44px}
+.grid6 td.a{width:200px;font-weight:500;white-space:nowrap}
+.grid6 td.a .dot{margin-right:8px}
+.ev{display:flex;flex-wrap:wrap;gap:4px}
+.g{width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:default;position:relative}
+.g.collected{border:1.5px dashed var(--tx3);color:var(--tx3)}
+.g.collected::after{content:"+"}
+.g.picked{border:1.5px solid var(--warn);background:radial-gradient(circle,var(--warn) 0 3px,transparent 3.5px)}
+.g.done{background:var(--ok)}
+.g.dropped{border:1.5px solid var(--tx3);color:var(--tx3)}
+.g.dropped::after{content:"×";font-size:12px}
+.cur{background:rgba(233,196,106,.035)}
+.legend{display:flex;gap:18px;font-size:12px;color:var(--tx3);margin:10px 0 0}
+.legend span{display:flex;align-items:center;gap:6px}
+.rv2{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:34px}
+.mv{display:grid;grid-template-columns:minmax(0,1fr) 140px 90px;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px}
+.mv:first-of-type{border-top:0}
+.mv .bars{position:relative;height:6px;border-radius:3px;background:var(--panel2)}
+.mv .bars i{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
+.mv .d{text-align:right;color:var(--tx2);font-size:12.5px}
+.mv .d b{color:var(--ok);font-weight:600}
+.plan{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.out{font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;width:96px;text-align:right;white-space:nowrap}
+.out.done{color:var(--ok)}.out.picked{color:var(--warn)}.out.collected{color:var(--tx3)}.out.dropped{color:var(--tx3)}
+.pick{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+/* modal */
+.modal{position:fixed;left:50%;top:16vh;transform:translateX(-50%) scale(.98);width:520px;z-index:41;background:var(--bg2);border:1px solid var(--line2);border-radius:14px;padding:22px 24px;opacity:0;pointer-events:none;transition:.18s;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.mscrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.18s}
+body.md .modal{opacity:1;pointer-events:auto;transform:translateX(-50%)}body.md .mscrim{opacity:1;pointer-events:auto}
+.inp{width:100%;height:42px;border:1px solid var(--line2);background:var(--bg);border-radius:8px;padding:0 12px;color:var(--tx);font:15px var(--sans);margin-bottom:10px}
+.inp:focus{outline:0;border-color:var(--acc)}
+.hintline{font-size:12.5px;color:var(--tx3);margin-top:12px}
+.mfoot{display:flex;align-items:center;gap:8px;margin-top:16px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel2);border:1px solid var(--line2);padding:10px 16px;border-radius:9px;font-size:13px;opacity:0;transition:.2s;z-index:60}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media (max-width:820px){
+  header{gap:6px;padding:0 10px}#addBtn .k{display:none}#addBtn{padding:0 10px}.search{display:none}nav button{padding:0 9px}
+  main{padding:20px 14px 60px}
+  .wbhead{flex-direction:column;align-items:flex-start}.wbhead .stats{margin-left:0;gap:20px}
+  .wbgrid,.libgrid,.rv2,.plan{grid-template-columns:minmax(0,1fr)}.ttl,.pc .where{min-width:0;overflow-wrap:anywhere}
+  .areas{position:static;display:none}
+  .item{grid-template-columns:22px minmax(0,1fr) 44px}.item .ty,.item .dt,.item .pr{display:none}
+  .pc{grid-template-columns:minmax(0,1fr)}.pc .age{grid-column:1;grid-row:auto;text-align:left;display:flex;gap:8px;align-items:baseline}.pc .age b{display:inline;font-size:14px}.pc .acts{grid-column:1;grid-row:auto;justify-content:flex-start}
+  .strip{grid-template-columns:repeat(2,1fr)}.grid6 td.a{width:auto}.grid6{font-size:12px}
+  .drawer{width:100%}.modal{width:calc(100% - 24px);top:10vh}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><i></i><span>Workbench</span></div>
+  <nav>
+    <button data-tab="wb" class="on">Workbench <span class="badge" id="nPicked"></span></button>
+    <button data-tab="plan">Plan <span class="badge" id="nPlan"></span></button>
+    <button data-tab="lib">Library <span class="badge new" id="nNew"></span></button>
+    <button data-tab="ins">Insights</button>
+  </nav>
+  <div class="hsp"></div>
+  <div class="search">⌕ Search library <kbd>/</kbd></div>
+  <button class="btn pri" id="addBtn">+ <span class="al">Add</span> <span class="k" style="border-color:rgba(0,0,0,.25);color:#5a4a1a;margin-left:4px">A</span></button>
+</header>
+<main>
+  <section class="tab on" id="wb"></section>
+  <section class="tab" id="lib"></section>
+  <section class="tab" id="plan"></section>
+  <section class="tab" id="ins"></section>
+</main>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="mscrim" id="mscrim"></div>
+<div class="modal" id="modal">
+  <h2 style="margin-bottom:14px">Add to library</h2>
+  <textarea class="inp" id="addUrl" rows="3" style="height:auto;padding:10px 12px;resize:vertical;font-size:14px" placeholder="Paste a link or type a title.&#10;Several lines add several items, e.g. a batch of links from WhatsApp."></textarea>
+  <input class="inp" id="addNote" style="font-size:13.5px;height:38px" placeholder="Why I care (optional)">
+  <div style="display:flex;gap:10px;flex-wrap:wrap"><div class="seg" id="addType"><button class="on">Resource</button><button>Project</button><button>Practice</button></div><div class="seg" id="addPrio"><button class="on">No priority</button><button>now</button><button>soon</button><button>someday</button></div></div>
+  <div class="hintline">↳ Lands in <b style="color:var(--tx2)">Unsorted</b>. Claude files each one into an area and topic later.</div>
+  <div class="mfoot"><span class="muted" style="font-size:12px">⏎ to save · Esc to close</span><span class="hsp"></span><button class="btn ghost" id="addCancel">Cancel</button><button class="btn pri" id="addSave">Save to library</button></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const RAW = [{"t": "Attention Is All You Need", "ty": "paper", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["Transformer Architecture", "Self-Attention", "Multi-Head Attention", "Positional Encoding", "Encoder-Decoder"], "src": "https://arxiv.org/abs/1706.03762", "sz": "medium", "sum": "The foundational paper introducing the Transformer architecture. Proposes replacing recurrence and convolution entirely with self-attention mechanisms. Introduces multi-head attention, positional encoding, and the encoder-decoder structure that became the basi"}, {"t": "BERT: Pre-training of Deep Bidirectional Transformers", "ty": "paper", "d": "ML/Foundations", "tp": "Model Architecture", "c": ["Masked Language Modeling", "Bidirectional Context", "Pre-training", "Fine-tuning", "Transformer Architecture", "Self-Attention", "Multi-Head Attention"], "src": "unknown", "sz": "deep-dive", "sum": "Devlin et al.'s BERT paper introducing bidirectional pre-training for language understanding. Demonstrates masked language modeling and demonstrates state-of-the-art results on diverse NLP benchmarks through fine-tuning."}, {"t": "BLT: Patches Scale Better Than Tokens", "ty": "paper", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["Byte-Level Processing", "Patch Embeddings", "Token-Free Models", "Transformer Architecture"], "src": "unknown", "sz": "deep-dive", "sum": "Research comparing patch-based and token-based approaches to model inputs. Demonstrates that byte-level or patch-level processing can be more efficient and scalable than traditional tokenization for foundation models."}, {"t": "Beej's Guide to Network Programming", "ty": "docs", "d": "Networking", "tp": "Socket Programming", "c": ["Socket API", "TCP/UDP", "select/poll/epoll", "Non-Blocking IO", "Client-Server Architecture"], "src": "https://beej.us/guide/bgnet/", "sz": "medium", "sum": "The classic guide to Unix network programming with sockets. Covers socket API, TCP/UDP, client-server architecture, select/poll/epoll, non-blocking I/O, and building a simple HTTP server. Practical C code throughout."}, {"t": "Build a Large Language Model (From Scratch)", "ty": "docs", "d": "ML/Foundations", "tp": "Neural Networks", "c": ["Tokenization", "Self-Attention", "Transformer Architecture", "Pretraining", "Fine-Tuning"], "src": "https://www.manning.com/books/build-a-large-language-model-from-scratch", "sz": "deep-dive", "sum": "Sebastian Raschka's book walking through the full implementation of a GPT-style LLM in PyTorch, covering tokenization, attention, transformer blocks, pretraining, and fine-tuning for classification and instruction-following."}, {"t": "Build a Reasoning Model (From Scratch)", "ty": "docs", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["Chain-of-Thought", "Reinforcement Learning Basics", "LLM Basics", "Transformer Architecture"], "src": "https://www.manning.com/books/build-a-reasoning-model-from-scratch", "sz": "deep-dive", "sum": "Sebastian Raschka's follow-up book focused on implementing reasoning-capable language models from scratch, covering techniques like chain-of-thought training, reinforcement learning for reasoning, and inference-time compute scaling."}, {"t": "CRDTs and Optimistic Replication", "ty": "paper", "d": "Systems", "tp": "Distributed Replication", "c": ["CRDTs", "Eventual Consistency", "Conflict Resolution", "Causal Consistency", "Optimistic Replication", "Vector Clocks"], "src": "/private/tmp/crdt.md", "sz": "deep-dive", "sum": "Convergent and Commutative Replicated Data Types (CRDTs) \u2014 data structures that can be replicated across nodes and updated independently, with mathematical guarantees of eventual convergence without coordination. Covers G-Counters, PN-Counters, OR-Sets, LWW-Re"}, {"t": "CSAPP \u2014 Computer Systems: A Programmer's Perspective", "ty": "docs", "d": "Systems", "tp": "Computer Architecture", "c": ["Memory Hierarchy", "Cache Architecture", "Virtual Memory", "x86-64 Assembly", "Linking", "Exceptional Control Flow", "Concurrency"], "src": "/private/tmp/csapp.md", "sz": "deep-dive", "sum": "CMU's comprehensive systems textbook covering the entire stack a programmer interacts with: data representation, machine-level programming (x86-64), processor architecture, memory hierarchy (caches, virtual memory), linking, exceptional control flow, system-le"}, {"t": "Compression = Prediction \u2014 Personal Notes", "ty": "docs", "d": "Systems", "tp": "Compression", "c": ["Information Theory", "Prediction-Compression Duality", "Multi-Algorithm Compression", "GPU Memory Bandwidth", "Quantization", "KV Cache", "Hardware Sparsity"], "src": "/private/tmp/compression-notes.md", "sz": "quick-read", "sum": "Personal brainstorm connecting compression theory to LLMs and GPU architecture. Core insight: prediction and compression are mathematically equivalent \u2014 better prediction means fewer bits. Explores multi-algorithm compression (already used in HTTP, PNG, video "}, {"t": "Context Engineering for AI Agents", "ty": "docs", "d": "ML/Agents", "tp": "Context Engineering", "c": ["Context Compaction", "Token Management", "System Prompts", "Tool Results Pruning", "Agent Architecture"], "src": "unknown", "sz": "medium", "sum": "Anthropic engineering guide on effective context management for AI agents. Covers context compaction strategies, token optimization, system prompt design, and intelligent tool result pruning to maximize agent capabilities within token limits."}, {"t": "Crafting Interpreters", "ty": "docs", "d": "Programming/Compilers", "tp": "Language Implementation", "c": ["Lexing", "Parsing", "AST", "Bytecode", "Virtual Machine", "Garbage Collection", "Closures"], "src": "https://craftinginterpreters.com", "sz": "deep-dive", "sum": "Bob Nystrom's guide to building two complete interpreters: a tree-walk interpreter in Java (jlox) and a bytecode VM in C (clox). Covers scanning, parsing, name resolution, control flow, functions, closures, classes, inheritance, and garbage collection."}, {"t": "DRS & GRS \u2014 Fairness Metrics for LLM Recommendations", "ty": "docs", "d": "ML/Evaluation", "tp": "Fairness Metrics", "c": ["Fairness Evaluation", "Demographic Representation Score", "Geographic Representation Score", "Bias Measurement", "LLM Evaluation", "Recommendation Systems"], "src": "/private/tmp/drs-grs.md", "sz": "medium", "sum": "Personal research work: developed two novel metrics for evaluating fairness in LLM-generated recommendations. Demographic Representation Score (DRS) measures how equitably recommendations represent demographic groups; Geographic Representation Score (GRS) meas"}, {"t": "DSPy - Programming Language Models", "ty": "paper", "d": "ML/Frameworks", "tp": "Prompt Engineering", "c": ["Prompt Optimization", "Teleprompters", "LM Modules", "Chain of Thought", "ReAct Pattern", "Automated Prompt Tuning"], "src": "https://arxiv.org/abs/2310.03714", "sz": "deep-dive", "sum": "Stanford NLP's framework for algorithmically optimizing LM prompts and weights. Replaces hand-written prompts with declarative modules (ChainOfThought, ReAct, etc.) that are automatically compiled into optimized prompt chains or fine-tuning recipes. Introduces"}, {"t": "Database Architecture \u2014 Readings in Database Systems (Berkeley)", "ty": "paper", "d": "Systems", "tp": "Databases", "c": ["Storage Engines", "Query Optimization", "Column Stores", "MVCC", "Weak Isolation", "Dataflow Engines", "NewSQL"], "src": "/private/tmp/db-architecture.md", "sz": "deep-dive", "sum": "Peter Bailis and Joe Hellerstein's curated collection of foundational database papers. Covers traditional RDBMS, new architectures (column stores, NewSQL), large-scale dataflow, weak isolation, query optimization, interactive analytics, and data integration. T"}, {"t": "Deep Learning (Goodfellow) \u2014 Part I: Math & Machine Learning Basics", "ty": "docs", "d": "ML/Foundations", "tp": "Mathematics", "c": ["Linear Algebra Basics", "Probability Theory", "Information Theory Basics", "Gradient Descent", "Maximum Likelihood", "Bias-Variance Tradeoff"], "src": "https://www.deeplearningbook.org/contents/part_basics.html", "sz": "deep-dive", "sum": "Chapters 2-5 of the Goodfellow/Bengio/Courville book: linear algebra (vectors, matrices, eigendecomposition, SVD), probability and information theory, numerical computation (gradient-based optimization, conditioning), and machine learning fundamentals (capacit"}, {"t": "Deep Learning (Goodfellow) \u2014 Part II-a: Feedforward Nets, Regularization & Optimization", "ty": "docs", "d": "ML/Foundations", "tp": "Neural Networks", "c": ["Neural Network Fundamentals", "Backpropagation", "Regularization", "Dropout", "Batch Normalization", "Adam Optimizer", "Weight Initialization"], "src": "https://www.deeplearningbook.org/contents/mlp.html", "sz": "deep-dive", "sum": "Chapters 6-8: deep feedforward networks (architecture, hidden units, backpropagation derived properly), regularization (L1/L2, dropout, early stopping, data augmentation), and optimization for training (SGD variants, momentum, adaptive methods, batch norm, ini"}, {"t": "Deep Learning (Goodfellow) \u2014 Part II-b: CNNs, RNNs & Practical Methodology", "ty": "docs", "d": "ML/Foundations", "tp": "Neural Networks", "c": ["Convolutional Networks", "RNN Fundamentals", "LSTM", "BPTT", "Hyperparameter Tuning", "Debugging Neural Networks"], "src": "https://www.deeplearningbook.org/contents/convnets.html", "sz": "deep-dive", "sum": "Chapters 9-12: convolutional networks (convolution, pooling, parameter sharing), sequence modeling with RNNs/LSTMs (BPTT, gating, long-term dependencies), practical methodology (performance metrics, baselines, hyperparameter tuning, debugging strategies) and a"}, {"t": "Deep Learning (Goodfellow) \u2014 Part III: Deep Learning Research", "ty": "docs", "d": "ML/Foundations", "tp": "Representation Learning", "c": ["Autoencoders", "Representation Learning", "Variational Inference", "Generative Models", "VAE", "Monte Carlo Methods"], "src": "https://www.deeplearningbook.org/contents/generative_models.html", "sz": "deep-dive", "sum": "Chapters 13-20: the research frontier as of the book \u2014 linear factor models, autoencoders, representation learning, structured probabilistic models, Monte Carlo methods, the partition function, approximate inference, and deep generative models (Boltzmann machi"}, {"t": "DeepSeek-V3 Technical Report", "ty": "paper", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["Mixture of Experts", "KV Cache", "Multi-Head Attention", "Transformer Architecture"], "src": "https://arxiv.org/abs/2412.19437", "sz": "deep-dive", "sum": "DeepSeek-V3 is a 671B-parameter (37B active) mixture-of-experts language model that introduces Multi-head Latent Attention for KV cache compression and multi-token prediction as an auxiliary training objective, achieving strong performance at relatively low tr"}, {"t": "Designing Data-Intensive Applications", "ty": "docs", "d": "Systems", "tp": "Distributed Systems", "c": ["Replication", "Partitioning", "Consistency Models", "Stream Processing", "Batch Processing", "Storage Engines", "Transactions"], "src": "https://dataintensive.net", "sz": "deep-dive", "sum": "Martin Kleppmann's comprehensive guide to the principles and practices behind reliable, scalable, and maintainable data systems. Covers data models, storage engines, encoding, replication, partitioning, transactions, consistency, batch/stream processing, and t"}, {"t": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model", "ty": "paper", "d": "ML/Foundations", "tp": "RLHF", "c": ["Direct Preference Optimization", "RLHF", "Reward Models"], "src": "https://arxiv.org/abs/2305.18290", "sz": "medium", "sum": "The DPO paper shows that the RLHF objective can be reformulated as a simple classification loss directly over a language model's policy, eliminating the need for a separate reward model and unstable RL training like PPO."}, {"t": "Distil-Whisper: Robust Knowledge Distillation for Fast Speech Recognition", "ty": "paper", "d": "ML/Voice", "tp": "ASR", "c": ["Knowledge Distillation", "Streaming ASR", "Chunked Inference"], "src": "https://arxiv.org/abs/2311.01899", "sz": "medium", "sum": "Distil-Whisper distills OpenAI's Whisper into a smaller model that runs significantly faster with minimal accuracy loss, and explores chunked inference strategies for streaming ASR with favorable latency-accuracy tradeoffs."}, {"t": "Don't Quant the KV Cache \u2014 Local LLM Field Notes", "ty": "article", "d": "ML/Infrastructure", "tp": "Inference Optimization", "c": ["KV Cache Quantization", "Numerical Precision", "VRAM Budgeting", "Local Inference Tuning"], "src": "https://www.reddit.com/r/LocalLLM/comments/1v9cnd9/thank_you_whoever_said_dont_quant_the_kv/", "sz": "quick-read", "sum": "r/LocalLLM community thread on why quantizing the KV cache degrades output quality far more than quantizing model weights. Practitioners report that aggressive KV cache quantization (q4/q8 cache flags in llama.cpp and similar) causes subtle coherence loss, rep"}, {"t": "Exploring ArkOS", "ty": "docs", "d": "Embedded/Gaming", "tp": "Custom OS", "c": ["Linux Embedded Systems", "RetroArch", "Emulation", "ARM Architecture"], "src": "https://github.com/ArkOS-Project", "sz": "medium", "sum": "Hands-on exploration of ArkOS, a custom Linux distribution for retro gaming handhelds (RG35XX, R36S, etc.). Covers flashing, configuration, emulator setup, RetroArch tuning, custom themes, and PortMaster for native Linux game ports."}, {"t": "FlashAttention - Fast and Memory-Efficient Attention", "ty": "paper", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["IO-Aware Algorithms", "GPU Memory Hierarchy", "Attention Tiling", "SRAM vs HBM", "Kernel Fusion"], "src": "https://arxiv.org/abs/2205.14135", "sz": "medium", "sum": "Introduces FlashAttention, an IO-aware exact attention algorithm that reduces memory usage from quadratic to linear while being 2-4x faster than standard attention. Achieves this by tiling the attention computation to avoid materializing the full N\u00d7N attention"}, {"t": "GPU Inference Deep Dive", "ty": "video", "d": "ML/Infrastructure", "tp": "Inference Optimization", "c": ["Continuous Batching", "PagedAttention", "KV Cache", "GPU Memory Management", "Tensor Parallelism"], "src": "https://www.youtube.com/watch?v=HN8aSSDQlEU", "sz": "medium", "sum": "A comprehensive video walkthrough of how modern GPU inference pipelines work \u2014 from batching strategies to KV cache management, continuous batching, and PagedAttention. Covers the full stack from model weights to serving requests at scale."}, {"t": "Gemma 3 Technical Report", "ty": "paper", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["Mixture of Experts", "RLHF", "Distillation", "Multi-Modal Models", "Safety Filtering", "Grouped Query Attention"], "src": "https://arxiv.org/abs/2503.19786", "sz": "deep-dive", "sum": "Google DeepMind's technical report on the Gemma 3 family of models. Covers the architecture (dense and MoE variants), training methodology, RLHF alignment, multimodal capabilities, and benchmark results. Introduces ShieldGemma for safety filtering and Recurren"}, {"t": "Gossip Glomers - Distributed Systems Challenges", "ty": "docs", "d": "Systems", "tp": "Distributed Systems", "c": ["Gossip Protocol", "Consensus", "CRDTs", "Linearizability", "Eventual Consistency", "Fault Tolerance"], "src": "https://fly.io/dist-sys/", "sz": "deep-dive", "sum": "Fly.io's hands-on distributed systems challenges using Maelstrom. Build increasingly complex distributed systems: echo, unique ID generation, broadcast, counter, Kafka-style log, transactions. Tests with fault injection and network partitions."}, {"t": "HTTP/2 \u2014 Protocol Deep Dive", "ty": "docs", "d": "Networking", "tp": "Protocols", "c": ["HTTP/2", "Multiplexing", "Binary Framing", "Header Compression", "Stream Prioritization"], "src": "/private/tmp/http2.md", "sz": "medium", "sum": "Understanding HTTP/2: multiplexing, server push, header compression (HPACK), binary framing, stream prioritization. How it solves head-of-line blocking, reduces latency, and changes best practices for web performance (no more domain sharding, spriting, or conc"}, {"t": "Halite II \u2014 Winner's Postmortem (Tom Van de Wiele)", "ty": "article", "d": "Game AI", "tp": "Competition Strategy", "c": ["Heuristic Design", "Simulation-Based Evaluation", "Meta-Game Strategy", "Bot Architecture"], "src": "https://tomvandewiele.com/halite2", "sz": "medium", "sum": "Detailed writeup of the winning strategy for Halite II competition. Covers heuristic design, bot architecture, simulation-based evaluation, and the meta-game of competing against evolving opponents on a live leaderboard."}, {"t": "HandyRL \u2014 Distributed Self-Play Framework", "ty": "docs", "d": "Game AI", "tp": "Self-Play Systems", "c": ["Distributed Self-Play", "Experience Replay", "Centralized Training", "Parallel Rollouts", "Actor-Critic"], "src": "https://github.com/DeNA/HandyRL", "sz": "medium", "sum": "DeNA's framework for distributed reinforcement learning with self-play. Clean architecture for training game-playing agents across multiple workers. Key patterns: centralized training with distributed rollout workers, experience replay, and parallel environmen"}, {"t": "High Agency: Taking Ownership and Initiative", "ty": "article", "d": "Mindset", "tp": "Growth", "c": ["High Agency", "Ownership", "Initiative"], "src": "unknown", "sz": "quick-read", "sum": "Essay on developing high agency mindset for personal growth. Explores how ownership mentality, proactive problem-solving, and initiative-taking compound into long-term success and capability development."}, {"t": "High-Frequency Software: Engineering for Responsiveness", "ty": "article", "d": "Systems", "tp": "Software Engineering", "c": ["Responsiveness", "Latency Budgets", "System Design", "Performance"], "src": "unknown", "sz": "medium", "sum": "Philosophy of building responsive software systems with tight latency budgets. Discusses techniques for maintaining system responsiveness, managing latency budgets, and designing for fast user feedback loops."}, {"t": "How to Think Step-by-Step: A Mechanistic Understanding of Chain-of-Thought Reasoning", "ty": "paper", "d": "ML/Foundations", "tp": "Interpretability", "c": ["Mechanistic Interpretability", "Chain of Thought", "Activation Probing", "Attention Head Analysis", "Circuit Analysis", "Reasoning Decomposition"], "src": "https://arxiv.org/abs/2402.18312", "sz": "deep-dive", "sum": "Mechanistic interpretability study of how LLMs actually perform chain-of-thought reasoning. Probes internal activations during multi-step fictional-ontology reasoning to locate where and how the model decomposes tasks, finding that CoT emerges from parallel pr"}, {"t": "Hugging Face YouTube \u2014 ML Tutorials and Demos", "ty": "video", "d": "ML/Foundations", "tp": "Model Architecture", "c": ["Transformer Architecture", "Fine-Tuning", "Quantization", "Diffusion Models", "Model Hub"], "src": "https://www.youtube.com/@HuggingFace/videos", "sz": "deep-dive", "sum": "Hugging Face's official YouTube channel covering transformers, diffusion models, fine-tuning, RLHF, quantization, inference optimization, and new model releases. Mix of deep technical talks, hands-on tutorials, and community demos. Good for staying current on "}, {"t": "Kafka, ZooKeeper, and Distributed Coordination", "ty": "paper", "d": "Systems", "tp": "Streaming", "c": ["Log-Structured Storage", "Atomic Broadcast", "Distributed Coordination", "Consumer Groups", "Partition Leadership", "Event Sourcing"], "src": "/private/tmp/kafka-dist.md", "sz": "deep-dive", "sum": "The distributed systems infrastructure stack: Kafka's log-based message broker with ZooKeeper's atomic broadcast protocol (Zab), Omega's flexible cluster scheduling, and Thialfi's client notification service. Covers how these systems achieve high-throughput, f"}, {"t": "KataGo \u2014 Accelerating Self-Play Learning in Go", "ty": "paper", "d": "Game AI", "tp": "Self-Play Systems", "c": ["Self-Play Acceleration", "Auxiliary Training Targets", "Data Augmentation", "Training Efficiency"], "src": "https://arxiv.org/abs/1902.10565", "sz": "medium", "sum": "The paper behind KataGo's training innovations. Shows how auxiliary training targets, game outcome prediction, and various data augmentation techniques can accelerate self-play training by 50x compared to AlphaZero-style approaches."}, {"t": "KataGo \u2014 Architecture & Methods", "ty": "docs", "d": "Game AI", "tp": "Self-Play Systems", "c": ["Monte Carlo Tree Search", "Auxiliary Training Targets", "Ownership Prediction", "Playout Cap Randomization", "Self-Play Efficiency"], "src": "https://github.com/lightvector/KataGo", "sz": "deep-dive", "sum": "Deep dive into KataGo, one of the strongest open-source Go engines. The KataGoMethods.md document explains innovations: auxiliary policy targets, ownership prediction, dynamic komi, playout cap randomization. Achieves superhuman play with 50x less compute than"}, {"t": "Kha Vo \u2014 Hungry Geese & Kore Competition Retrospectives", "ty": "article", "d": "Game AI", "tp": "Competition Strategy", "c": ["Reward Shaping", "Rule-Based vs Learned Agents", "Competition Meta-Strategy", "Multi-Agent Training"], "src": "https://kaggle.com/khahuras", "sz": "medium", "sum": "Solution writeups from top Kaggle competitor covering Hungry Geese and Kore 2022. Discusses rule-based vs learned approaches, reward shaping for RL agents, and practical tricks for game AI competitions."}, {"t": "Lamport Clocks and Causal Ordering", "ty": "paper", "d": "Systems", "tp": "Distributed Systems", "c": ["Lamport Clocks", "Happens-Before Relation", "Logical Clocks", "Causal Ordering", "Total Ordering", "Vector Clocks"], "src": "/private/tmp/lamport-clocks.md", "sz": "medium", "sum": "Lamport's foundational 'Time, Clocks, and the Ordering of Events in a Distributed System'. Defines happens-before relation, logical clocks, and total ordering in distributed systems. The paper that established how to reason about time and causality when there'"}, {"t": "Language Server Protocol \u2014 How It Works", "ty": "docs", "d": "Systems", "tp": "Developer Tooling", "c": ["Language Server Protocol", "JSON-RPC", "AST", "Editor Architecture", "Process Communication", "IPC"], "src": "/private/tmp/lsp.md", "sz": "medium", "sum": "Understanding LSP end-to-end: what a language server is, how editors launch and communicate with them (JSON-RPC over stdio/socket), what capabilities they provide (completion, diagnostics, go-to-definition, rename), how they parse and hold ASTs in memory, why "}, {"t": "Learning Zig", "ty": "docs", "d": "Programming/Zig", "tp": "Language Fundamentals", "c": ["Comptime", "Explicit Allocation", "C Interop", "Error Unions", "SIMD"], "src": "https://ziglearn.org", "sz": "medium", "sum": "Introduction to the Zig programming language \u2014 a systems language focused on simplicity, explicit allocation, comptime metaprogramming, and C interop. No hidden control flow, no hidden allocations, no garbage collector."}, {"t": "Letta Memory Blocks: Persistent Memory for AI Agents", "ty": "docs", "d": "ML/Agents", "tp": "Agent Memory", "c": ["Agent Memory Systems", "Memory Blocks", "Stateful Agents", "Long-Term Memory"], "src": "unknown", "sz": "medium", "sum": "Guide to implementing persistent memory systems in LLM agents using memory blocks. Explains how to build stateful agents with long-term memory capabilities, enabling agents to maintain context and learn across multiple conversations."}, {"t": "Llama 2 Technical Report", "ty": "paper", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["Grouped Query Attention", "RLHF", "Ghost Attention", "Rejection Sampling", "Safety Evaluation", "SFT"], "src": "https://arxiv.org/abs/2307.09288", "sz": "deep-dive", "sum": "Meta's technical report on Llama 2, covering pretraining at scale, supervised fine-tuning, RLHF with rejection sampling, Ghost Attention for multi-turn consistency, and safety evaluation. Trained on 2T tokens with context length of 4096."}, {"t": "Mamba - Linear-Time Sequence Modeling", "ty": "paper", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["State Space Models", "Selective Scan", "Linear Attention", "Hardware-Aware Design", "Sequence Modeling"], "src": "https://arxiv.org/abs/2402.17764", "sz": "medium", "sum": "Introduces Mamba, a selective state space model that matches Transformer quality while scaling linearly with sequence length. Replaces attention with a hardware-aware selective scan algorithm. Shows strong results on language, audio, and genomics."}, {"t": "Math Foundations for Machine Learning", "ty": "docs", "d": "ML/Foundations", "tp": "Mathematics", "c": ["Calculus", "Linear Algebra", "Probability", "Gradient Descent", "Computational Graphs"], "src": "https://github.com/ml-curriculum/math-foundations", "sz": "medium", "sum": "A curriculum module reviewing the calculus, linear algebra, and probability needed to understand ML algorithms, including gradients, matrix operations, and computational graphs for automatic differentiation."}, {"t": "Matryoshka Representation Learning", "ty": "paper", "d": "ML/Foundations", "tp": "Representation Learning", "c": ["Matryoshka Embeddings", "Nested Representations", "Adaptive Retrieval", "Embedding Truncation", "Coarse-to-Fine Search", "Representation Learning"], "src": "https://arxiv.org/abs/2205.13147", "sz": "medium", "sum": "Introduces Matryoshka Representation Learning (MRL): training embeddings so that nested prefixes of a single vector are themselves valid, high-quality representations at multiple granularities \u2014 like nesting dolls. One 2048-d embedding contains usable 8, 16, ."}, {"t": "Microservices vs Monolith \u2014 Architecture Patterns", "ty": "docs", "d": "Systems", "tp": "Architecture", "c": ["Microservices", "Monolith Architecture", "Service Boundaries", "API Design", "Event-Driven Architecture"], "src": "/private/tmp/microservices.md", "sz": "medium", "sum": "Survey of microservice and monolith architecture patterns. Covers Martin Fowler's definition, Netflix's migration journey, the 'monolith first' approach, communication patterns (sync REST, async messaging), and practical questions to ask before splitting servi"}, {"t": "Mixtral - Sparse Mixture of Experts", "ty": "paper", "d": "ML/Infrastructure", "tp": "Inference Optimization", "c": ["Sparse MoE", "Expert Routing", "Load Balancing", "Top-K Gating", "Expert Specialization"], "src": "https://arxiv.org/abs/2312.10997", "sz": "medium", "sum": "Mistral AI's Mixtral 8x7B model using sparse Mixture of Experts. Each token is routed to 2 of 8 expert FFN layers, achieving quality matching Llama 2 70B at 6x lower inference cost. Covers routing, load balancing, and expert specialization."}, {"t": "Moshi: A Speech-Text Foundation Model for Real-Time Dialogue", "ty": "paper", "d": "ML/Voice", "tp": "Speech Models", "c": ["Streaming Speech Models", "Neural Audio Codec", "Inner Monologue", "Transformer Architecture"], "src": "https://arxiv.org/abs/2410.00037", "sz": "deep-dive", "sum": "The Moshi paper introduces a full-duplex spoken dialogue model that jointly models an inner text monologue alongside audio tokens from a neural codec, enabling low-latency, natural-sounding real-time conversation without a separate ASR/TTS pipeline."}, {"t": "NLP and Attention Mechanisms", "ty": "docs", "d": "ML/Foundations", "tp": "NLP", "c": ["Tokenization", "Word Embeddings", "N-gram Models", "Attention Mechanisms", "Encoder-Decoder Architecture"], "src": "https://github.com/ml-curriculum/nlp-attention", "sz": "medium", "sum": "A curriculum module tracing the evolution of NLP techniques from tokenization and n-gram models through word embeddings to early attention mechanisms like Bahdanau and Luong attention in encoder-decoder architectures."}, {"t": "Nand2Tetris - Building a Computer from First Principles", "ty": "docs", "d": "Systems", "tp": "Computer Architecture", "c": ["Logic Gates", "ALU Design", "CPU Architecture", "Assembly Language", "Virtual Machine", "Compiler Design"], "src": "https://www.nand2tetris.org", "sz": "deep-dive", "sum": "Build a complete computer system from NAND gates up: logic gates, ALU, CPU, memory, assembler, VM, compiler, and OS. Each layer builds on the previous, demystifying how software meets hardware."}, {"t": "Neural Machine Translation by Jointly Learning to Align and Translate", "ty": "paper", "d": "ML/Foundations", "tp": "NLP", "c": ["Attention Mechanisms", "Encoder-Decoder", "Alignment", "Self-Attention"], "src": "unknown", "sz": "deep-dive", "sum": "Bahdanau et al.'s landmark paper introducing the attention mechanism. Demonstrates how attention enables seq2seq models to focus on relevant input parts, dramatically improving translation quality and enabling longer sequences."}, {"t": "Neural Networks: Foundations", "ty": "docs", "d": "ML/Foundations", "tp": "Neural Networks", "c": ["Perceptrons", "Backpropagation", "Activation Functions", "Gradient Descent", "Adam Optimizer"], "src": "https://github.com/ml-curriculum/neural-networks", "sz": "medium", "sum": "A curriculum module covering the building blocks of neural networks \u2014 perceptrons, forward and backward propagation, activation functions, and optimization algorithms like SGD and Adam. Includes worked derivations of backprop through simple architectures."}, {"t": "Neural Networks: Zero to Hero (Karpathy)", "ty": "video", "d": "ML/Foundations", "tp": "Neural Networks", "c": ["Backpropagation", "Tokenization", "GPT Implementation", "Neural Network Fundamentals"], "src": "https://youtube.com/@andrejkarpathy", "sz": "deep-dive", "sum": "Andrej Karpathy's video lecture series building neural networks and GPT-style language models from scratch in Python, starting from micrograd's autodiff engine through to a working GPT implementation with tokenization."}, {"t": "Noam Brown \u2014 AI for Imperfect-Information Games (Pluribus Talk)", "ty": "video", "d": "Game AI", "tp": "Imperfect Information Games", "c": ["Counterfactual Regret Minimization", "Nash Equilibrium", "Blueprint Strategy", "Real-Time Search", "Imperfect Information"], "src": "https://youtube.com/noam-brown-pluribus", "sz": "medium", "sum": "Talk on building superhuman poker AI. Covers counterfactual regret minimization (CFR), search in imperfect-information games, blueprint strategies, and real-time search. Key insight: in imperfect info games, you can't just look ahead \u2014 you need to reason about"}, {"t": "Noam Brown \u2014 CICERO: AI for Diplomacy", "ty": "video", "d": "Game AI", "tp": "Imperfect Information Games", "c": ["Strategic Reasoning", "Natural Language Negotiation", "Planning with LLMs", "Intent Prediction", "Cooperative-Competitive Games"], "src": "https://youtube.com/noam-brown-cicero", "sz": "medium", "sum": "Talk on CICERO, the first AI to achieve human-level play in Diplomacy \u2014 a game requiring natural language negotiation. Bridges game AI and LLM reasoning: uses a language model for dialogue and a planning algorithm for strategy. Shows how LLMs can ground reason"}, {"t": "Non-Obvious Things About GEPA", "ty": "article", "d": "ML/Frameworks", "tp": "Prompt Optimization", "c": ["Prompt Optimization", "Validation Composition", "Test-Driven Prompting"], "src": "unknown", "sz": "medium", "sum": "Exploration of validation composition and per-example frontiers in test-driven prompt optimization. Discusses how to structure prompt optimization as a composition of validators and leverage test-driven approaches to find better prompts incrementally."}, {"t": "OSTEP - Operating Systems: Three Easy Pieces", "ty": "docs", "d": "Systems", "tp": "Operating Systems", "c": ["Process Scheduling", "Virtual Memory", "Page Tables", "File Systems", "Locks", "Condition Variables", "Context Switching"], "src": "https://pages.cs.wisc.edu/~remzi/OSTEP/", "sz": "deep-dive", "sum": "Free online textbook covering the three core OS concepts: virtualization (processes, address spaces), concurrency (threads, locks, condition variables), and persistence (file systems, devices). Includes homework simulations."}, {"t": "Orphan and Zombie Processes \u2014 How They Consume Resources", "ty": "docs", "d": "Systems", "tp": "Operating Systems", "c": ["Process Lifecycle", "Orphan Processes", "Zombie Processes", "Process Table", "Signal Handling", "Process Groups"], "src": "/private/tmp/orphan.md", "sz": "medium", "sum": "What happens when a parent process dies but its children keep running. Covers Unix process lifecycle (fork, exec, wait, exit), how orphans get reparented to init/launchd, how zombies retain PIDs and entries in the process table, why orphaned language servers a"}, {"t": "Paxos \u2014 Consensus Papers Collection", "ty": "paper", "d": "Systems", "tp": "Distributed Consensus", "c": ["Paxos Consensus", "Multi-Paxos", "Quorum", "Proposer-Acceptor-Learner", "FLP Impossibility", "Partial Synchrony"], "src": "/private/tmp/paxos.md", "sz": "deep-dive", "sum": "The family of Paxos consensus papers: Lamport's 'The Part-Time Parliament' (original), 'Paxos Made Simple' (accessible rewrite), 'Paxos Made Live' (Google's engineering experience), and 'Paxos Made Practical'. Covers single-decree Paxos, Multi-Paxos, and the g"}, {"t": "Physics of Language Models: Knowledge Storage and Extraction", "ty": "paper", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["Mechanistic Interpretability", "Knowledge Storage", "Transformer Architecture"], "src": "https://arxiv.org/abs/2309.14316", "sz": "medium", "sum": "Part of the Physics of Language Models series, this work uses controlled synthetic experiments to study how transformer language models internally store and retrieve factual knowledge, revealing structure behind memorization and generalization."}, {"t": "Pluribus \u2014 Superhuman AI for Multiplayer Poker", "ty": "paper", "d": "Game AI", "tp": "Imperfect Information Games", "c": ["Monte Carlo CFR", "Depth-Limited Search", "Blueprint Strategy", "Abstraction", "Imperfect Information"], "src": "https://science.org/pluribus-2019", "sz": "deep-dive", "sum": "The Science 2019 paper on Pluribus, the first AI to beat professional poker players in 6-player no-limit Texas Hold'em. Introduces depth-limited search in imperfect-information games and a novel blueprint strategy computed via Monte Carlo CFR."}, {"t": "Pokemon TCG Agent - LLM Agentic Approach", "ty": "docs", "d": "Game AI", "tp": "Agentic Systems", "c": ["Game State Representation", "Action Space Design", "Multi-Step Reasoning", "Tool Use", "Agent Memory", "Opponent Modeling"], "src": "https://github.com/pokemon-tcg-llm-agent", "sz": "deep-dive", "sum": "A project exploring building an LLM-powered agent that can play the Pokemon Trading Card Game. Involves game state representation, action space design, multi-step reasoning for card combos, and opponent modeling. Demonstrates practical agentic patterns: tool u"}, {"t": "PostgreSQL Internals \u2014 EXPLAIN, Indexes, and Bloom Filters", "ty": "docs", "d": "Systems", "tp": "Databases", "c": ["Query Planning", "EXPLAIN ANALYZE", "Index Design", "Bloom Filters", "Lateral Joins", "Query Optimization"], "src": "/private/tmp/pg.md", "sz": "deep-dive", "sum": "Deep dive into PostgreSQL internals: reading and visualizing EXPLAIN ANALYZE output, understanding query planner decisions, lateral joins, following a SELECT through Postgres internals, index maintenance strategies, monitoring unused indexes, and using Bloom f"}, {"t": "Process Profiling on macOS", "ty": "docs", "d": "Systems", "tp": "Operating Systems", "c": ["Process Profiling", "Flame Graphs", "dtrace", "Instruments", "CPU Profiling", "Memory Profiling", "System Calls"], "src": "/private/tmp/proc.md", "sz": "medium", "sum": "How to find and diagnose resource-hogging processes on macOS. Covers top, ps, Activity Monitor internals, Instruments.app for CPU/memory profiling, dtrace/dtruss for syscall tracing, sample and spindump for hang diagnosis, and how to read flame graphs. Underst"}, {"t": "Python Design Patterns and Django Best Practices", "ty": "docs", "d": "Programming/Python", "tp": "Design Patterns", "c": ["Design Patterns", "State Machines", "WSGI", "Django Migrations", "Factory Pattern", "Observer Pattern"], "src": "/private/tmp/patterns.md", "sz": "medium", "sum": "Design patterns applied to Python: factory, observer, strategy, state machines (FSM), decorator. Django-specific patterns: WSGI internals, zero-downtime migrations, cached_property, and deployment with Fabric. Understanding how Django serves requests from WSGI"}, {"t": "RLHF Book", "ty": "docs", "d": "ML/Foundations", "tp": "RLHF", "c": ["RLHF", "Reward Models", "PPO", "Direct Preference Optimization", "Post-Training"], "src": "https://rlhfbook.com", "sz": "deep-dive", "sum": "Nathan Lambert's comprehensive book on reinforcement learning from human feedback, covering the full post-training pipeline: reward modeling, PPO, and Direct Preference Optimization as a simpler alternative."}, {"t": "Raft \u2014 In Search of an Understandable Consensus Algorithm", "ty": "paper", "d": "Systems", "tp": "Distributed Consensus", "c": ["Raft Consensus", "Leader Election", "Log Replication", "Replicated State Machine", "Membership Changes", "Log Compaction"], "src": "/private/tmp/raft.md", "sz": "deep-dive", "sum": "The Raft consensus algorithm, designed for understandability. Covers leader election, log replication, safety guarantees, membership changes, and log compaction. The go-to alternative to Paxos for building replicated state machines. Used in etcd, CockroachDB, "}, {"t": "ReAct - Reasoning and Acting in LLMs", "ty": "paper", "d": "ML/Frameworks", "tp": "Prompt Engineering", "c": ["ReAct Pattern", "Chain of Thought", "Tool Use", "Thought-Action-Observation", "Few-Shot Prompting"], "src": "https://arxiv.org/abs/2210.11416", "sz": "medium", "sum": "The foundational paper on interleaving reasoning traces and actions in LLMs. Shows that letting models think step-by-step AND take actions (search, lookup) outperforms either reasoning or acting alone. Introduced the Thought-Action-Observation loop."}, {"t": "Recurrent Neural Networks: RNN, LSTM, GRU", "ty": "docs", "d": "ML/Foundations", "tp": "Sequence Models", "c": ["Simple RNN", "LSTM", "GRU", "Backpropagation Through Time", "Vanishing Gradients"], "src": "https://github.com/ml-curriculum/rnns", "sz": "medium", "sum": "A curriculum module on sequence modeling with recurrent architectures, covering vanilla RNNs, LSTM and GRU gating mechanisms, backpropagation through time, and the vanishing/exploding gradient problem."}, {"t": "Redpanda - Kafka-Compatible Streaming", "ty": "docs", "d": "Systems", "tp": "Streaming", "c": ["Event Streaming", "Thread-Per-Core", "Raft Consensus", "Log-Structured Storage", "Zero-Copy Networking"], "src": "https://github.com/redpanda-data/redpanda", "sz": "medium", "sum": "Exploration of Redpanda, a Kafka-compatible streaming platform written in C++ using Seastar. Covers its architecture: thread-per-core design, no JVM/ZooKeeper dependency, Raft for replication, and how it achieves lower latency than Kafka."}, {"t": "Reinforcement Learning Fundamentals", "ty": "docs", "d": "ML/Foundations", "tp": "RL", "c": ["Markov Decision Processes", "Policy Gradients", "Value Functions", "Reinforcement Learning Basics", "RLHF"], "src": "https://github.com/ml-curriculum/reinforcement-learning", "sz": "medium", "sum": "A curriculum module covering core RL concepts \u2014 MDPs, value functions, policy gradients, and reward modeling \u2014 framed as groundwork for understanding RLHF pipelines used to align language models."}, {"t": "Retrieval-Augmented Generation Approaches", "ty": "docs", "d": "ML/Frameworks", "tp": "RAG", "c": ["Retrieval Augmented Generation", "Vector Search", "Chunking Strategies", "Prompt Engineering Fundamentals"], "src": "https://github.com/ml-curriculum/rag-approaches", "sz": "medium", "sum": "A survey of RAG architectural patterns for grounding LLM outputs in external knowledge, covering retriever design, chunking strategies, and approaches for combining retrieval with generation."}, {"t": "Router-R1: LLM Query Routing System", "ty": "paper", "d": "ML/Infrastructure", "tp": "LLM Serving", "c": ["Model Routing", "Cost Optimization", "Quality-Cost Tradeoff", "Load Balancing"], "src": "unknown", "sz": "deep-dive", "sum": "Research paper on routing queries to optimal models with cost-quality tradeoffs. Presents system design for automatically selecting appropriate models based on query characteristics and inference constraints."}, {"t": "Running LLMs on R36S", "ty": "docs", "d": "Embedded/Gaming", "tp": "Edge AI", "c": ["Cross-Compilation", "Model Quantization", "llama.cpp", "ARM NEON", "Edge Inference"], "src": "https://r36s-llm-experiments", "sz": "deep-dive", "sum": "Experimenting with running small language models on the R36S handheld (Allwinner H700, 1GB RAM). Explores llama.cpp cross-compilation for ARM, model quantization to fit in memory, and practical limitations of edge inference on ultra-low-power devices."}, {"t": "SIP and PSTN - Network Level Deep Dive", "ty": "article", "d": "Networking", "tp": "Telecom Protocols", "c": ["SIP Protocol", "SDP Negotiation", "RTP Media", "PSTN Interconnect", "NAT Traversal", "Codec Negotiation", "SIP Trunking"], "src": "https://tools.ietf.org/html/rfc3261", "sz": "deep-dive", "sum": "Understanding Session Initiation Protocol (SIP) and the Public Switched Telephone Network (PSTN) at the network level. Covers SIP message flow, registration, call setup/teardown, SDP negotiation, RTP media, PSTN interconnects via SIP trunking, codec negotiatio"}, {"t": "SNAC: Multi-Scale Neural Audio Codec", "ty": "paper", "d": "ML/Voice", "tp": "Audio Codecs", "c": ["Neural Audio Codec", "Residual Vector Quantization", "Multi-Scale Encoding"], "src": "https://arxiv.org/abs/2410.02981", "sz": "quick-read", "sum": "SNAC introduces a neural audio codec that encodes speech into hierarchical, multi-scale discrete tokens at different temporal resolutions, improving compression efficiency and downstream generative modeling compared to flat residual vector quantization codecs."}, {"t": "STT Learning Loop: Self-Improving Speech Recognition", "ty": "paper", "d": "ML/Voice", "tp": "ASR", "c": ["STT Learning Loop", "Active Learning", "Error Correction"], "src": "unknown", "sz": "medium", "sum": "Research on creating feedback loops in speech-to-text systems for continuous improvement. Discusses active learning approaches and error correction mechanisms that enable ASR models to improve from real-world usage."}, {"t": "SWE-Agent - LLM Software Engineering Agent", "ty": "paper", "d": "ML/Agents", "tp": "Agentic Systems", "c": ["Agent-Computer Interface", "Code Navigation", "Tool Design", "SWE-bench", "Autonomous Debugging"], "src": "https://arxiv.org/abs/2401.04088", "sz": "medium", "sum": "Research on using LLMs as autonomous software engineering agents. Introduces Agent-Computer Interface (ACI) design, showing that how the agent interacts with the codebase matters as much as the model. Achieves strong results on SWE-bench by giving agents file "}, {"t": "Sierra: Reliable Inference Layer for Foundation Models", "ty": "article", "d": "ML/Infrastructure", "tp": "Inference Optimization", "c": ["Model Failover", "Inference Reliability", "Load Balancing", "Fault Tolerance"], "src": "unknown", "sz": "medium", "sum": "Overview of Sierra's inference reliability infrastructure. Discusses model failover mechanisms, redundancy patterns, and load balancing techniques for building production-grade inference systems that maintain service reliability."}, {"t": "Silero VAD", "ty": "docs", "d": "ML/Voice", "tp": "Voice Activity", "c": ["Voice Activity Detection", "Endpointing", "Barge-in Detection"], "src": "https://github.com/snakers4/silero-vad", "sz": "quick-read", "sum": "Documentation and code for Silero VAD, a lightweight, pre-trained voice activity detection model used for endpointing and barge-in detection in real-time speech applications."}, {"t": "SmolAgents \u2014 Lightweight AI Agent Framework", "ty": "tweet", "d": "ML/Agents", "tp": "Agentic Systems", "c": ["Code Agents", "Tool Calling", "Multi-Step Reasoning", "Lightweight Agent Frameworks"], "src": "https://x.com/SergioPaniego/status/2074863503312044499", "sz": "quick-read", "sum": "Thread on SmolAgents, Hugging Face's lightweight agent framework. Covers building agents with minimal code, tool calling, code-based agents vs JSON-based, multi-step reasoning, and integration with any LLM. Demonstrates the shift from heavy frameworks to simpl"}, {"t": "SoundStorm: Efficient Parallel Audio Generation", "ty": "paper", "d": "ML/Voice", "tp": "Speech Synthesis", "c": ["Non-Autoregressive Generation", "Neural Audio Codec", "Parallel Decoding"], "src": "https://arxiv.org/abs/2305.09636", "sz": "medium", "sum": "SoundStorm introduces a non-autoregressive, parallel decoding scheme for generating audio tokens from a neural codec, using an iterative masked-token approach that produces long-form audio far faster than autoregressive TTS models."}, {"t": "Spanner and Calvin \u2014 Globally Distributed Transactions", "ty": "paper", "d": "Systems", "tp": "Distributed Databases", "c": ["External Consistency", "TrueTime", "Deterministic Transactions", "Two-Phase Commit", "Multi-Datacenter Consistency", "Global Ordering"], "src": "/private/tmp/spanner.md", "sz": "deep-dive", "sum": "Google Spanner's globally distributed database with external consistency via TrueTime (GPS + atomic clocks), and Calvin's deterministic transaction ordering as an alternative approach. Covers the spectrum from strong consistency (Spanner) to deterministic exec"}, {"t": "Speculative Decoding for LLMs", "ty": "paper", "d": "ML/Infrastructure", "tp": "Inference Optimization", "c": ["Speculative Decoding", "Draft Model", "Token Verification", "Acceptance Rate", "Parallel Verification"], "src": "https://arxiv.org/abs/2305.18290", "sz": "medium", "sum": "Technique to speed up LLM inference by using a small draft model to propose multiple tokens, then verifying them in parallel with the large model. Achieves 2-3x speedup with mathematically guaranteed identical output distribution."}, {"t": "Stanford CS153: Building Agentic AI Systems", "ty": "docs", "d": "ML/Agents", "tp": "Agentic Systems", "c": ["Agent Architecture", "Planning Strategies", "Tool Use", "Evaluation", "ReAct Pattern"], "src": "unknown", "sz": "deep-dive", "sum": "University course on AI agents and foundation models. Covers agent architecture, planning strategies, tool use patterns, and system evaluation methodologies for building effective autonomous AI agents."}, {"t": "Suphx \u2014 Mastering Mahjong with Deep Reinforcement Learning", "ty": "paper", "d": "Game AI", "tp": "Imperfect Information Games", "c": ["Oracle Guiding", "Global Reward Prediction", "Imperfect Information", "Stochastic Games", "Multi-Player Strategy"], "src": "https://arxiv.org/abs/2003.13590", "sz": "medium", "sum": "Microsoft Research's Suphx achieves superhuman performance in Mahjong on the Tenhou platform. Notable for handling a game with imperfect information, stochastic elements, and 4 players. Uses oracle guiding and global reward prediction."}, {"t": "Survey of LLM-Based Autonomous Agents", "ty": "paper", "d": "ML/Agents", "tp": "Agentic Systems", "c": ["Agent Architecture", "Agent Memory Systems", "Planning Strategies", "Tool Use", "ReAct Pattern", "Reflection"], "src": "https://arxiv.org/abs/2309.06180", "sz": "deep-dive", "sum": "A comprehensive survey covering the landscape of LLM-based autonomous agents. Categorizes agent architectures by their core components: profiling, memory, planning, and action modules. Reviews applications across software engineering, scientific research, and "}, {"t": "The Annotated Transformer (Harvard NLP)", "ty": "article", "d": "ML/Foundations", "tp": "Model Architecture", "c": ["Transformer Architecture", "Multi-Head Attention", "Positional Encoding", "Masking", "Label Smoothing", "Encoder-Decoder", "Layer Normalization"], "src": "https://nlp.seas.harvard.edu/2018/04/03/attention.html", "sz": "deep-dive", "sum": "A line-by-line PyTorch implementation of 'Attention Is All You Need', annotated with explanations. Covers the full architecture: multi-head attention, positional encoding, encoder/decoder stacks, masking, label smoothing, and training loop. The definitive code"}, {"t": "The Bitter Lesson", "ty": "article", "d": "ML/Foundations", "tp": "Philosophy", "c": ["Scaling Hypothesis", "Compute vs Engineering"], "src": "unknown", "sz": "quick-read", "sum": "Richard Sutton's influential essay arguing that in AI research, methods exploiting compute and data scale consistently outperform hand-crafted domain-specific solutions. Advocates for general learning algorithms over hardcoded knowledge."}, {"t": "The Illustrated Transformer (Jay Alammar)", "ty": "article", "d": "ML/Foundations", "tp": "Model Architecture", "c": ["Self-Attention", "Multi-Head Attention", "Positional Encoding", "Encoder-Decoder", "Query Key Value", "Layer Normalization"], "src": "http://jalammar.github.io/illustrated-transformer/", "sz": "medium", "sum": "A visual, intuitive walkthrough of the Transformer architecture from 'Attention Is All You Need'. Uses diagrams to explain self-attention, multi-head attention, positional encoding, encoder-decoder structure, and how information flows through the model. The go"}, {"t": "The Illustrated Transformer", "ty": "article", "d": "ML/Foundations", "tp": "Model Architecture", "c": ["Self-Attention", "Multi-Head Attention", "Positional Encoding", "Transformer Architecture"], "src": "https://jalammar.github.io/illustrated-transformer/", "sz": "quick-read", "sum": "Jay Alammar's widely-used visual walkthrough of the Transformer architecture, breaking down self-attention, multi-head attention, positional encoding, and the encoder-decoder stack with intuitive diagrams."}, {"t": "The Llama 3 Herd of Models", "ty": "paper", "d": "ML/Infrastructure", "tp": "Training Optimization", "c": ["Post-Training", "Direct Preference Optimization", "Supervised Fine-Tuning", "LLM Basics"], "src": "https://arxiv.org/abs/2407.21783", "sz": "deep-dive", "sum": "Meta's Llama 3.1 paper details the full training recipe for the Llama 3 herd, including pretraining data curation, architecture choices, and a multi-stage post-training pipeline combining supervised fine-tuning, rejection sampling, and DPO."}, {"t": "The Rust Programming Language", "ty": "docs", "d": "Programming/Rust", "tp": "Language Fundamentals", "c": ["Ownership", "Borrowing", "Lifetimes", "Pattern Matching", "Traits", "Zero-Cost Abstractions", "Fearless Concurrency"], "src": "https://doc.rust-lang.org/book/", "sz": "deep-dive", "sum": "The official Rust book. Covers ownership, borrowing, lifetimes, pattern matching, traits, generics, error handling, concurrency, and unsafe Rust. A systems programming language focused on safety and performance without garbage collection."}, {"t": "The Twelve-Factor App", "ty": "docs", "d": "Systems", "tp": "Architecture", "c": ["Twelve-Factor App", "Config Management", "Stateless Processes", "Disposability", "Dev-Prod Parity"], "src": "/private/tmp/12factor.md", "sz": "quick-read", "sum": "Heroku's methodology for building SaaS applications. Twelve principles: codebase, dependencies, config, backing services, build/release/run, processes, port binding, concurrency, disposability, dev/prod parity, logs, admin processes. The foundation of modern c"}, {"t": "The Ultra-Scale Playbook", "ty": "docs", "d": "ML/Infrastructure", "tp": "Distributed Training", "c": ["Tensor Parallelism", "Pipeline Parallelism", "Data Parallelism", "ZeRO", "Activation Recomputation"], "src": "https://huggingface.co/spaces/nanotron/ultrascale-playbook", "sz": "deep-dive", "sum": "A Hugging Face guide to training large language models across thousands of GPUs, covering data/tensor/pipeline parallelism, ZeRO optimizer sharding, and activation recomputation strategies for maximizing throughput at scale."}, {"t": "Toad Brigade \u2014 Lux AI Season 1 Winning Solution", "ty": "article", "d": "Game AI", "tp": "Competition Strategy", "c": ["Imitation Learning", "Leaderboard Mining", "Self-Play Fine-Tuning", "Behavioral Cloning"], "src": "https://kaggle.com/lux-ai-toad-brigade", "sz": "medium", "sum": "Writeup of the winning Lux AI strategy using imitation learning from leaderboard replays. Instead of training from scratch, they learned to imitate the best bots on the leaderboard, then fine-tuned with self-play."}, {"t": "Toolformer - Teaching LLMs to Use Tools", "ty": "paper", "d": "ML/Agents", "tp": "Agentic Systems", "c": ["Self-Supervised Tool Learning", "API Call Insertion", "Tool Selection", "Few-Shot Tool Use"], "src": "https://arxiv.org/abs/2305.10601", "sz": "medium", "sum": "Meta's paper on training LLMs to autonomously decide when and how to use external tools (calculator, search, calendar, translator). Self-supervised approach: the model learns to insert API calls where they improve prediction."}, {"t": "Training Compute-Optimal Large Language Models (Chinchilla)", "ty": "paper", "d": "ML/Infrastructure", "tp": "Scaling Laws", "c": ["Scaling Laws", "Compute-Optimal Training", "LLM Basics"], "src": "https://arxiv.org/abs/2203.15556", "sz": "medium", "sum": "The Chinchilla paper establishes revised scaling laws showing that most large language models of the time were significantly undertrained relative to their parameter count, and derives the compute-optimal trade-off between model size (N) and training tokens (D"}, {"t": "Transformer Deep Dive", "ty": "docs", "d": "ML/Infrastructure", "tp": "Model Architecture", "c": ["Positional Encoding", "Multi-Head Attention", "Grouped Query Attention", "FlashAttention", "Transformer Architecture"], "src": "https://github.com/ml-curriculum/transformer-deep-dive", "sz": "deep-dive", "sum": "An in-depth curriculum module on modern Transformer internals: positional encoding schemes (RoPE, ALiBi), attention variants (MHA, MQA, GQA), FlashAttention, feed-forward network improvements, and how these pieces compose in production LLM architectures."}, {"t": "Tribes \u2014 Strategy Game AI Framework (Polytopia)", "ty": "docs", "d": "Game AI", "tp": "Strategy Game AI", "c": ["Forward Model Simulation", "Rolling Horizon Evolution", "Statistical Forward Planning", "4X Game AI", "Branching Factor Management", "Tech Tree Decisions"], "src": "https://github.com/GAIGResearch/Tribes", "sz": "deep-dive", "sum": "Exploration of GAIG Research's open-source Java re-implementation of The Battle of Polytopia as an AI research framework. A full 4X-lite strategy environment \u2014 tech trees, city management, unit combat, fog of war \u2014 with a fast forward model built for statistic"}, {"t": "Unsloth: Efficient LLM Fine-Tuning", "ty": "docs", "d": "ML/Infrastructure", "tp": "Training Optimization", "c": ["LoRA", "Quantization", "Memory-Efficient Training", "Fine-Tuning"], "src": "https://unsloth.ai", "sz": "quick-read", "sum": "Documentation for Unsloth, a library that accelerates and reduces the memory footprint of LLM fine-tuning through custom Triton kernels, optimized backward passes, and quantization-aware training tricks."}, {"t": "VALL-E: Neural Codec Language Models for Text-to-Speech", "ty": "paper", "d": "ML/Voice", "tp": "Speech Synthesis", "c": ["Neural Audio Codec", "Zero-Shot Voice Cloning", "LLM Basics"], "src": "https://arxiv.org/abs/2301.02111", "sz": "medium", "sum": "VALL-E treats text-to-speech as a conditional language modeling problem over discrete neural codec tokens, enabling zero-shot voice cloning from a short audio prompt without speaker-specific fine-tuning."}, {"t": "WebSockets and WebRTC: Real-Time Communication Protocols", "ty": "article", "d": "Networking", "tp": "Real-Time Communication", "c": ["WebRTC", "WebSockets", "Peer-to-Peer", "STUN/TURN", "Media Streams"], "src": "unknown", "sz": "medium", "sum": "Overview of WebSocket and WebRTC technologies for real-time peer-to-peer communication. Covers protocol fundamentals, STUN/TURN infrastructure, and media stream management for building responsive communication applications."}, {"t": "Zero-Downtime Postgres Schema Migrations", "ty": "docs", "d": "Systems", "tp": "Databases", "c": ["Schema Migrations", "Lock Timeouts", "Zero-Downtime Deploys", "Advisory Locks", "Database Fundamentals"], "src": "unknown", "sz": "medium", "sum": "Practical guide to performing safe schema migrations on production Postgres databases. Covers lock timeout strategies, retry patterns, and advisory lock usage for achieving zero-downtime deployments."}, {"t": "macOS Memory Model \u2014 Pages, Compressor, and Swap", "ty": "docs", "d": "Systems", "tp": "Operating Systems", "c": ["Virtual Memory", "Memory Pages", "Memory Compressor", "Swap Management", "Unified Memory", "Memory Pressure", "Mach VM"], "src": "/private/tmp/macos-mem.md", "sz": "medium", "sum": "How macOS manages memory differently from Linux. Covers Mach VM pages (free, active, inactive, speculative, wired, compressor), why 'free memory' being low is normal, how the in-RAM compressor works before swap kicks in, when swap thrashing happens and how to "}, {"t": "vLLM - Efficient LLM Serving", "ty": "docs", "d": "ML/Infrastructure", "tp": "LLM Serving", "c": ["PagedAttention", "Continuous Batching", "Speculative Decoding", "Prefix Caching", "Tensor Parallelism", "Pipeline Parallelism"], "src": "https://docs.vllm.ai/en/latest/", "sz": "deep-dive", "sum": "Documentation and architecture guide for vLLM, the high-throughput LLM serving engine. Covers PagedAttention (its core innovation), continuous batching, speculative decoding, prefix caching, multi-GPU support via tensor/pipeline parallelism, and integration wi"}, {"t": "word2vec: Efficient Estimation of Word Representations", "ty": "paper", "d": "ML/Foundations", "tp": "NLP", "c": ["Word Embeddings", "Skip-gram", "CBOW", "Distributed Representations"], "src": "unknown", "sz": "deep-dive", "sum": "Foundational paper introducing word2vec embeddings with Skip-gram and CBOW architectures. Demonstrates how to learn distributed word representations that capture semantic relationships efficiently at scale."}];
+const TODAY = new Date('2026-10-03T12:00:00');
+const DAY = 864e5;
+const iso = d => d.toISOString().slice(0,10);
+const ago = n => iso(new Date(TODAY - n*DAY));
+const fmt = s => new Date(s+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const days = s => Math.round((TODAY - new Date(s+'T12:00:00'))/DAY);
+const AREA_COLORS = {'ML/Infrastructure':'#6aa8ff','ML/Foundations':'#a78bfa','Systems':'#4fd1c5','Game AI':'#f6ad55','ML/Agents':'#68d391','ML/Voice':'#f687b3','Networking':'#63b3ed','ML/Frameworks':'#b794f4','Embedded/Gaming':'#fbd38d','Unsorted':'#e9c46a'};
+const col = a => AREA_COLORS[a] || '#8a94a3';
+const short = a => a.replace('ML/','ML ').replace('Infrastructure','Infra');
+
+// ---- sample data: real library, simulated six weeks of activity ----
+let id=0;
+const items = RAW.map(r => ({id:id++, title:r.t, type:r.ty, area:r.d||'Unsorted', topic:r.tp||'General', concepts:r.c, summary:r.sum, src:r.src, state:'collected', ingested:'2026-07-09', picked:null, done:null, dropped:null, sessions:[], checks:[], notes:'', prio:null, planned:null, note:null}));
+const find = s => items.find(i => i.title.toLowerCase().includes(s.toLowerCase()));
+const set = (s, o) => { const it = find(s); if (it) Object.assign(it, o); return it; };
+const add = o => { const it = Object.assign({id:id++, concepts:[], summary:'', src:'', state:'collected', picked:null, done:null, dropped:null, sessions:[], checks:[], notes:'', prio:null, planned:null, note:null}, o); items.push(it); return it; };
+// done in the window
+set('Part I', {state:'done', picked:ago(40), done:ago(19), planned:'2026-09'});
+set('Attention Is All You Need', {state:'done', picked:ago(30), done:ago(26)});
+set('DRS & GRS', {state:'done', picked:ago(4), done:ago(1)});
+set('Neural Networks: Zero', {state:'done', picked:ago(18), done:ago(9), planned:'2026-09'});
+set('Redpanda', {state:'done', picked:ago(13), done:ago(11), planned:'2026-09'});
+// picked now
+set('Part II', {state:'picked', picked:ago(17), planned:'2026-10', prio:'now'});
+set('Raft —', {state:'picked', picked:ago(5), planned:'2026-10', note:'Needed before the toy Raft project.'});
+add({title:'Build a toy Raft in Rust', type:'project', area:'Systems', topic:find('Raft —')?.topic||'Distributed Systems', concepts:['Raft Consensus'], ingested:ago(6), state:'picked', picked:ago(5), planned:'2026-10', note:'Leader election + log replication, single binary, 3 nodes.'});
+add({title:'Implement a KV cache in nanoGPT', type:'practice', area:'ML/Infrastructure', topic:find('KV Cache')?.topic||'KV Cache Design', concepts:['KV Cache'], ingested:ago(23), state:'picked', picked:ago(22), note:'Measure tokens/s before and after.'});
+// dropped
+set('Polytopia', {state:'dropped', picked:ago(33), dropped:ago(24)});
+set('Zig', {state:'dropped', dropped:ago(12)});
+// planned, not started
+set('DeepSeek-V3', {planned:'2026-10', prio:'soon'});
+set('Exploring ArkOS', {planned:'2026-10'});
+set('KV Cache', {planned:'2026-09'});
+set('Gossip Glomers', {planned:'2026-09'});
+set('KV cache in nanoGPT', {planned:'2026-09'});
+set('Lamport Clocks', {state:'done', picked:ago(55), done:ago(45)});
+set('Twelve-Factor', {state:'done', picked:ago(58), done:ago(52)});
+set('Tribes', {state:'picked', picked:ago(2)});
+// priorities
+['Matryoshka','Don\'t Quant','vLLM','FlashAttention','Mixture'].forEach((s,i)=>set(s,{prio:['soon','now','soon','someday','someday'][i]}));
+// collected in the window (some new since last look)
+const recent = [['Don\'t Quant',30],['Tribes',26],['Matryoshka',20],['Step-by-Step',15],['Part III',13],['Part IV',13]];
+recent.forEach(([s,n])=>set(s,{ingested:ago(n)}));
+add({title:'Mixture-of-Experts routing: a survey', type:'paper', area:'ML/Infrastructure', topic:find('DeepSeek')?.topic||'Model Architecture', concepts:['Mixture of Experts'], ingested:ago(2), summary:'Survey of token routing strategies for sparse MoE models.'});
+add({title:'https://jvns.ca/blog/2026/09/28/tcp-retransmits/', type:'article', area:'Unsorted', topic:'', ingested:ago(1), note:'saw on HN, debugging retransmits at work', enrich:true});
+add({title:'Designing Data-Intensive Applications, ch. 9', type:'docs', area:'Unsorted', topic:'', ingested:ago(0), note:'consistency & consensus chapter, pairs with Raft', enrich:true});
+add({title:'Write a tiny HTTP/2 frame parser', type:'practice', area:'Networking', topic:'Protocols', concepts:[], ingested:ago(3)});
+const LOGS = {
+  'Part I:': [[39,2],[35,1.5,'Ch. 2-3: linear algebra, probability'],[30,2],[25,2,'Ch. 4 numerical computation'],[19,1.5,'Ch. 5 done, finished Part I']],
+  'Attention Is All You Need': [[29,1.5],[26,1.5,'Re-derived scaled dot-product attention by hand']],
+  'DRS & GRS': [[1,1]],
+  'Neural Networks: Zero': [[17,2,'micrograd'],[14,2,'makemore part 1-2'],[9,2,'Finished the series']],
+  'Redpanda': [[13,1],[11,.5]],
+  'Part II': [[16,1.5],[10,1.5,'Ch. 7 regularization'],[6,1,'Started ch. 8 optimization, at Adam']],
+  'Raft —': [[4,1,'Read through §5.3 log replication']],
+  'Build a toy Raft': [[3,2,'Leader election works with 3 nodes; log replication next'],[1,1.5,'AppendEntries RPC stubbed, heartbeats OK']],
+  'KV cache in nanoGPT': [[21,1,'Baseline measured: 38 tok/s on M2']],
+  'Tribes': [[2,1,'Skimmed the framework, could be a Game AI side project']],
+  'Lamport Clocks': [[50,1.5]],
+};
+for (const [k,ss] of Object.entries(LOGS)) { const it = find(k); if (it) it.sessions = ss.map(([n,h,note])=>({d:ago(n),h,note})); }
+const STEPS = {
+  'Build a toy Raft': [['Leader election with 3 nodes',3],['Heartbeats + AppendEntries RPC stub',1],['Log replication'],['Persist the log to disk'],["Read 2-3 other Rust Raft implementations (raft-rs, openraft)"]],
+  'Raft —': [['Read §1-4',4],['Read §5: log replication and safety'],['Read §6-8: membership, compaction']],
+  'Part II': [['Ch. 6 deep feedforward networks',16],['Ch. 7 regularization',10],['Ch. 8 optimization (stopped at Adam)']],
+  'KV cache in nanoGPT': [['Measure baseline tokens/s',21],['Add the cache to the attention forward pass'],["Compare with other people's implementations (llama.cpp, vLLM)"]],
+};
+for (const [k,ss] of Object.entries(STEPS)) { const it = find(k); if (it) it.checks = ss.map(([t,n])=>({t, done:n!=null})); }
+const NOTES = {
+  'Build a toy Raft': 'Single binary, 3 nodes on localhost, tokio for networking.\nElection timeout 150-300ms randomised, works.\nAppendEntries stubbed, heartbeats OK. Log replication is next; re-read §5.3 first.',
+  'Raft —': 'Read half of §5, stopped at 5.4.1 (election restriction).\nThe Figure 2 summary is the thing to keep open while implementing.',
+  'Part II': 'Ch. 7: dropout as bagging finally made sense.\nStopped at Adam in ch. 8.',
+  'KV cache in nanoGPT': 'Baseline 38 tok/s on M2 with block_size 256.',
+  'Tribes': 'Polytopia clone with a bot API. Could be a fun Game AI side project; not now.',
+};
+for (const [k,n] of Object.entries(NOTES)) { const it = find(k); if (it) it.notes = n; }
+items.forEach(i=>{ if ((i.state==='picked'||i.state==='done') && !i.planned) i.planned = i.picked.slice(0,7); });
+const LAST_SEEN = ago(4);
+
+// ---- model ----
+const live = i => i.state !== 'dropped';
+const coverageAt = (list, d) => {
+  const inSet = list.filter(i => i.ingested <= d && !(i.dropped && i.dropped <= d));
+  const done = inSet.filter(i => i.done && i.done <= d).length;
+  return {done, total: inSet.length};
+};
+const cov = list => {
+  const l = list.filter(live);
+  return {done:l.filter(i=>i.state==='done').length, picked:l.filter(i=>i.state==='picked').length, total:l.length};
+};
+const groupBy = (arr, f) => arr.reduce((m,x)=>((m[f(x)] ||= []).push(x), m), {});
+const areasSorted = () => Object.entries(groupBy(items.filter(i=>i.area!=='Unsorted'), i=>i.area)).sort((a,b)=>b[1].length-a[1].length);
+const monday = d => { const x = new Date(d); const k = (x.getDay()+6)%7; x.setDate(x.getDate()-k); x.setHours(12); return x; };
+const WEEKS = Array.from({length:6}, (_,k) => { const s = new Date(monday(TODAY) - (5-k)*7*DAY); return {start:iso(s), end:iso(new Date(+s+6*DAY))}; });
+const weekNo = d => { const t = new Date(d); t.setDate(t.getDate()+3-(t.getDay()+6)%7); const w1 = new Date(t.getFullYear(),0,4); return 1+Math.round(((t-w1)/DAY-3+(w1.getDay()+6)%7)/7); };
+const sum = a => a.reduce((s,x)=>s+x,0);
+const total = i => sum(i.sessions.map(s=>s.h));
+const lastWorked = i => i.sessions.at(-1)?.d;
+const allSessions = () => items.flatMap(i=>i.sessions.map(s=>({...s,i})));
+const fmtH = h => { const H=Math.floor(h), M=Math.round((h-H)*60); return (H?H+'h':'')+(M?(H?' ':'')+M+'m':'') || '0h'; };
+
+// ---- render helpers ----
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const typeChip = t => t==='project'||t==='practice' ? `<span class="chip ${t}">${t}</span>` : '';
+const toast = m => { const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove('on'),1800); };
+function act(itId, a){
+  const it = items.find(i=>i.id===itId), today = iso(TODAY);
+  if (a==='pick') Object.assign(it,{state:'picked',picked:today,done:null,dropped:null,planned:(!it.planned||it.planned>MONTH)?MONTH:it.planned});
+  if (a==='done') Object.assign(it,{state:'done',done:today,picked:it.picked||today});
+  if (a==='drop') Object.assign(it,{state:'dropped',dropped:today});
+  if (a==='shelve') Object.assign(it,{state:'collected',picked:null,done:null,dropped:null});
+  toast({pick:'Picked up · added to October',done:'Marked done',drop:'Dropped',shelve:'Put back in the library'}[a] + ' · ' + it.title.slice(0,40));
+  renderAll(); if (document.body.classList.contains('dr')) openItem(itId);
+}
+
+// ---- workbench ----
+const PR = {now:0, soon:1, someday:2};
+const byPrio = (a,b) => (PR[a.prio]??3)-(PR[b.prio]??3) || (a.ingested<b.ingested?1:-1);
+const prioPill = i => `<button class="pp ${i.prio||'none'}" onclick="event.stopPropagation();cyclePrio(${i.id})" title="Click to change priority">${i.prio||'set priority'}</button>`;
+function cyclePrio(id){ const it = items.find(i=>i.id===id), o=[null,'now','soon','someday']; it.prio = o[(o.indexOf(it.prio)+1)%4]; renderAll(); if (document.body.classList.contains('dr')) openItem(id,true); }
+function renderWB(){
+  const picked = items.filter(i=>i.state==='picked').sort((a,b)=>(lastWorked(b)||b.picked)<(lastWorked(a)||a.picked)?-1:1);
+  const upNext = inPlan(MONTH).filter(i=>i.state==='collected').sort(byPrio);
+  const weekH = sum(allSessions().filter(s=>s.d>=WEEKS[5].start).map(s=>s.h));
+  $('#nPicked').textContent = picked.length;
+  $('#nNew').textContent = items.filter(i=>i.ingested>LAST_SEEN).length + ' new';
+  $('#wb').innerHTML = `
+  <div class="wbhead"><div><h1>What you're working on</h1><div class="sub">Saturday, 3 October · ${fmtH(weekH)} this week</div></div></div>
+  <div class="wbgrid">
+    <div>
+      <h2>In progress <span class="c">${picked.length}</span><span class="r">last worked first</span></h2>
+      <div class="picked">${picked.map(i=>{const lw=lastWorked(i), d=days(lw||i.picked), nc=i.checks.filter(c=>c.done).length, td=todayH(i), n1=(i.notes||'').split('\n').filter(Boolean).at(-1);return `
+        <div class="card pc" style="--c:${col(i.area)}" onclick="openItem(${i.id})">
+          <div class="where"><span class="dot"></span>${esc(short(i.area))} · ${esc(i.topic)} ${typeChip(i.type)}</div>
+          <div class="ttl">${esc(i.title)}</div>
+          <div class="meta"><span>${i.sessions.length?fmtH(total(i))+' total':'no time yet'}${td?` · <b style="color:var(--acc);font-weight:500">${fmtH(td)} today</b>`:''}</span>${i.checks.length?`<span>☑ ${nc}/${i.checks.length}</span>`:''}</div>
+          ${n1?`<div class="lastlog">${esc(n1.length>110?n1.slice(0,109)+'…':n1)}</div>`:''}
+          <div class="age ${d>14?'stale':''}"><b class="num">${d===0?'today':d+'d'}</b><span>since last worked</span></div>
+          <div class="acts"><button class="btn sm logbtn" onclick="event.stopPropagation();addTime(${i.id},.5)">+30m</button></div>
+        </div>`}).join('')}
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h2>Up next <span class="c">${upNext.length}</span><span class="r">from your October plan</span></h2>
+        ${upNext.length?upNext.map(i=>`<div class="row"><span class="dot" style="--c:${col(i.area)}"></span><span class="t" onclick="openItem(${i.id})">${esc(i.title)}</span>${i.prio?`<span class="pr ${i.prio}">${i.prio}</span>`:''}<button class="btn sm" onclick="act(${i.id},'pick')">Pick up</button></div>`).join(''):`<div class="muted" style="font-size:13px;padding:6px 0">Nothing queued for October.</div>`}
+        <div class="row" style="justify-content:center"><button class="btn sm ghost" onclick="go('plan')">Open the plan →</button></div>
+      </div>
+    </div>
+  </div>`;
+}
+const todayH = i => i.sessions.find(s=>s.d===iso(TODAY))?.h || 0;
+function addTime(id, h){
+  const it = items.find(i=>i.id===id), d = iso(TODAY);
+  let s = it.sessions.find(s=>s.d===d);
+  if (!s && h>0) { s = {d, h:0}; it.sessions.push(s); }
+  if (s) { s.h = Math.max(0, s.h + h); if (!s.h) it.sessions = it.sessions.filter(x=>x!==s); }
+  if (h>0 && it.state==='collected') Object.assign(it,{state:'picked',picked:d,planned:(!it.planned||it.planned>MONTH)?MONTH:it.planned});
+  renderAll(); if (document.body.classList.contains('dr')) openItem(id, true);
+  if (!document.body.classList.contains('dr')) toast(`${h>0?'+':'−'}30m · ${fmtH(todayH(it))} today on ${it.title.slice(0,30)}`);
+}
+function toggleCheck(id,k){ const c = items.find(i=>i.id===id).checks[k]; c.done = !c.done; renderAll(); openItem(id, true); }
+function delCheck(id,k){ items.find(i=>i.id===id).checks.splice(k,1); renderAll(); openItem(id, true); }
+function addCheck(id,t){ items.find(i=>i.id===id).checks.push({t,done:false}); renderAll(); openItem(id, true); setTimeout(()=>$('#newCheck')?.focus(),20); }
+function workPanel(i){
+  const td = todayH(i);
+  return `
+    <div class="work">
+      <div class="tbox">
+        <div><div class="tl">Today</div><div class="tv num">${td?fmtH(td):'0m'}</div></div>
+        <div class="tbtns"><button class="btn" onclick="addTime(${i.id},-.5)" ${td?'':'disabled'}>−30m</button><button class="btn pri" onclick="addTime(${i.id},.5)">+30m</button></div>
+        <div class="tt muted">${i.sessions.length?`${fmtH(total(i))} total · ${i.sessions.length} day${i.sessions.length>1?'s':''} worked`:'No time yet'}</div>
+      </div>
+      <div class="wl">Notes</div>
+      <textarea class="notes" placeholder="Anything worth remembering: where you stopped, what clicked, links…" oninput="items.find(x=>x.id===${i.id}).notes=this.value">${esc(i.notes||'')}</textarea>
+      <div class="wl">Checklist ${i.checks.length?`<span class="muted num">${i.checks.filter(c=>c.done).length}/${i.checks.length}</span>`:''}</div>
+      <div class="checks">${i.checks.map((c,k)=>`<div class="ck ${c.done?'done':''}"><input type="checkbox" ${c.done?'checked':''} onchange="toggleCheck(${i.id},${k})"><span onclick="toggleCheck(${i.id},${k})">${esc(c.t)}</span><button class="x2" onclick="delCheck(${i.id},${k})" title="Remove">✕</button></div>`).join('')}
+        <input class="inp addck" id="newCheck" placeholder="+ Add a subtask, press Enter" onkeydown="if(event.key==='Enter'&&this.value.trim())addCheck(${i.id},this.value.trim())">
+      </div>
+      <button class="btn sm ghost" style="margin-top:12px" onclick="openAdd()">+ Save something for later to the library</button>
+    </div>`;
+}
+
+// ---- library ----
+let libSort = 'area';
+function itemRow(i){
+  const isNew = i.ingested > LAST_SEEN;
+  const dt = i.state==='done'?`done ${fmt(i.done)}`:i.state==='picked'?'in progress':i.state==='dropped'?'dropped':`added ${fmt(i.ingested)}`;
+  const pl = inPlan(MONTH).includes(i) ? '<span class="inpl">Oct plan</span>' : i.planned===NEXT ? '<span class="inpl">Nov plan</span>' : i.state==='collected' ? `<span class="pls"><button class="btn sm" onclick="event.stopPropagation();planM(${i.id},MONTH)">+ Oct</button><button class="btn sm ghost" onclick="event.stopPropagation();planM(${i.id},NEXT)">+ Nov</button></span>` : '';
+  return `<div class="item ${i.state}" onclick="openItem(${i.id})"><span class="st ${i.state}"></span><span class="tt">${esc(i.title)} ${typeChip(i.type)}${isNew?' <span class="newtag">NEW</span>':''}</span><span class="dt num">${dt}</span>${i.state==='collected'?prioPill(i):'<span></span>'}<span class="plc">${pl}</span></div>`;
+}
+function renderLib(){
+  const unsorted = items.filter(i=>i.area==='Unsorted');
+  const A = areasSorted();
+  const all = cov(items.filter(i=>i.area!=='Unsorted'));
+  $('#lib').innerHTML = `
+  <div class="wbhead"><div><h1>Library</h1><div class="sub">${all.total} items · ${all.done} done (${Math.round(all.done/all.total*100)}%) · ${all.picked} in progress · nothing here is a to-do</div></div></div>
+  <div class="libgrid">
+    <div class="areas">
+      ${A.map(([a,l])=>{const c=cov(l);return `<button class="ar" onclick="document.getElementById('a-${a.replace(/\W/g,'')}').scrollIntoView({behavior:'smooth',block:'start'})"><div class="n"><span class="dot" style="--c:${col(a)}"></span>${esc(short(a))}<em class="num">${c.done}/${c.total}</em></div><div class="bar"><i style="width:${c.done/c.total*100}%;background:${col(a)}"></i><i style="width:${c.picked/c.total*100}%;background:${col(a)};opacity:.35"></i></div></button>`}).join('')}
+    </div>
+    <div>
+      <div class="libtools">
+        <div class="seg"><button class="on">By area</button><button>My priority</button><button>Recently added</button></div>
+        <div class="seg"><button class="on">All</button><button>Collected</button><button>Picked</button><button>Done</button><button>Dropped</button></div>
+        <span class="hsp"></span><span class="muted" style="font-size:12px">${items.filter(i=>i.ingested>LAST_SEEN).length} new since ${fmt(LAST_SEEN)}</span>
+      </div>
+      <div class="card unsorted">
+        <h2 style="color:#b9a36a">Unsorted <span class="c">${unsorted.length}</span><span class="r"><button class="btn sm" onclick="toast('Run: lpt enrich · Claude files these')">File with Claude</button></span></h2>
+        ${unsorted.map(itemRow).join('')}
+      </div>
+      ${A.map(([a,l])=>{const c=cov(l);const T=Object.entries(groupBy(l,i=>i.topic)).sort((x,y)=>y[1].length-x[1].length);return `
+      <div class="asec" id="a-${a.replace(/\W/g,'')}">
+        <div class="ahead"><span class="dot" style="--c:${col(a)};width:10px;height:10px"></span><h3>${esc(a.replace('/',' / '))}</h3>
+          <div class="cov"><span class="num">${c.done}/${c.total} done${c.picked?` · ${c.picked} in progress`:''}</span><div class="bar"><i style="width:${c.done/c.total*100}%;background:${col(a)}"></i><i style="width:${c.picked/c.total*100}%;background:${col(a)};opacity:.35"></i></div></div></div>
+        ${T.map(([t,tl])=>{const tc=cov(tl);return `<div class="topic"><div class="th">${esc(t)} <span class="muted num">${tc.done}/${tc.total}</span><div class="bar mini"><i style="width:${tc.total?tc.done/tc.total*100:0}%;background:${col(a)}"></i></div></div>
+          ${tl.sort((x,y)=>({picked:0,collected:1,done:2,dropped:3}[x.state]-{picked:0,collected:1,done:2,dropped:3}[y.state])||byPrio(x,y)).map(itemRow).join('')}</div>`}).join('')}
+      </div>`}).join('')}
+    </div>
+  </div>`;
+}
+
+// ---- item drawer ----
+function similar(it){
+  return items.filter(o=>o.id!==it.id && o.area!=='Unsorted' && (o.topic===it.topic && o.area===it.area || o.concepts.filter(c=>it.concepts.includes(c)).length>=2)).slice(0,6);
+}
+function openItem(itId, keep){
+  const i = items.find(x=>x.id===itId);
+  const sc0 = keep ? $('#drawer').scrollTop : 0;
+  const btn = (a,l,p) => `<button class="btn ${p?'pri':''}" onclick="act(${i.id},'${a}')">${l}</button>`;
+  const actions = {collected:btn('pick','Pick up',1), picked:btn('done','✓ Done',1)+btn('shelve','Put back')+btn('drop','Drop'), done:btn('pick','Pick up again'), dropped:btn('pick','Pick up')}[i.state];
+  const sim = i.state==='collected' ? similar(i) : [];
+  const inP = inPlan(MONTH).includes(i), inN = i.planned===NEXT;
+  $('#drawer').innerHTML = `
+    <button class="btn sm ghost x" onclick="closeItem()">✕</button>
+    <div class="where" style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tx2)"><span class="dot" style="--c:${col(i.area)}"></span>${esc(short(i.area))}${i.topic?' · '+esc(i.topic):''} ${typeChip(i.type)}</div>
+    <h1>${esc(i.title)}</h1>
+    <div class="acts2">${actions}<span class="hsp"></span>${prioPill(i)}</div>
+    ${i.state!=='collected'||i.sessions.length?workPanel(i):''}
+    ${i.state==='collected'?`<div class="acts2">${inP?'<span class="muted" style="font-size:13px">In the October plan</span>':inN?'<span class="muted" style="font-size:13px">In the November plan</span>':`<button class="btn" onclick="planM(${i.id},MONTH)">+ October plan</button><button class="btn" onclick="planM(${i.id},NEXT)">+ November plan</button>`}</div>`:''}
+    ${i.note?`<div class="note">“${esc(i.note)}”</div>`:''}
+    ${i.summary?`<p>${esc(i.summary)}…</p>`:i.enrich?`<p class="muted">Waiting for Claude to fill in the details and file it.</p>`:''}
+    ${i.src?`<div style="font-size:13px;margin-bottom:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a style="color:#9fc4ff" href="${esc(i.src)}">${esc(i.src.replace(/^https?:\/\//,''))}</a></div>`:''}
+    ${sim.length?`<h2 style="margin-top:22px">Already in your library on this topic</h2>
+    <div class="sim">${sim.map(o=>`<div class="row"><span class="st ${o.state}" style="width:12px;height:12px"></span><span class="t" onclick="openItem(${o.id})">${esc(o.title)}</span><span class="muted" style="font-size:12px">${o.state==='collected'?'not started':o.state}</span></div>`).join('')}</div>`:''}
+  `;
+  document.body.classList.add('dr');
+  if (keep) $('#drawer').scrollTop = sc0;
+}
+function closeItem(){ document.body.classList.remove('dr'); }
+
+// ---- plan (this month) ----
+const MONTH = '2026-10', NEXT = '2026-11';
+const FOCUS = {'ML/Infrastructure':.9,'ML/Agents':.85,'ML/Frameworks':.8,'Systems':.8,'Game AI':.6};
+const focusOf = a => FOCUS[a] ?? .5;
+const isBuild = i => i.type==='project' || i.type==='practice';
+const monthOf = d => d.slice(0,7);
+// an item is in month M's plan if it was planned for M or earlier and isn't finished (or was finished during M): unfinished items carry over
+const inPlan = M => items.filter(i=>i.planned && i.planned<=M && i.state!=='dropped' && (i.state!=='done' || monthOf(i.done)===M));
+const mName = m => new Date(m+'-15').toLocaleDateString('en-GB',{month:'short'});
+function planRow(i, extra=''){
+  return `<div class="prow"><span class="dot" style="--c:${col(i.area)}"></span>
+    <div class="pt"><div class="t" onclick="openItem(${i.id})">${esc(i.title)} ${typeChip(i.type)}${i.planned<MONTH?` <span class="from">from ${mName(i.planned)}</span>`:''}</div>
+    <div class="ps">${esc(short(i.area))} · ${esc(i.topic)}${i.sessions.length?` · ${fmtH(total(i))}`:''}</div></div>
+    ${prioPill(i)}${extra}</div>`;
+}
+function renderPlan(){
+  const P = inPlan(MONTH), prog = P.filter(i=>i.state==='picked'), todo = P.filter(i=>i.state==='collected').sort(byPrio), done = P.filter(i=>i.state==='done');
+  const N = items.filter(i=>i.planned===NEXT).sort(byPrio);
+  const doneBy = m => items.filter(i=>i.done && monthOf(i.done)===m).length;
+  const hist = [['Aug','2026-08'],['Sep','2026-09']].map(([l,m])=>[l,doneBy(m)]);
+  const open = prog.length + todo.length;
+  const pool = items.filter(i=>i.state==='collected' && i.area!=='Unsorted' && !i.planned).sort(byPrio);
+  const groups = [['now','Now'],['soon','Soon'],['someday','Someday']].map(([k,l])=>[l, pool.filter(i=>i.prio===k)]).filter(g=>g[1].length);
+  const rem = i => `<button class="btn sm ghost" onclick="planM(${i.id},null)">Remove</button>`;
+  $('#plan').innerHTML = `
+  <div class="wbhead"><div><h1>October</h1><div class="sub">28 days left · anything unfinished carries over to November on its own</div></div></div>
+  <div class="wbgrid">
+    <div>
+      <div class="card psec">
+        <h2>October plan <span class="c">${P.length}</span><span class="r">${done.length} done · ${prog.length} in progress · ${todo.length} not started</span></h2>
+        ${prog.length?`<div class="gl">In progress</div>${prog.map(i=>planRow(i)).join('')}`:''}
+        ${todo.length?`<div class="gl">Not started</div>${todo.map(i=>planRow(i, rem(i))).join('')}`:''}
+        ${done.length?`<div class="gl">Done</div>${done.map(i=>planRow(i, `<span class="out done">${fmt(i.done)}</span>`)).join('')}`:''}
+      </div>
+      <div class="card psec">
+        <h2>November <span class="c">${N.length}</span><span class="r">starts on 1 Nov</span></h2>
+        ${N.length?N.map(i=>planRow(i, rem(i))).join(''):`<div class="muted" style="font-size:13px;padding:4px 0">Nothing yet. Use “+ Nov” on anything in your library.</div>`}
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h2>How much fits</h2>
+        <div class="fit">${hist.map(([l,n])=>`<div><b class="num">${n}</b><span>finished in ${l}</span></div>`).join('')}<div class="now"><b class="num">${open}</b><span>open in October</span></div></div>
+        <div class="muted" style="font-size:12.5px;margin-top:10px">${open > Math.max(...hist.map(h=>h[1]))+1 ? 'More open than you usually finish in a month.' : 'In line with what you usually finish.'}</div>
+      </div>
+      <div class="card">
+        <h2>Add from library <span class="r">by your priority</span></h2>
+        ${groups.map(([l,g])=>`<div class="gl">${l}</div>${g.slice(0,4).map(i=>`<div class="row"><span class="dot" style="--c:${col(i.area)}"></span><span class="t" onclick="openItem(${i.id})">${esc(i.title)}<span class="muted" style="font-size:12px"> · ${esc(i.topic)}</span></span><button class="btn sm" onclick="planM(${i.id},MONTH)">+ Oct</button><button class="btn sm ghost" onclick="planM(${i.id},NEXT)">+ Nov</button></div>`).join('')}`).join('')}
+        <div class="row" style="justify-content:center"><button class="btn sm ghost" onclick="go('lib')">Set priorities in the library →</button></div>
+      </div>
+    </div>
+  </div>`;
+}
+function planM(itId,m){ items.find(i=>i.id===itId).planned=m; renderAll(); if (document.body.classList.contains('dr')) openItem(itId,true); toast(m?`Added to the ${mName(m)} plan`:'Removed from the plan'); }
+
+// ---- insights (six weeks) ----
+function renderIns(){
+  const from = WEEKS[0].start, to = WEEKS[5].end;
+  const S = allSessions().filter(s=>s.d>=from && s.d<=to);
+  const H = sum(S.map(s=>s.h));
+  const buildH = sum(S.filter(s=>isBuild(s.i)).map(s=>s.h));
+  const doneIn = items.filter(i=>i.done && i.done>=from);
+  const collIn = items.filter(i=>i.ingested>=from);
+  const wk = WEEKS.map(w=>{ const ss=S.filter(s=>s.d>=w.start&&s.d<=w.end); return {w, h:sum(ss.map(s=>s.h)), b:sum(ss.filter(s=>isBuild(s.i)).map(s=>s.h)), byA:groupBy(ss,s=>s.i.area), done:doneIn.filter(i=>i.done>=w.start&&i.done<=w.end)}; });
+  const maxH = Math.max(4,...wk.map(x=>x.h));
+  const areas = [...new Set([...Object.keys(FOCUS), ...S.map(s=>s.i.area)])].map(a=>{ const ss=S.filter(s=>s.i.area===a), l=items.filter(i=>i.area===a), c=cov(l), c0=coverageAt(l,from); return {a, h:sum(ss.map(s=>s.h)), f:focusOf(a), done:doneIn.filter(i=>i.area===a).length, c, c0}; }).sort((x,y)=>y.f-x.f||y.h-x.h);
+  const top = areas.slice().sort((x,y)=>y.h-x.h)[0], topF = areas[0];
+  const stalled = items.filter(i=>i.state==='picked' && days(lastWorked(i)||i.picked)>=14);
+  const noLog = doneIn.filter(i=>!i.sessions.length).length;
+  const pct = x => Math.round(x/H*100);
+  const insights = [
+    `<b>${pct(top.h)}%</b> of your time went to <b>${esc(short(top.a))}</b>.`,
+    topF.a!==top.a ? `<b>${esc(short(topF.a))}</b> is your top career focus and got <b>${pct(topF.h)}%</b> (${fmtH(topF.h)}).` : `Your top career focus also got the most time.`,
+    `<b>${pct(buildH)}%</b> was building (projects and practice); the rest was reading and watching.`,
+    `You collected <b>${collIn.length}</b> and finished <b>${doneIn.length}</b>. The library grew faster than you finished.`,
+  ];
+  $('#ins').innerHTML = `
+  <div class="rvhead"><div><h1>The last six weeks</h1><div class="sub">${fmt(from)} – ${fmt(to)} · <b style="color:var(--tx)">${fmtH(H)}</b> logged · <b style="color:var(--tx)">${doneIn.length}</b> finished</div></div>
+    <div class="r"><div class="seg"><button>◂ Earlier</button><button class="on">6 weeks</button><button>3 months</button></div></div></div>
+  <div class="insights">${insights.map(s=>`<div class="card ins">${s}</div>`).join('')}</div>
+  <div class="ins2">
+    <div>
+      <h2>Time per week <span class="r"><span class="lg"><i style="background:#8a94a3"></i>by area</span></span></h2>
+      <div class="card weeks">
+        ${wk.map((x,k)=>`<div class="wk ${k===5?'cur':''}">
+          <div class="hh num">${x.h?fmtH(x.h):'—'}</div>
+          <div class="col">${Object.entries(x.byA).map(([a,ss])=>`<i style="height:${sum(ss.map(s=>s.h))/maxH*100}%;background:${col(a)}" title="${esc(short(a))} · ${fmtH(sum(ss.map(s=>s.h)))}"></i>`).join('')}</div>
+          <div class="wl">${k===5?'This week':fmt(x.w.start)}</div>
+          <div class="lb"><i style="width:${x.h?x.b/x.h*100:0}%"></i></div>
+          <div class="wd">${x.done.map(i=>`<span title="${esc(i.title)}">✓ ${esc(i.title.length>20?i.title.slice(0,19)+'…':i.title)}</span>`).join('')}</div>
+        </div>`).join('')}
+      </div>
+      <div class="legend"><span><i class="lbk"></i>green line = share spent building</span><span>✓ finished that week</span></div>
+    </div>
+    <div>
+      <h2>Learning vs building</h2>
+      <div class="card" style="padding:18px">
+        <div class="split"><i style="flex:${H-buildH};background:#6aa8ff"></i><i style="flex:${buildH};background:var(--ok)"></i></div>
+        <div class="splitl"><span><b class="num">${fmtH(H-buildH)}</b> learning · ${100-pct(buildH)}%</span><span><b class="num">${fmtH(buildH)}</b> building · ${pct(buildH)}%</span></div>
+        <div class="muted" style="font-size:12.5px;margin-top:12px">Learning = papers, articles, videos, docs. Building = projects and practice.</div>
+      </div>
+      <h2 style="margin-top:22px">Stalled <span class="c">${stalled.length}</span><span class="r">picked up, no work in 14+ days</span></h2>
+      <div class="card" style="padding:4px 16px">${stalled.length?stalled.map(i=>`<div class="row"><span class="dot" style="--c:${col(i.area)}"></span><span class="t" onclick="openItem(${i.id})">${esc(i.title)}</span><span class="muted num" style="font-size:12px">${days(lastWorked(i)||i.picked)}d</span></div>`).join(''):'<div class="row muted">Nothing stalled.</div>'}</div>
+    </div>
+  </div>
+  <h2 style="margin-top:30px">Direction <span class="r">areas ordered by your career focus (config.yaml)</span></h2>
+  <div class="card" style="padding:6px 18px 10px">
+    <div class="drow head"><span>Area</span><span>Focus</span><span>Share of time</span><span>Finished</span><span>Coverage</span></div>
+    ${areas.map(r=>`<div class="drow ${r.h?'':'dim'}"><span><span class="dot" style="--c:${col(r.a)};margin-right:9px"></span>${esc(short(r.a))}</span>
+      <span class="fdots">${[.6,.75,.85].map(t=>`<i class="${r.f>=t?'on':''}"></i>`).join('')}</span>
+      <span class="tb"><i style="width:${r.h/top.h*100}%;background:${col(r.a)}"></i><em class="num">${r.h?pct(r.h)+'% · '+fmtH(r.h):'no time'}</em></span>
+      <span class="num">${r.done||'<span class="muted">—</span>'}</span>
+      <span class="num">${r.c.done}/${r.c.total}${r.c.done>r.c0.done?` <span style="color:var(--ok);font-size:12px">+${r.c.done-r.c0.done}</span>`:''}</span></div>`).join('')}
+  </div>
+  ${noLog?`<div class="muted" style="font-size:12px;margin-top:14px">${noLog} of ${doneIn.length} finished items have no time logged, so the time figures undercount.</div>`:''}`;
+}
+
+function renderAll(){ renderWB(); renderLib(); renderPlan(); renderIns(); $('#nPlan').textContent = items.filter(i=>i.planned===MONTH).length; }
+function go(t){ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t)); document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('on',s.id===t)); scrollTo(0,0); history.replaceState(null,'','#'+t); }
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+$('#scrim').onclick=closeItem;
+const openAdd=()=>{document.body.classList.add('md');setTimeout(()=>$('#addUrl').focus(),50)}, closeAdd=()=>document.body.classList.remove('md');
+$('#addBtn').onclick=openAdd; $('#mscrim').onclick=closeAdd; $('#addCancel').onclick=closeAdd;
+document.querySelectorAll('#addType button,#addPrio button').forEach(b=>b.onclick=()=>{[...b.parentNode.children].forEach(x=>x.classList.toggle('on',x===b))});
+$('#addSave').onclick=()=>{ const lines=$('#addUrl').value.split('\n').map(s=>s.trim()).filter(Boolean); const pb=[...$('#addPrio').children].findIndex(b=>b.classList.contains('on')); const prio=[null,'now','soon','someday'][pb]; const ty=['article','project','practice'][[...$('#addType').children].findIndex(b=>b.classList.contains('on'))]; lines.forEach(v=>add({title:v,type:ty,area:'Unsorted',topic:'',ingested:iso(TODAY),enrich:true,prio,note:$('#addNote').value.trim()||null})); closeAdd(); $('#addUrl').value=''; $('#addNote').value=''; renderAll(); toast(lines.length?`Added ${lines.length} to Unsorted`:'Nothing to add'); };
+addEventListener('keydown',e=>{ if(e.key==='Escape'){closeAdd();closeItem();} if(e.key==='a'&&!/INPUT/.test(document.activeElement.tagName)&&!document.body.classList.contains('md')){e.preventDefault();openAdd();} });
+renderAll();
+const h = location.hash.slice(1);
+if (['wb','lib','plan','ins'].includes(h)) go(h);
+if (h.startsWith('item=')) { const it=find(decodeURIComponent(h.slice(5))); addTime(it.id,.5); addTime(it.id,.5); openItem(it.id); }
+if (h==='add') openAdd();
+setTimeout(()=>scrollTo(0,0),0);
+</script>
+</body>
+</html>
