@@ -44,6 +44,13 @@ kbd,.k{font:11px var(--sans);border:1px solid var(--line2);border-radius:4px;pad
 .btn.ghost:hover{color:var(--tx);background:var(--panel)}
 .btn:disabled{opacity:.35;cursor:default}
 .ro .ed{display:none!important}
+#saveBtn{display:none;color:var(--tx3)}
+body.cansave #saveBtn{display:inline-flex}
+#saveBtn .sd{width:7px;height:7px;border-radius:50%;background:var(--tx3);opacity:.6}
+#saveBtn.dirty{color:var(--tx);border-color:rgba(233,196,106,.45)}
+#saveBtn.dirty .sd{background:var(--acc);opacity:1;box-shadow:0 0 0 3px rgba(233,196,106,.15)}
+#saveBtn.busy .sd{animation:svp 1s ease-in-out infinite}
+@keyframes svp{50%{opacity:.25}}
 main{max-width:1280px;margin:0 auto;padding:30px 28px 80px}
 .tab{display:none}.tab.on{display:block}
 h1{font:400 30px/1.15 var(--serif);margin:0;letter-spacing:-.01em}
@@ -203,6 +210,7 @@ body.md .modal{opacity:1;pointer-events:auto;transform:translateX(-50%)}body.md 
   nav .badge{position:absolute;top:4px;right:calc(50% - 30px);font-size:9.5px;padding:0 5px}nav .badge.new{display:none}
   main{padding:20px 14px 96px}
   .toast{bottom:84px}
+  #saveBtn{padding:0 11px}
   #addBtn .al,#addBtn .k{display:none}#addBtn{width:36px;justify-content:center;padding:0;font-size:18px}
   h1{font-size:25px}.wbhead{margin-bottom:18px}
   .wbgrid,.libgrid,.ins2,.insights{grid-template-columns:minmax(0,1fr)}
@@ -234,6 +242,7 @@ body.md .modal{opacity:1;pointer-events:auto;transform:translateX(-50%)}body.md 
   <div class="hsp"></div>
   <label class="search">⌕ <input id="q" placeholder="Search library" autocomplete="off"><kbd>/</kbd></label>
   <span class="robadge" title="Run `lpt serve` on your laptop to edit">Read-only</span>
+  <button class="btn ed" id="saveBtn" onclick="saveAll()"><span class="sd"></span><span id="saveLbl">Saved</span></button>
   <button class="btn pri ed" id="addBtn">+ <span class="al">Add</span> <span class="k" style="border-color:rgba(0,0,0,.25);color:#5a4a1a">A</span></button>
 </header>
 <main>
@@ -327,7 +336,39 @@ async function post(path, body){
   const r = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), keepalive:true});
   let j = {}; try { j = await r.json(); } catch(e) {}
   if (!r.ok || !j.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  if (path !== '/api/save') saveStatus();
   return j;
+}
+// Save = commit the vault and push to GitHub (lpt save). Shown only when the server can do it.
+let SAVE = {available:false, pending:0}, saving = false;
+function renderSave(){
+  const b = $('#saveBtn');
+  document.body.classList.toggle('cansave', LIVE && SAVE.available);
+  b.classList.toggle('dirty', (SAVE.pending > 0 || SAVE.unpushed > 0) && !saving);
+  b.classList.toggle('busy', saving);
+  b.disabled = saving;
+  $('#saveLbl').textContent = saving ? 'Saving…' : SAVE.pending ? `Save · ${SAVE.pending}` : SAVE.unpushed ? 'Save · push' : 'Saved';
+  b.title = SAVE.pending ? `${SAVE.pending} changed page${SAVE.pending>1?'s':''} not on GitHub yet. Click (or S) to commit and push to ${SAVE.target}`
+          : SAVE.unpushed ? `Committed but not pushed to ${SAVE.target} yet. Click (or S) to try again`
+          : `Everything is on GitHub (${SAVE.target||''})`;
+}
+async function saveStatus(){
+  try {
+    const j = await (await fetch('/api/save', {cache:'no-store'})).json();
+    if (j.ok) { SAVE = j; renderSave(); }
+  } catch(e) {}
+}
+async function saveAll(){
+  if (!LIVE || saving) return;
+  if (notesTimer && drawerK !== null) { clearTimeout(notesTimer); await saveNotes(drawerK); }
+  saving = true; renderSave();
+  try {
+    const j = await post('/api/save', {});
+    toast(j.committed || j.pushed ? `Saved to GitHub · the site updates in a minute` : 'Already saved: nothing new');
+    if (await refresh()) { renderAll(); if (drawerK !== null && K(drawerK)) openItem(drawerK, true); }
+  } catch(e) { toast(`Couldn't save: ${e.message}`, true); }
+  saving = false;
+  await saveStatus();
 }
 function readOnly(){ toast('Read-only here. Run `lpt serve` on your laptop to edit.'); }
 async function act(k, action, extra={}, msg){
@@ -655,6 +696,7 @@ addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (document.body.classList.contains('md')) closeAdd(); else if (drawerK !== null) closeItem(); else if (typing) document.activeElement.blur(); }
   if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === 'a' && LIVE) { e.preventDefault(); openAdd(); }
+  if (e.key === 's' && LIVE && SAVE.available) { e.preventDefault(); saveAll(); }
   if (e.key === '/') { e.preventDefault(); $('#q').focus(); }
 });
 addEventListener('pagehide', () => { flushNotes(); if (curTab === 'lib') localStorage.setItem('lpt.seen', TODAY); });
@@ -674,6 +716,7 @@ document.addEventListener('visibilitychange', async () => {
   const before = TODAY; setToday();
   if (await refresh()) { renderAll(); if (drawerK !== null && K(drawerK)) openItem(drawerK, true); }
   if (before !== TODAY) renderAll();
+  saveStatus();
 });
 
 (async function boot(){
@@ -681,6 +724,7 @@ document.addEventListener('visibilitychange', async () => {
   LIVE = location.protocol.startsWith('http') && await refresh();
   document.body.classList.toggle('ro', !LIVE);
   renderAll();
+  if (LIVE) saveStatus();
   route();
   addEventListener('hashchange', route);
 })();

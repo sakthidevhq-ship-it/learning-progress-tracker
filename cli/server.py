@@ -7,6 +7,8 @@ and DNS-rebinding tricks can't drive it.
     GET  /api/items                       every item, fresh from disk
     POST /api/item  {id, action, ...}     one change to one item -> {ok, item}
     POST /api/add   {text, note, type, prio}   capture, one item per line -> {ok, added, skipped}
+    GET  /api/save                        {ok, available, pending}: unsaved vault changes
+    POST /api/save  {}                    commit the vault and push it (see cli/sync.py) -> {ok, committed, pushed}
 """
 
 from __future__ import annotations
@@ -20,6 +22,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from cli import items as it
+from cli import sync
 
 _LOCAL_HOSTS = {"127.0.0.1", "localhost"}
 _write_lock = threading.Lock()
@@ -52,6 +55,7 @@ class _Debounce:
 class _Handler(SimpleHTTPRequestHandler):
     vault: Path
     rebuild = None
+    save_to: tuple[str, str] | None = None
 
     def log_message(self, fmt, *args):  # keep the terminal quiet
         pass
@@ -83,6 +87,10 @@ class _Handler(SimpleHTTPRequestHandler):
             if route == "/api/items":
                 return self._json(200, {"ok": True, "today": date.today().isoformat(),
                                         "items": it.load_items(self.vault)})
+            if route == "/api/save":
+                if not self.save_to:
+                    return self._json(200, {"ok": True, "available": False, "pending": 0})
+                return self._json(200, {"ok": True, **sync.status(self.vault, *self.save_to)})
             return self._json(404, {"error": f"No route {route}"})
         return super().do_GET()
 
@@ -106,6 +114,10 @@ class _Handler(SimpleHTTPRequestHandler):
                     result = self._item(body)
                 elif route == "/api/add":
                     result = self._add(body)
+                elif route == "/api/save":
+                    if not self.save_to:
+                        raise ValueError("Saving isn't set up for this server")
+                    result = sync.save(self.vault, *self.save_to)
                 else:
                     return self._json(404, {"error": f"No route {route}"})
         except _NotFound as e:
@@ -114,6 +126,8 @@ class _Handler(SimpleHTTPRequestHandler):
             return self._json(400, {"error": f"Missing {e}"})
         except (ValueError, TypeError) as e:
             return self._json(400, {"error": str(e) or "Bad request"})
+        except sync.SaveError as e:
+            return self._json(409, {"error": str(e)})
         type(self).rebuild()
         return self._json(200, {"ok": True, **result})
 
@@ -149,8 +163,9 @@ class _Server(ThreadingHTTPServer):
         self.server_name, self.server_port = self.server_address[:2]
 
 
-def make_server(vault: Path, site_dir: Path, rebuild=lambda: None, port: int = 8765, debounce: float = 1.5):
+def make_server(vault: Path, site_dir: Path, rebuild=lambda: None, port: int = 8765, debounce: float = 1.5,
+                save_to: tuple[str, str] | None = None):
     handler = type("Handler", (_Handler,), {
-        "vault": Path(vault), "rebuild": staticmethod(_Debounce(rebuild, debounce) if debounce else rebuild),
+        "vault": Path(vault), "save_to": save_to, "rebuild": staticmethod(_Debounce(rebuild, debounce) if debounce else rebuild),
     })
     return _Server(("127.0.0.1", port), partial(handler, directory=str(site_dir)))

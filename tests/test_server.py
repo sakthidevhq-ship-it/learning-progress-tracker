@@ -124,3 +124,40 @@ def test_restart_can_rebind_the_same_port_immediately(tmp_path):
     first.server_close()
     second = make_server(tmp_path, site, port=port, debounce=0)
     second.server_close()
+
+
+def test_save_endpoints_off_without_a_target(served):
+    assert call(served["base"] + "/api/save") == (200, {"ok": True, "available": False, "pending": 0})
+    status, body = call(served["base"] + "/api/save", {})
+    assert status == 400
+
+
+def test_save_endpoints_commit_and_push(tmp_path):
+    import subprocess
+    run = lambda *a, cwd=None: subprocess.run(a, cwd=cwd, check=True, capture_output=True, text=True).stdout
+    remote, work = tmp_path / "remote.git", tmp_path / "work"
+    run("git", "init", "-q", "--bare", "-b", "main", str(remote))
+    run("git", "clone", "-q", str(remote), str(work))
+    run("git", "config", "user.email", "t@example.com", cwd=work)
+    run("git", "config", "user.name", "Test", cwd=work)
+    (work / "vault" / "pages").mkdir(parents=True)
+    (work / "vault" / "pages" / "Raft Paper.md").write_text("title:: Raft Paper\ntype:: paper\nstate:: collected\n")
+    run("git", "add", "-A", cwd=work)
+    run("git", "commit", "-qm", "init", cwd=work)
+    run("git", "push", "-q", "origin", "HEAD:main", cwd=work)
+
+    site = tmp_path / "site"
+    site.mkdir()
+    server = make_server(work / "vault", site, port=0, debounce=0, save_to=("origin", "main"))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{server.server_address[1]}"
+    try:
+        assert call(base + "/api/item", {"id": "Raft Paper", "action": "pick"})[0] == 200
+        assert call(base + "/api/save")[1]["pending"] == 1
+        status, body = call(base + "/api/save", {})
+        assert status == 200 and body["committed"] == 1 and body["pushed"] == 1
+        assert call(base + "/api/save")[1]["pending"] == 0
+        assert run("git", "log", "--format=%s", "main", cwd=remote).splitlines()[0] == "Update library: Raft Paper"
+    finally:
+        server.shutdown()
+        server.server_close()

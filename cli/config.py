@@ -11,6 +11,8 @@ class Config:
     topic_weights: dict[str, float] = field(default_factory=dict)
     default_weight: float = 0.5
     on_duplicate: str = "skip"
+    save_remote: str = "origin"   # where `lpt save` pushes: the remote GitHub Pages builds from
+    save_branch: str = "main"
 
 
 def load_config(path: str | None = None) -> Config:
@@ -30,6 +32,8 @@ def load_config(path: str | None = None) -> Config:
         topic_weights=raw.get("topic_weights", {}),
         default_weight=raw.get("default_weight", 0.5),
         on_duplicate=raw.get("on_duplicate", "skip"),
+        save_remote=(raw.get("save") or {}).get("remote", "origin"),
+        save_branch=(raw.get("save") or {}).get("branch", "main"),
     )
 
 

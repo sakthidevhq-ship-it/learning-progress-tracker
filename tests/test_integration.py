@@ -8,7 +8,7 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
-from cli.items import load_items
+from cli.items import STATES, load_items
 from cli.main import cli
 
 REAL_VAULT = Path(__file__).resolve().parent.parent / "vault"
@@ -35,7 +35,7 @@ def run(*args, input=None):
 def test_capture_then_evening_session(project, tmp_path):
     run("migrate")
     before = len(load_items(project / "vault"))
-    assert all(i["state"] == "collected" for i in load_items(project / "vault"))
+    assert all(i["state"] in STATES for i in load_items(project / "vault"))  # the real vault has picked items too
 
     # capture: a batch of links from WhatsApp
     run("add", "--note", "from WhatsApp", input="https://example.com/event-loops\nhttps://example.com/tcp\n")

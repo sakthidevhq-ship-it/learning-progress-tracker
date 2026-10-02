@@ -259,6 +259,22 @@ def migrate():
     click.echo(f"Migrated {stats['items']} items, cleaned {stats['other_pages']} other pages")
 
 
+@cli.command()
+@click.option("-m", "--message", default=None, help="Commit message (default: lists the changed pages)")
+def save(message):
+    """Commit vault changes and push them so the read-only site updates."""
+    from cli.sync import SaveError, save as save_vault
+    cfg = load_config(os.environ.get("LPT_CONFIG", "config.yaml"))
+    try:
+        r = save_vault(cfg.vault_path, cfg.save_remote, cfg.save_branch, message)
+    except SaveError as e:
+        raise click.ClickException(str(e))
+    if not r["committed"] and not r["pushed"]:
+        click.echo(f"Nothing to save: {r['target']} is up to date")
+    else:
+        click.echo(f"Saved {r['committed']} changed page(s) to {r['target']} ({r['commit']})")
+
+
 # ---------- the app ----------
 
 def _build_site(vault: Path) -> Path:
@@ -283,8 +299,10 @@ def serve(port, no_open):
     """Run the workbench locally with editing: time, notes, checklist, plan and add all write to the vault."""
     from cli.server import make_server
     vault = _vault()
+    cfg = load_config(os.environ.get("LPT_CONFIG", "config.yaml"))
     _build_site(vault)
-    server = make_server(vault, PROJECT_ROOT / "site", rebuild=lambda: _build_site(vault), port=port)
+    server = make_server(vault, PROJECT_ROOT / "site", rebuild=lambda: _build_site(vault), port=port,
+                         save_to=(cfg.save_remote, cfg.save_branch))
     url = f"http://127.0.0.1:{server.server_address[1]}/"
     click.echo(f"Workbench at {url}  (Ctrl+C to stop)")
     if not no_open:

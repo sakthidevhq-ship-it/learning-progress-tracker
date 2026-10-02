@@ -1,5 +1,10 @@
 vault_path: ./vault
 
+# `lpt save` and the app's Save button commit vault/ and push here (GitHub Pages builds from it)
+save:
+  remote: personal
+  branch: main
+
 domain_weights:
   ML/Infrastructure: 0.9
   ML/Agents: 0.85

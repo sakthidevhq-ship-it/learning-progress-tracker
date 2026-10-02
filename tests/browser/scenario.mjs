@@ -122,6 +122,18 @@ try {
   check((await text('#t-ins')).includes('1h') && (await text('#t-ins')).includes('of your time went to'), 'insights reflect the logged hour');
 
   // Phone
+  // save to GitHub (a throwaway remote here)
+  const saveLbl = () => text('#saveLbl');
+  check(/^Save · \d+$/.test(await saveLbl()), `save button counts unsaved pages (${await saveLbl()})`);
+  await shot('d-save-dirty');
+  await click('#saveBtn', 'Save');
+  for (let n = 0; n < 40 && (await saveLbl()) !== 'Saved'; n++) await sleep(250);
+  check((await saveLbl()) === 'Saved', 'save: button returns to Saved');
+  const { execFileSync } = await import('node:child_process');
+  const remoteLog = execFileSync('git', ['-C', process.env.SHOTS + '/remote.git', 'log', '--format=%s', 'main']).toString();
+  check(remoteLog.startsWith('Update library:'), 'save: commit pushed to the remote');
+  await shot('d-save-clean');
+
   await size(390, 844, true);
   for (const t of ['wb', 'plan', 'lib', 'ins']) { await nav(BASE + '#' + t); await shot('p-' + t); }
   check((await vis('nav button')) === 4, 'phone: four tabs in the bottom bar');

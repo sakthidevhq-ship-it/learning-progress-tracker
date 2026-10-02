@@ -12,12 +12,13 @@ Specs: `docs/specs/2026-10-03-workbench-requirements.md`, `docs/specs/2026-10-03
 
 ```
 ├── vault/pages/              # Markdown pages: items, plus concept/topic/domain stubs (git-tracked)
-├── config.yaml               # Vault path, domain weights (= career focus in Insights)
+├── config.yaml               # Vault path, save target (remote/branch), domain weights (= career focus in Insights)
 ├── ui/workbench.html         # The app: Workbench / Plan / Library / Insights tabs
 ├── cli/
 │   ├── main.py               # CLI entry point
 │   ├── items.py              # Item model: states, dates, notes, checklist, time, plan, capture, migration
 │   ├── server.py             # `lpt serve`: the app plus a local JSON API that edits the vault
+│   ├── sync.py               # `lpt save` / the Save button: commit vault/ and push to the Pages branch
 │   ├── build_graph.py        # Builds site/index.html from the vault (also run by CI)
 │   ├── page_writer.py        # Concept/topic/domain stub pages (used when filing items)
 │   ├── page_reader.py, config.py
@@ -66,6 +67,7 @@ There is no per-item percentage and no computed priority. Don't add them back.
 
 ```bash
 lpt serve                         # the app at http://127.0.0.1:8765 with editing (time, notes, checklist, plan, add)
+lpt save [-m "msg"]               # commit vault/ and push to save.remote/save.branch (the app's Save button, or S)
 lpt graph                         # build site/ and open it read-only
 ```
 
@@ -83,7 +85,8 @@ lpt plan "raft" [next|2026-11|none]          # default: this month
 lpt show "raft"   ·   lpt ls [--state picked|--unsorted]   ·   lpt status
 ```
 
-Then commit and push the changed `vault/pages/` files to update the read-only site.
+Then `lpt save` (or the Save button in the app) to update the read-only site. It commits only `vault/`, rebases onto
+a save made from another machine, and refuses if the current branch has code commits that aren't on the target yet.
 
 ## Filing Unsorted items (Claude's job)
 
@@ -120,7 +123,8 @@ Tool Use, ReAct Pattern
 
 One self-contained file. The build replaces `VAULT_PLACEHOLDER` (item JSON from `cli/items.load_items`) and
 `META_PLACEHOLDER` (domain weights). On load it asks `/api/items`: if that answers (under `lpt serve`) the page is
-editable and every change goes through `POST /api/item {id, action, ...}` or `POST /api/add`; otherwise (a file, or
+editable and every change goes through `POST /api/item {id, action, ...}` or `POST /api/add`; the header's Save button
+shows unsaved pages (`GET /api/save`) and pushes them (`POST /api/save`); otherwise (a file, or
 GitHub Pages, or a phone) it is read-only and hides edit controls. Deep links: `#wb`, `#plan`, `#lib`, `#ins`,
 `#item=<id>`. On phones the tabs move to a bottom bar.
 
@@ -131,4 +135,4 @@ GitHub Pages, or a phone) it is read-only and hides edit controls. Deep links: `
 bash tests/browser/run.sh              # drives Chrome against `lpt serve` on a migrated copy of the vault
 ```
 
-Run both after changing `items.py`, `server.py` or `ui/workbench.html`.
+Run both after changing `items.py`, `server.py`, `sync.py` or `ui/workbench.html`.
