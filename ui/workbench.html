@@ -46,11 +46,14 @@ kbd,.k{font:11px var(--sans);border:1px solid var(--line2);border-radius:4px;pad
 .ro .ed{display:none!important}
 #saveBtn{display:none;color:var(--tx3)}
 body.cansave #saveBtn{display:inline-flex}
-#saveBtn .sd{width:7px;height:7px;border-radius:50%;background:var(--tx3);opacity:.6}
+#saveBtn .si{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#saveBtn .si .up{display:none}
 #saveBtn.dirty{color:var(--tx);border-color:rgba(233,196,106,.45)}
-#saveBtn.dirty .sd{background:var(--acc);opacity:1;box-shadow:0 0 0 3px rgba(233,196,106,.15)}
-#saveBtn.busy .sd{animation:svp 1s ease-in-out infinite}
-@keyframes svp{50%{opacity:.25}}
+#saveBtn.dirty .si,#saveBtn.busy .si{color:var(--acc)}
+#saveBtn.dirty .si .ok,#saveBtn.busy .si .ok{display:none}
+#saveBtn.dirty .si .up,#saveBtn.busy .si .up{display:inline}
+#saveBtn.busy .si .up{animation:svu .9s ease-in-out infinite}
+@keyframes svu{0%{transform:translateY(2px);opacity:.3}60%{transform:translateY(-1px);opacity:1}100%{transform:translateY(-2px);opacity:0}}
 main{max-width:1280px;margin:0 auto;padding:30px 28px 80px}
 .tab{display:none}.tab.on{display:block}
 h1{font:400 30px/1.15 var(--serif);margin:0;letter-spacing:-.01em}
@@ -242,7 +245,7 @@ body.md .modal{opacity:1;pointer-events:auto;transform:translateX(-50%)}body.md 
   <div class="hsp"></div>
   <label class="search">⌕ <input id="q" placeholder="Search library" autocomplete="off"><kbd>/</kbd></label>
   <span class="robadge" title="Run `lpt serve` on your laptop to edit">Read-only</span>
-  <button class="btn ed" id="saveBtn" onclick="saveAll()"><span class="sd"></span><span id="saveLbl">Saved</span></button>
+  <button class="btn ed" id="saveBtn" onclick="saveAll()"><svg class="si" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.4 9.1 4.75 4.75 0 0 0 7 18.5z"/><path class="ok" d="M9.4 13.4l2 2 3.6-3.8"/><path class="up" d="M12 16.2V10.6M9.6 12.9 12 10.5l2.4 2.4"/></svg><span id="saveLbl">Saved</span></button>
   <button class="btn pri ed" id="addBtn">+ <span class="al">Add</span> <span class="k" style="border-color:rgba(0,0,0,.25);color:#5a4a1a">A</span></button>
 </header>
 <main>
