@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[Game AI]]
 topic:: [[Competition Strategy]]
-referenced-by:: [[Halite II — Winner's Postmortem (Tom Van de Wiele)]], [[Suphx — Mastering Mahjong with Deep Reinforcement Learning]], [[KataGo — Architecture & Methods]], [[Noam Brown — CICERO: AI for Diplomacy]], [[Pluribus — Superhuman AI for Multiplayer Poker]], [[Noam Brown — AI for Imperfect-Information Games (Pluribus Talk)]], [[Tribes — Strategy Game AI Framework (Polytopia)]]
+referenced-by:: [[Halite II — Winner's Postmortem (Tom Van de Wiele)]], [[Suphx — Mastering Mahjong with Deep Reinforcement Learning]], [[KataGo — Architecture & Methods]], [[Noam Brown — CICERO: AI for Diplomacy]], [[Pluribus — Superhuman AI for Multiplayer Poker]], [[Noam Brown — AI for Imperfect-Information Games (Pluribus Talk)]], [[Tribes — Strategy Game AI Framework (Polytopia)]], [[Pokémon Showdown AI Agent]]
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.
