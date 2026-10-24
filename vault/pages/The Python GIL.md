@@ -20,16 +20,16 @@ What the Global Interpreter Lock protects, how CPython hands it between threads,
 - [ ] What do other language like Go use as alternatives?
 - [ ] Re-implement?
 - [x] How to circumvent the downsides of GIL in python
-- [x] Upsides of GIL?
+- [ ] Upsides of GIL?
 - [x] subinterpreters
 - [x] What have people done in 3.14 on this
-- [ ] Python JIT (pypy).
+- [x] Python JIT (pypy).
 - [ ] Hypervisor, VMs, Emulators
 - [ ] Garbage collector
 
 ## Time
 - 2026-10-04 · 30m
-- 2026-10-25 · 2h
+- 2026-10-25 · 3h
 
 ## Notes
 Learnt what Cpython does. How it differs from JIT and complier. 
