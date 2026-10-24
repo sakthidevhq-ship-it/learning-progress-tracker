@@ -28,3 +28,12 @@ The foundational paper introducing the Transformer architecture. Proposes replac
 - [[Neural Network Fundamentals]]
 
 ## Notes
+
+## Checklist
+- [ ] Read §3 and redraw the architecture (encoder, decoder, attention blocks) from memory
+- [ ] Implement scaled dot-product and multi-head attention from scratch in PyTorch, with a causal mask
+- [ ] Show numerically why scores are scaled by √d_k (softmax saturation without it)
+- [ ] Implement sinusoidal positional encoding and plot it
+- [ ] Train a char-level decoder-only transformer on Tiny Shakespeare in a Kaggle notebook (free GPU) and sample text
+- [ ] Ablate on Shakespeare: 1 vs 4 heads, with and without positional encoding; compare val loss
+- [ ] Count parameters and FLOPs per token for your model

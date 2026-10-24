@@ -28,3 +28,14 @@ Andrej Karpathy's video lecture series building neural networks and GPT-style la
 - [[Linear Algebra Basics]]
 
 ## Notes
+
+## Checklist
+- [ ] micrograd: build the autograd engine and train a small MLP
+- [ ] makemore 1: bigram model
+- [ ] makemore 2: MLP (Bengio 2003)
+- [ ] makemore 3: activations, gradients and BatchNorm
+- [ ] makemore 4: backprop by hand (backprop ninja)
+- [ ] makemore 5: WaveNet
+- [ ] Let's build GPT, then compare with your own Shakespeare model
+- [ ] Let's build the GPT tokenizer: implement BPE
+- [ ] Reproduce GPT-2 124M (Kaggle or rented GPU)
