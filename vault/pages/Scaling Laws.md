@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Infrastructure]]
 topic:: [[Scaling Laws]]
-referenced-by:: [[Training Compute-Optimal Large Language Models (Chinchilla)]]
+referenced-by:: [[Training Compute-Optimal Large Language Models (Chinchilla)]], [[Gemini Flash Pretraining (Vlad Feinberg)]]
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.

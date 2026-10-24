@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
-referenced-by:: [[Attention Is All You Need]], [[Hugging Face YouTube — ML Tutorials and Demos]], [[Matryoshka Representation Learning]], [[Deep Learning (Goodfellow) — Part II-b: CNNs, RNNs & Practical Methodology]], [[Deep Learning (Goodfellow) — Part II-a: Feedforward Nets, Regularization & Optimization]], [[Deep Learning (Goodfellow) — Part III: Deep Learning Research]], [[The Little Book of Deep Learning]]
+referenced-by:: [[Attention Is All You Need]], [[Hugging Face YouTube — ML Tutorials and Demos]], [[Matryoshka Representation Learning]], [[Deep Learning (Goodfellow) — Part II-b: CNNs, RNNs & Practical Methodology]], [[Deep Learning (Goodfellow) — Part II-a: Feedforward Nets, Regularization & Optimization]], [[Deep Learning (Goodfellow) — Part III: Deep Learning Research]], [[The Little Book of Deep Learning]], [[LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale]], [[Tiny Transformer in JAX, Flax and Optax that Learns 3-Digit Addition]]
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.

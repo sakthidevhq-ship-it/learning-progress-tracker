@@ -7,3 +7,4 @@ type:: domain
 - [[Inference Optimization]]
 - [[GPU Kernels]]
 - [[Distributed Training]]
+- [[Scaling Laws]]
