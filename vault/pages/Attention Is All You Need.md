@@ -11,7 +11,9 @@ concepts:: [[Transformer Architecture]], [[Self-Attention]], [[Multi-Head Attent
 tags:: transformers, foundational
 source:: https://arxiv.org/abs/1706.03762
 ingested:: [[2026-07-08]]
-state:: collected
+state:: picked
+picked:: [[2026-10-25]]
+planned:: 2026-10
 
 ## Summary
 The foundational paper introducing the Transformer architecture. Proposes replacing recurrence and convolution entirely with self-attention mechanisms. Introduces multi-head attention, positional encoding, and the encoder-decoder structure that became the basis for GPT, BERT, and virtually all modern language models.

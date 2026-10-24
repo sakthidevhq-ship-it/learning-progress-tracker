@@ -1,6 +1,6 @@
 title:: How to Land a Frontier Lab Job (Vlad Feinberg)
 type:: article
-state:: picked
+state:: done
 source:: https://vladfeinberg.com/2026/05/10/how-to-land-a-job-at-a-frontier-lab.html
 ingested:: [[2026-10-03]]
 domain:: [[Mindset]]
@@ -10,6 +10,7 @@ size:: medium
 concepts:: [[Agent Architecture]]
 picked:: [[2026-10-03]]
 planned:: 2026-10
+done:: [[2026-10-25]]
 
 ## Summary
 Vlad Feinberg's advice on getting hired at a frontier lab: show a specific skill the lab needs by working at the edges of the LLM stack. Below it sit kernels, above it agentic loops. Includes a lesson plan built on JAX, Pallas and the scaling book.
@@ -19,3 +20,19 @@ Vlad Feinberg's advice on getting hired at a frontier lab: show a specific skill
 - Kernel work is the most direct path in; the benchmark gives instant feedback
 - Look for constraints nobody has modelled (memory bandwidth, latches), not just flops
 - Flash Attention papers are the model of lateral systems thinking
+
+## Notes
+1. Flashattention series
+2. Quantization 
+3. Jax + Scale your model 
+
+There are three layers 
+
+1. Above LLM (agentic loops, harness, hermes agents etc)
+2. Below LLM, above kernels. The neural network architecture 
+3. Kernels, GPUs architecture. 
+
+Learn on all three fronts 
+
+## Time
+- 2026-10-25 · 30m
