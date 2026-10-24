@@ -185,6 +185,24 @@ def note(title, text):
 
 @cli.command()
 @click.argument("title")
+@click.argument("text")
+@click.option("--date", "day", default=None, help="today (default), yesterday or YYYY-MM-DD")
+def learn(title, text, day):
+    """Record what you learned on an item (a dated line under Learnings)."""
+    item = _apply(title, "learn", text=text, day=_day(day))
+    click.echo(f"Learning added to '{item['title']}'")
+
+
+@cli.command("day-log")
+@click.option("--date", "day", default=None, help="today (default), yesterday or YYYY-MM-DD")
+def day_log(day):
+    """Print the day's local Claude conversations (prompts and replies only), for the learning routine."""
+    from cli import daylog
+    click.echo(daylog.render(_day(day)))
+
+
+@cli.command()
+@click.argument("title")
 @click.argument("level", type=click.Choice(["now", "soon", "someday", "none"]))
 def prio(title, level):
     """Set your priority for an item."""

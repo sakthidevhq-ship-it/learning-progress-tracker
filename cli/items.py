@@ -10,6 +10,7 @@ All state lives on the item's own page so the vault stays plain, hand-editable m
     ## Notes        free text
     ## Checklist    - [ ] / - [x] lines
     ## Time         - 2026-10-03 · 1h30m   (one line per day)
+    ## Learnings    - 2026-10-03 · what I learned (dated, newest last)
 
 Imported by the CI site build, which only has PyYAML, so keep third-party imports lazy.
 """
@@ -34,6 +35,7 @@ _CHECK_RE = re.compile(r"^- \[([ xX])\] (.*)$")
 _TIME_RE = re.compile(r"^- (\d{4}-\d{2}-\d{2})\s*[·|:-]\s*(\S+)")
 _DURATION_RE = re.compile(r"^(?:(\d+(?:\.\d+)?)h)?(?:(\d+)m)?$")
 _URL_RE = re.compile(r"^https?://", re.I)
+_LEARN_RE = re.compile(r"^- (\d{4}-\d{2}-\d{2})\s*·\s*(.+)$")
 
 
 # ---------- durations ----------
@@ -215,6 +217,15 @@ def sessions(page: Page) -> list[dict]:
     return sorted(out, key=lambda s: s["d"])
 
 
+def learnings(page: Page) -> list[dict]:
+    out = []
+    for line in page.section("Learnings") or []:
+        m = _LEARN_RE.match(line.strip())
+        if m:
+            out.append({"d": m.group(1), "t": m.group(2).strip()})
+    return out
+
+
 def notes(page: Page) -> str:
     return "\n".join(page.section("Notes") or [])
 
@@ -248,6 +259,7 @@ def to_json(page: Page) -> dict:
         "sessions": sessions(page),
         "checks": checklist(page),
         "notes": notes(page),
+        "learnings": learnings(page),
     }
 
 
@@ -352,6 +364,19 @@ def append_note(page: Page, text: str):
     set_notes(page, "\n".join(current + [text]))
 
 
+def add_learning(page: Page, text: str, day: date):
+    """A dated line on what was learned. The same text on the same day is only added once."""
+    text = " ".join(text.split())
+    if not text:
+        raise ValueError("Learning can't be empty")
+    entries = learnings(page)
+    if any(e["d"] == day.isoformat() and e["t"] == text for e in entries):
+        return
+    entries.append({"d": day.isoformat(), "t": text})
+    entries.sort(key=lambda e: e["d"])
+    page.set_section("Learnings", [f"- {e['d']} · {e['t']}" for e in entries])
+
+
 def set_priority(page: Page, prio: str | None):
     if prio in (None, "", "none"):
         page.remove("my-priority")
@@ -371,7 +396,7 @@ def set_plan(page: Page, month: str | None):
 
 
 ACTIONS = {"pick", "done", "drop", "back", "time", "check_add", "check_toggle", "check_remove",
-           "notes", "prio", "plan"}
+           "notes", "learn", "prio", "plan"}
 
 
 def apply(path: Path, action: str, today: date | None = None, **kw) -> dict:
@@ -398,6 +423,8 @@ def apply(path: Path, action: str, today: date | None = None, **kw) -> dict:
         check_remove(page, int(kw["index"]))
     elif action == "notes":
         set_notes(page, str(kw.get("text", "")))
+    elif action == "learn":
+        add_learning(page, str(kw.get("text", "")), kw.get("day") or today)
     elif action == "prio":
         set_priority(page, kw.get("prio"))
     elif action == "plan":
