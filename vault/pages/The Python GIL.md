@@ -17,15 +17,13 @@ What the Global Interpreter Lock protects, how CPython hands it between threads,
 
 ## Checklist
 - [x] Why was it created?
-- [ ] What do other language like Go use as alternatives?
+- [x] What do other language like Go use as alternatives?
 - [ ] Re-implement?
 - [x] How to circumvent the downsides of GIL in python
-- [ ] Upsides of GIL?
+- [x] Upsides of GIL?
 - [x] subinterpreters
 - [x] What have people done in 3.14 on this
 - [x] Python JIT (pypy).
-- [ ] Hypervisor, VMs, Emulators
-- [ ] Garbage collector
 
 ## Time
 - 2026-10-04 · 30m
