@@ -56,6 +56,8 @@ free text, one running note
 - [ ] Implement log replication
 ## Time
 - 2026-10-03 · 1h30m               # one line per day
+## Learnings
+- 2026-10-03 · Terms fence off stale leaders   # dated, what was learned
 ```
 
 Rules (in `cli/items.py`): picking up or adding time puts an item in this month's plan; adding time to a collected
@@ -79,7 +81,7 @@ pbpaste | lpt add                 # one item per line, e.g. a batch of links fro
 lpt pick "raft"   ·   lpt done "raft"   ·   lpt drop "raft"   ·   lpt back "raft"
 lpt time "raft" [30m|1h|1h30m|-30m] [--date yesterday]
 lpt check "raft" "Implement log replication"   ·   lpt check "raft" --toggle 1   ·   --remove 1
-lpt note "raft" "Stopped at 5.4.1"
+lpt note "raft" "Stopped at 5.4.1"   ·   lpt learn "raft" "Terms fence off stale leaders" [--date yesterday]
 lpt prio "raft" now|soon|someday|none
 lpt plan "raft" [next|2026-11|none]          # default: this month
 lpt show "raft"   ·   lpt ls [--state picked|--unsorted]   ·   lpt status
@@ -87,6 +89,12 @@ lpt show "raft"   ·   lpt ls [--state picked|--unsorted]   ·   lpt status
 
 Then `lpt save` (or the Save button in the app) to update the read-only site. It commits only `vault/`, rebases onto
 a save made from another machine, and refuses if the current branch has code commits that aren't on the target yet.
+
+## End-of-day learning routine
+
+A T3 scheduled task runs `docs/routines/daily-learning.md` every evening: `lpt day-log` prints the day's local Claude
+conversations (prompts and replies only), Claude adds new items, writes dated `## Learnings` lines
+(`- 2026-10-25 · what was learned`) and explicit progress, files the new items, then runs one `lpt save`.
 
 ## Filing Unsorted items (Claude's job)
 

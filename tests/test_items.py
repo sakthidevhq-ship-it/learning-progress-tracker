@@ -277,3 +277,15 @@ def test_migrate_twice_changes_nothing(vault):
     before = (vault / "pages" / "Old.md").read_text()
     assert migrate(vault) == {"items": 0, "other_pages": 0}
     assert (vault / "pages" / "Old.md").read_text() == before
+
+
+def test_learn_adds_dated_lines_once_and_keeps_state(vault):
+    apply(item(vault), "learn", TODAY, text="Terms  fence off stale leaders")
+    apply(item(vault), "learn", TODAY, text="Terms fence off stale leaders")
+    it = apply(item(vault), "learn", date(2026, 10, 1), text="Log matching")
+    assert it["learnings"] == [{"d": "2026-10-01", "t": "Log matching"},
+                               {"d": "2026-10-03", "t": "Terms fence off stale leaders"}]
+    assert it["state"] == "collected"
+    assert "## Learnings\n- 2026-10-01 · Log matching\n" in item(vault).read_text()
+    with pytest.raises(ValueError):
+        apply(item(vault), "learn", TODAY, text="  ")

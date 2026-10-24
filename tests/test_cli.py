@@ -154,3 +154,28 @@ def test_graph_builds_site(project, monkeypatch):
     assert r.exit_code == 0
     html = (project / "site" / "index.html").read_text()
     assert "Raft Paper" in html and "VAULT_PLACEHOLDER" not in html
+
+
+def test_daylog_keeps_the_days_prompts_and_replies_only(tmp_path):
+    import json
+    from datetime import date, datetime, timezone
+    from cli import daylog
+    proj = tmp_path / "-Users-me-work"
+    proj.mkdir()
+    noon = datetime(2026, 10, 3, 12, tzinfo=timezone.utc).astimezone().isoformat()
+    old = datetime(2026, 10, 1, 12, tzinfo=timezone.utc).isoformat()
+    rows = [
+        {"type": "user", "timestamp": noon, "cwd": "/w", "message": {"content": "How does io_uring batch?"}},
+        {"type": "assistant", "timestamp": noon, "message": {"content": [
+            {"type": "thinking", "thinking": "hmm"}, {"type": "text", "text": "Submission queue."},
+            {"type": "tool_use", "name": "Bash"}]}},
+        {"type": "user", "timestamp": noon, "message": {"content": [{"type": "tool_result", "content": "x"}]}},
+        {"type": "user", "timestamp": old, "message": {"content": "an older day"}},
+    ]
+    (proj / "s1.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
+    skipped = tmp_path / "-Users-me-learning-progress-tracker"
+    skipped.mkdir()
+    (skipped / "s2.jsonl").write_text(json.dumps(rows[0]))
+    out = daylog.render(date.fromisoformat(noon[:10]), tmp_path)
+    assert "[user] How does io_uring batch?" in out and "[assistant] Submission queue." in out
+    assert "older day" not in out and "hmm" not in out and "s2" not in out
