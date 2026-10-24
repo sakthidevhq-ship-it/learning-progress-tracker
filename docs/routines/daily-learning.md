@@ -1,7 +1,7 @@
 # End-of-day learning routine
 
 Runs once a day (T3 scheduled task). Turns the day's local Claude conversations into vault changes, then saves
-once. Work in the main checkout `/Users/sakthi/learning-progress-tracker` and use `.venv/bin/lpt` from there.
+once. Work in the checkout the app (`lpt serve`) runs from, `/Users/sakthi/conductor/workspaces/learning-progress-tracker/hat-yai`, and use `.venv/bin/lpt` from there, so the routine and the app edit the same vault.
 
 ## 1. Read the day
 
