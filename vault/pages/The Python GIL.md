@@ -1,6 +1,6 @@
 title:: The Python GIL
 type:: article
-state:: picked
+state:: done
 ingested:: [[2026-10-03]]
 domain:: [[Programming/Python]]
 topic:: [[Concurrency]]
@@ -11,6 +11,7 @@ prerequisites:: [[Python]]
 picked:: [[2026-10-03]]
 planned:: 2026-10
 my-priority:: now
+done:: [[2026-10-25]]
 
 ## Summary
 What the Global Interpreter Lock protects, how CPython hands it between threads, why it limits CPU-bound threading, and where free-threaded (no-GIL) CPython stands.
@@ -18,7 +19,7 @@ What the Global Interpreter Lock protects, how CPython hands it between threads,
 ## Checklist
 - [x] Why was it created?
 - [x] What do other language like Go use as alternatives?
-- [ ] Re-implement?
+- [x] Re-implement?
 - [x] How to circumvent the downsides of GIL in python
 - [x] Upsides of GIL?
 - [x] subinterpreters
@@ -32,6 +33,8 @@ What the Global Interpreter Lock protects, how CPython hands it between threads,
 ## Notes
 Learnt what Cpython does. How it differs from JIT and complier. 
 Where GIL prevents. 
+
+Skipping implementation, its just a mutual-exclusion lock at cpython process level. 
 
 ## Learnings
 - 2026-10-25 · CPython never turns my code into machine code: it compiles each file to bytecode before running (imports get cached as .pyc) and a precompiled C loop in ceval.c acts out each instruction. A JIT like PyPy also interprets at first, but compiles hot loops to machine code once and then runs that directly.
