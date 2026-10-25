@@ -18,3 +18,6 @@ A study topic rather than a single source: compare the two main garbage-collecti
 - CPython's cycle collector finds unreachable cycles by subtracting references internal to container objects
 - Tracing GC (mark from roots) handles cycles for free but needs pauses or concurrent marking with write barriers
 - Go trades memory headroom for CPU via GOGC; GOMEMLIMIT caps the total heap
+
+## Learnings
+- 2026-10-25 · CPython picked reference counting in 1991 because it is simple, frees memory the moment the count hits 0 (files close immediately), keeps the C API to Py_INCREF/Py_DECREF, and avoids long pauses; Java, Go and JS use tracing collectors instead, and CPython still needs a separate cycle collector.
