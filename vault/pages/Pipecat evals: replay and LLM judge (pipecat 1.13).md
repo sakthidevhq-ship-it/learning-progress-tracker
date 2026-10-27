@@ -20,3 +20,4 @@ Pipecat 1.13's evaluation framework for voice agents (https://github.com/pipecat
 
 ## Learnings
 - 2026-10-26 · Pipecat's eval judge is an LLM that checks plain-English eval criteria after each bot reply (a fast yes/no/continue classifier, then a second call for the reason) and can re-judge a recorded conversation offline; our harness kept only rule-based checks on timings and counts, since response correctness is out of scope.
+- 2026-10-27 · Integration tests are a self-check that change with the code, so an upgrade PR can make them green while quietly accepting regressions; evals are an auditor kept frozen in a separate repo, where accepting new behaviour means a visible new rubric version. That's why both need to exist side by side.
