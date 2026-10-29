@@ -28,3 +28,6 @@ DeepSeek-V3 is a 671B-parameter (37B active) mixture-of-experts language model t
 - [[Transformer Architecture]]
 
 ## Notes
+
+## Learnings
+- 2026-10-29 · Multi-Head Latent Attention (§2.1.1) shrinks the KV cache by caching one small latent vector per token and rebuilding keys and values with up-projections that get folded into other weights; RoPE's position-dependent rotation would break that folding, so 'decoupled RoPE' splits each query and key into a compressed position-free part and a small separate part that carries the rotation.
