@@ -20,3 +20,5 @@ The release notes for Pipecat, the open-source Python framework for real-time vo
 
 ## Learnings
 - 2026-10-27 · In Pipecat 1.8.0 services connect while the pipeline is being set up, in parallel, so startup costs as much as the slowest service instead of the sum; a setup step over 20 s now silently ends the pipeline, and teardown also runs in parallel, so custom early-connect and cleanup overrides break.
+- 2026-10-30 · Pipecat observers used to hear the same frame once per processor it passed through, so ten built-in observers each kept a set of seen frame IDs that grew for the whole session (~8-40 MB/hour). pipecat#5908 (1.9) makes WorkerObserver mark a frame's first push (FramePushed.first_push, or observe_every_push=False), so observers keep no IDs and pipelines ran 17-19% faster; any custom observer relying on the old repeats can break.
+- 2026-10-30 · Since pipecat#5232 (1.8.0) VAD volume is the loudness of a rolling 400 ms window kept by the VAD class, not of each 32 ms frame on its own, and calculate_audio_volume now raises 'audio too short' on less than 400 ms of audio, which crashes code that called it per frame.
