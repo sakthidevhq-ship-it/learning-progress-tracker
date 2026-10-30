@@ -28,6 +28,7 @@ Andrej Karpathy's video lecture series building neural networks and GPT-style la
 - [[Linear Algebra Basics]]
 
 ## Notes
+2026-10-30: committed to sit down tonight (with Attention Is All You Need).
 
 ## Checklist
 - [ ] micrograd: build the autograd engine and train a small MLP

@@ -28,6 +28,7 @@ The foundational paper introducing the Transformer architecture. Proposes replac
 - [[Neural Network Fundamentals]]
 
 ## Notes
+2026-10-30: committed to sit down tonight (with Zero to Hero).
 
 ## Checklist
 - [ ] Read §3 and redraw the architecture (encoder, decoder, attention blocks) from memory
