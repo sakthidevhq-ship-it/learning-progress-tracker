@@ -11,7 +11,10 @@ concepts:: [[Socket API]], [[TCP/UDP]], [[select/poll/epoll]], [[Non-Blocking IO
 tags:: sockets, beej
 source:: https://beej.us/guide/bgnet/
 ingested:: [[2026-07-09]]
-state:: collected
+state:: picked
+picked:: [[2026-11-07]]
+planned:: 2026-11
+my-priority:: now
 
 ## Summary
 The classic guide to Unix network programming with sockets. Covers socket API, TCP/UDP, client-server architecture, select/poll/epoll, non-blocking I/O, and building a simple HTTP server. Practical C code throughout.
@@ -25,5 +28,12 @@ The classic guide to Unix network programming with sockets. Covers socket API, T
 - [[C Basics]]
 - [[Networking Fundamentals]]
 - [[TCP/IP Basics]]
+
+## Checklist
+- [ ] Write a TCP echo server + client (socket/bind/listen/accept/connect)
+- [ ] Capture it with tcpdump/Wireshark: identify the 3-way handshake and FIN teardown
+- [ ] Write a UDP version and compare behaviour (no connection, message boundaries)
+- [ ] Handle multiple clients with poll/select (then epoll or kqueue)
+- [ ] Build a minimal HTTP/1.1 server and hit it with curl
 
 ## Notes

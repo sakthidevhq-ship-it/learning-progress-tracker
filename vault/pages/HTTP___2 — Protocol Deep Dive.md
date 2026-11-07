@@ -11,7 +11,10 @@ concepts:: [[HTTP/2]], [[Multiplexing]], [[Binary Framing]], [[Header Compressio
 tags:: http2, web
 source:: /private/tmp/http2.md
 ingested:: [[2026-07-09]]
-state:: collected
+state:: picked
+picked:: [[2026-11-07]]
+planned:: 2026-11
+my-priority:: now
 
 ## Summary
 Understanding HTTP/2: multiplexing, server push, header compression (HPACK), binary framing, stream prioritization. How it solves head-of-line blocking, reduces latency, and changes best practices for web performance (no more domain sharding, spriting, or concatenation).
@@ -24,5 +27,11 @@ Understanding HTTP/2: multiplexing, server push, header compression (HPACK), bin
 ## Prerequisites
 - [[Networking Fundamentals]]
 - [[TCP/IP Basics]]
+
+## Checklist
+- [ ] Read up on binary framing, streams and multiplexing
+- [ ] Understand HPACK header compression
+- [ ] Compare HTTP/1.1 head-of-line blocking vs HTTP/2 using curl -v --http2
+- [ ] Inspect HTTP/2 frames in Wireshark (or nghttp -v)
 
 ## Notes
