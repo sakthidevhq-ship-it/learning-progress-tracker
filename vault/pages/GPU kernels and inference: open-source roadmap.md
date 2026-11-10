@@ -45,3 +45,7 @@ Your unfair advantage. Almost everyone optimizing inference is chasing throughpu
 How to land the first PR. Don't open with a new kernel. Run their benchmark suite on your hardware, find a regression or an unhandled shape, and file an issue with numbers and a profile. Maintainers respond to measurements. Fix that, then go bigger.
 
 Hardware: rent, don't buy. An L4 or a 4090 on RunPod or Vast is plenty for kernel work — you don't need an H100 to learn occupancy.
+
+## Learnings
+- 2026-11-10 · LLM token generation is bound by memory bandwidth, not compute: a 4060 Ti (~288 GB/s) generates roughly 20-30% slower than a 5060 Ti (~448 GB/s) on the same CUDA stack. For learning the runtime layer (vLLM, GPTQ/AWQ, FlashAttention, Triton, Nsight) CUDA matters more than speed; ROCm runs PyTorch and llama.cpp but much of that tooling is second-class there.
+- 2026-11-10 · 16 GB VRAM is the floor for quantization study: it fits a 3-4B model in fp16 next to its 8-bit and 4-bit versions, with room to vary KV cache size and batching. Quantization and conversion load the full-precision weights into system RAM first, so 32 GB RAM is the practical minimum for 7-8B models.

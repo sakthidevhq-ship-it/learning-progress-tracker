@@ -19,3 +19,6 @@ Intel's open-source toolkit for converting and running models, built mainly for 
 - First builds take 30-60+ minutes; use ccache and build only the needed parts
 - openvino.genai can build against a nightly OpenVINO package instead of compiling the core
 - Review and CI take longer than writing the code
+
+## Learnings
+- 2026-11-10 · OpenVINO's GPU and NPU plugins target Intel hardware only (integrated graphics, Arc, NPUs), so an Nvidia or AMD card adds nothing for it; on a non-Intel box it runs on the CPU plugin.
