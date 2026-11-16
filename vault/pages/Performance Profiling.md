@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[Systems]]
 topic:: [[Performance Debugging]]
-referenced-by:: [[macOS Performance Diagnosis — Debugging Cheatsheet]]
+referenced-by:: [[macOS Performance Diagnosis — Debugging Cheatsheet]], [[Before GPU Engineering]]
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.

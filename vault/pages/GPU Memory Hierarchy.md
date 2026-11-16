@@ -3,7 +3,7 @@ type:: concept
 status:: stub
 domain:: [[ML/Infrastructure]]
 topic:: [[Model Architecture]]
-referenced-by:: [[FlashAttention - Fast and Memory-Efficient Attention]]
+referenced-by:: [[FlashAttention - Fast and Memory-Efficient Attention]], [[Before GPU Engineering]]
 
 ## About
 Auto-generated stub. This concept is a prerequisite for items in your learning queue.
