@@ -24,3 +24,6 @@ Practical guide to performing safe schema migrations on production Postgres data
 - [[Database Basics]]
 
 ## Notes
+
+## Learnings
+- 2026-11-17 · The same expand-before-use rule applies to config stored in a shared DB: main added a stage STT 'router' field and agents were edited to use it, but the 1.15 branch's Pydantic model has extra='forbid', so every canary call for those agents failed at set-up. Old readers must tolerate new fields (or the field must ship to every running version) before any writer starts storing it.
