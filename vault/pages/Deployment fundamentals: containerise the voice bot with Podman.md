@@ -26,3 +26,6 @@ Learn what makes a deployment setup good by judging our own against seven questi
 - [ ] List every host assumption that broke (logs, /storage/recordings, /storage/models, git commit lookup)
 - [ ] Run it as a systemd unit with Quadlet and compare with gunicorn@.service
 - [ ] Time a rollback: switch to the previous image tag and restart
+
+## Learnings
+- 2026-11-18 · An ALB listener checks its rules first, lowest priority number first, and the first match wins; the default action has no conditions and applies only when no rule matched. Our canary split lives in the voicebot-lb :443 default action as a weighted forward (prod/canary 95/5, then 90/10, now 100/0), while testingprod is a separate host-header rule at priority 6 that is managed in the console, not Terraform.
