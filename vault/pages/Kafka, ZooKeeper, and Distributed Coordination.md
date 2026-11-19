@@ -27,3 +27,6 @@ The distributed systems infrastructure stack: Kafka's log-based message broker w
 - [[Concurrency Basics]]
 
 ## Notes
+
+## Learnings
+- 2026-11-19 · Cheap coordination with Redis for an hourly summary across many workers: every event INCRs a counter, SET NX on a throttle key lets exactly one worker win the right to post, and that worker reads and clears the counts in one MULTI/EXEC, so an event landing in between goes into this summary or the next, never lost or doubled. On Redis Cluster those keys need a shared hash tag, or the transaction spans slots and fails.
