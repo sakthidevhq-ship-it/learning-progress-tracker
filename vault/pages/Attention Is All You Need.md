@@ -38,3 +38,6 @@ The foundational paper introducing the Transformer architecture. Proposes replac
 - [ ] Train a char-level decoder-only transformer on Tiny Shakespeare in a Kaggle notebook (free GPU) and sample text
 - [ ] Ablate on Shakespeare: 1 vs 4 heads, with and without positional encoding; compare val loss
 - [ ] Count parameters and FLOPs per token for your model
+
+## Learnings
+- 2026-11-22 · In a decoder, the final output of every earlier token is thrown away; only the last token's output predicts the next one. What an earlier token leaves behind is its key and value in each layer (the KV cache: on gpt-oss-20b 24 layers × 2 × 512 numbers, about 50 KB per token). A new token builds a query in each layer, scores it against every stored key, and takes the weighted mix of their values, which is how context reaches it.
